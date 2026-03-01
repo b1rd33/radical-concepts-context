@@ -1,0 +1,2265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>I2P Radical Concepts — Design Thinking Ideation Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============ RESET & BASE ============ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --font-hand: 'Caveat', cursive;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'DM Mono', monospace;
+  --bg: #f5f0e8;
+  --bg-cork: #e8dfd3;
+  --surface: #faf8f4;
+  --text: #2c2416;
+  --text-dim: #8a7e6a;
+  --text-light: #b5a88f;
+  --border: rgba(0,0,0,0.08);
+  /* Sticky note colors */
+  --pink-1: #ffb3ba; --pink-2: #ffc2c7; --pink-3: #ffccd2; --pink-4: #ffd5d9;
+  --white-1: #fefefe; --white-2: #f9f9f7; --white-3: #f4f3ef; --white-4: #efeee9;
+  --yellow-1: #fff9c4; --yellow-2: #fff59d; --yellow-3: #ffee58;
+  --blue-1: #bbdefb; --blue-2: #c8e6f8; --blue-3: #d4ecfa; --blue-4: #b3d4fc;
+  --green-1: #c8e6c9; --green-2: #d4edda; --green-3: #b9dfbb; --green-4: #a8d5aa;
+  --red-alert: #e74c3c;
+  /* Flow arrow */
+  --arrow: #9e8e78;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--text);
+  background: var(--bg);
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(255,179,186,0.15) 0%, transparent 40%),
+    radial-gradient(circle at 80% 10%, rgba(200,230,201,0.15) 0%, transparent 40%),
+    radial-gradient(circle at 50% 90%, rgba(255,249,196,0.2) 0%, transparent 40%);
+  min-height: 100vh;
+  line-height: 1.4;
+}
+
+/* ============ HEADER ============ */
+.board-header {
+  text-align: center;
+  padding: 40px 24px 20px;
+  position: relative;
+}
+.board-header h1 {
+  font-family: var(--font-hand);
+  font-size: clamp(2.4rem, 5vw, 3.8rem);
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+}
+.board-header .subtitle {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--text-dim);
+  margin-top: 8px;
+  font-weight: 500;
+}
+.board-header .process-label {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-light);
+  background: rgba(0,0,0,0.04);
+  padding: 4px 14px;
+  border-radius: 20px;
+  margin-top: 12px;
+}
+
+/* ============ LEGEND ============ */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+  padding: 12px 24px 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-dim);
+}
+.legend-swatch {
+  width: 20px; height: 20px;
+  border-radius: 3px;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.15);
+  transform: rotate(-2deg);
+}
+
+/* ============ SECTIONS CONTAINER ============ */
+.board {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 24px 60px;
+}
+
+/* ============ SECTION WRAPPER ============ */
+.section {
+  margin-bottom: 20px;
+  animation: fadeUp 0.6s ease both;
+}
+.section:nth-child(1) { animation-delay: 0.1s; }
+.section:nth-child(2) { animation-delay: 0.2s; }
+.section:nth-child(3) { animation-delay: 0.3s; }
+.section:nth-child(4) { animation-delay: 0.4s; }
+.section:nth-child(5) { animation-delay: 0.5s; }
+.section:nth-child(6) { animation-delay: 0.6s; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .section { animation: none; }
+}
+
+/* ============ SECTION HEADER (TAPE LABEL) ============ */
+.section-label {
+  display: inline-block;
+  font-family: var(--font-hand);
+  font-size: 1.6rem;
+  font-weight: 700;
+  padding: 6px 28px;
+  margin-bottom: 16px;
+  position: relative;
+  color: var(--text);
+}
+.section-label::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,200,0.7);
+  border-radius: 2px;
+  transform: rotate(-0.5deg);
+  z-index: -1;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.section-label.pink::before { background: rgba(255,179,186,0.5); }
+.section-label.white::before { background: rgba(220,218,210,0.6); }
+.section-label.yellow::before { background: rgba(255,249,196,0.7); }
+.section-label.blue::before { background: rgba(187,222,251,0.6); }
+.section-label.green-label::before { background: rgba(200,230,201,0.6); }
+
+.section-count {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+/* ============ INFO ICON ============ */
+.info-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0,0,0,0.12);
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+  margin-left: 10px;
+  vertical-align: middle;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  transition: all 0.2s;
+  position: relative;
+  top: -1px;
+}
+.info-btn:hover {
+  background: var(--text);
+  color: white;
+  border-color: var(--text);
+  transform: scale(1.1);
+}
+.info-btn:active { transform: scale(0.95); }
+
+/* ============ SESSION DEBRIEF ============ */
+.debrief { margin-top:32px; padding:24px; background:rgba(33,150,243,0.04); border:2px solid rgba(33,150,243,0.12); border-radius:14px; }
+.debrief.c3-debrief { background:rgba(76,175,80,0.04); border-color:rgba(76,175,80,0.12); }
+.debrief-title { font-family:var(--font-serif); font-size:1.1rem; font-weight:700; margin-bottom:16px; }
+.spark-card { background:white; border-radius:10px; padding:14px 16px; margin-bottom:10px; border-left:4px solid #ffc107; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+.spark-card .spark-label { font-family:var(--font-mono); font-size:0.62rem; text-transform:uppercase; letter-spacing:1.5px; color:#ff8f00; margin-bottom:4px; }
+.spark-card h4 { font-family:var(--font-serif); font-size:0.92rem; margin:0 0 4px; }
+.spark-card p { font-size:0.8rem; color:var(--text-dim); margin:0; line-height:1.45; }
+.constraint-card { background:rgba(0,0,0,0.03); border-radius:10px; padding:12px 16px; margin-bottom:8px; border-left:4px solid #f44336; }
+.constraint-card strong { font-size:0.82rem; }
+.constraint-card p { font-size:0.78rem; color:var(--text-dim); margin:4px 0 0; line-height:1.4; }
+.vote-tag { display:inline-block; padding:2px 8px; border-radius:10px; font-size:0.68rem; font-family:var(--font-mono); margin-right:4px; }
+.vote-tag.yes { background:rgba(76,175,80,0.15); color:#2e7d32; }
+.vote-tag.maybe { background:rgba(255,193,7,0.2); color:#f57f17; }
+.vote-tag.no { background:rgba(244,67,54,0.1); color:#c62828; }
+.vote-tag.split { background:rgba(33,150,243,0.12); color:#1565c0; }
+
+/* ============ CLUSTER ============ */
+.cluster {
+  margin-bottom: 20px;
+}
+.cluster-name {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+  padding-left: 4px;
+}
+
+/* ============ STICKY NOTE BASE ============ */
+.stickies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.sticky {
+  width: 170px;
+  min-height: 120px;
+  padding: 14px 12px 10px;
+  border-radius: 2px;
+  box-shadow:
+    2px 3px 6px rgba(0,0,0,0.12),
+    0 0 0 0.5px rgba(0,0,0,0.04);
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: default;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+.sticky:hover {
+  transform: scale(1.04) rotate(0deg) !important;
+  box-shadow: 4px 6px 16px rgba(0,0,0,0.18);
+  z-index: 10;
+}
+.sticky .note-text {
+  font-family: var(--font-hand);
+  font-size: 1.05rem;
+  font-weight: 500;
+  line-height: 1.25;
+  color: rgba(0,0,0,0.8);
+}
+.sticky .note-num {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: rgba(0,0,0,0.3);
+  position: absolute;
+  top: 4px;
+  right: 6px;
+}
+
+/* Rotations — applied inline via style for variety */
+.r1 { transform: rotate(-2.5deg); }
+.r2 { transform: rotate(1.8deg); }
+.r3 { transform: rotate(-1.2deg); }
+.r4 { transform: rotate(2.8deg); }
+.r5 { transform: rotate(-0.5deg); }
+.r6 { transform: rotate(1.5deg); }
+.r7 { transform: rotate(-1.8deg); }
+.r8 { transform: rotate(0.8deg); }
+
+/* Pink stickies */
+.sticky.pink { background: var(--pink-1); }
+.sticky.pink-2 { background: var(--pink-2); }
+.sticky.pink-3 { background: var(--pink-3); }
+.sticky.pink-4 { background: var(--pink-4); }
+
+/* White/audience stickies */
+.sticky.white { background: var(--white-1); }
+.sticky.white-2 { background: var(--white-2); }
+.sticky.white-3 { background: var(--white-3); }
+.sticky.white-4 { background: var(--white-4); }
+
+/* Yellow intersection stickies */
+.sticky.yellow {
+  background: var(--yellow-1);
+  width: 260px;
+  min-height: 160px;
+  padding: 18px 16px;
+}
+.sticky.yellow .note-text { font-size: 1.1rem; }
+.sticky.yellow.starred {
+  background: var(--yellow-2);
+  border: 2px solid rgba(255,152,0,0.4);
+}
+.sticky .star-badge {
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  background: #ff9800;
+  color: white;
+  font-size: 0.6rem;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(255,152,0,0.3);
+}
+.sticky .connects {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: rgba(0,0,0,0.4);
+  margin-top: auto;
+  padding-top: 8px;
+  line-height: 1.3;
+}
+
+/* Blue idea stickies */
+.sticky.blue { background: var(--blue-1); }
+.sticky.blue-2 { background: var(--blue-2); }
+.sticky.blue-3 { background: var(--blue-3); }
+
+/* Green idea stickies */
+.sticky.green { background: var(--green-1); }
+.sticky.green-2 { background: var(--green-2); }
+.sticky.green-3 { background: var(--green-3); }
+
+/* Idea stickies — with voting area */
+.sticky.idea {
+  width: 200px;
+  min-height: 140px;
+  padding-bottom: 32px;
+}
+.sticky.idea .idea-title {
+  font-family: var(--font-hand);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: rgba(0,0,0,0.85);
+  margin-bottom: 4px;
+  line-height: 1.15;
+}
+.sticky.idea .idea-desc {
+  font-family: var(--font-hand);
+  font-size: 0.88rem;
+  color: rgba(0,0,0,0.55);
+  line-height: 1.2;
+}
+.vote-row {
+  position: absolute;
+  bottom: 6px;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: rgba(0,0,0,0.4);
+}
+.vote-row span {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.vote-circle {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid rgba(0,0,0,0.25);
+  border-radius: 50%;
+  background: rgba(255,255,255,0.4);
+}
+
+/* ============ FLOW ARROW ============ */
+.flow-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 0;
+  color: var(--arrow);
+}
+.flow-arrow svg {
+  width: 48px;
+  height: 48px;
+  opacity: 0.5;
+}
+.flow-arrow .arrow-label {
+  font-family: var(--font-hand);
+  font-size: 1rem;
+  color: var(--text-dim);
+  margin-left: 8px;
+}
+
+/* ============ HMW BANNER ============ */
+.hmw-banner {
+  background: rgba(255,249,196,0.5);
+  border-left: 4px solid #ffc107;
+  padding: 12px 20px;
+  margin-bottom: 16px;
+  border-radius: 0 6px 6px 0;
+  font-family: var(--font-hand);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* ============ CONCEPT CARDS (Convergence) ============ */
+.convergence-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: center;
+}
+.concept-card {
+  width: 320px;
+  min-height: 180px;
+  border: 3px dashed rgba(0,0,0,0.15);
+  border-radius: 12px;
+  padding: 24px;
+  background: rgba(255,255,255,0.5);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s;
+}
+.concept-card:hover { border-color: rgba(0,0,0,0.3); }
+.concept-card .cc-num {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+.concept-card .cc-title {
+  font-family: var(--font-hand);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.concept-card .cc-status {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: var(--text-light);
+}
+.concept-card.c1 { border-color: rgba(158,142,120,0.4); background: rgba(158,142,120,0.06); }
+.concept-card.c2 { border-color: rgba(100,160,230,0.4); background: rgba(187,222,251,0.15); }
+.concept-card.c3 { border-color: rgba(100,180,100,0.4); background: rgba(200,230,201,0.15); }
+
+/* ============ RISK CALLOUT ============ */
+.risk-callout {
+  max-width: 700px;
+  margin: 30px auto;
+  background: rgba(231,76,60,0.08);
+  border: 2px solid rgba(231,76,60,0.25);
+  border-radius: 8px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.risk-callout .risk-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.risk-callout .risk-text {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--text);
+  line-height: 1.5;
+}
+.risk-callout .risk-text strong {
+  color: var(--red-alert);
+}
+
+/* ============ IDEA SECTION SPLIT ============ */
+.idea-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+@media (max-width: 900px) {
+  .idea-split { grid-template-columns: 1fr; }
+}
+.idea-column {
+  background: rgba(0,0,0,0.02);
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid var(--border);
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 700px) {
+  .zoom-bar {
+    bottom: 12px;
+    left: 12px;
+    padding: 6px 10px;
+    gap: 4px;
+  }
+  .zoom-slider { width: 80px; }
+  .zoom-bar button { width: 26px; height: 26px; font-size: 0.9rem; }
+  .zoom-pct { font-size: 0.65rem; min-width: 36px; }
+}
+@media (max-width: 600px) {
+  .sticky { width: 150px; min-height: 100px; }
+  .sticky.yellow { width: 220px; }
+  .sticky.idea { width: 170px; }
+  .concept-card { width: 100%; }
+  .board-header h1 { font-size: 2rem; }
+}
+
+/* ============ EDITABLE IDEA STICKIES ============ */
+.add-ideas-area {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 2px dashed rgba(0,0,0,0.1);
+}
+.add-ideas-label {
+  font-family: var(--font-hand);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sticky.editable {
+  border: 2px dashed rgba(0,0,0,0.15);
+  background: rgba(255,255,255,0.6) !important;
+  cursor: text;
+  min-height: 100px;
+  width: 200px;
+}
+.sticky.editable:focus-within {
+  border-color: rgba(0,0,0,0.3);
+  box-shadow: 4px 6px 16px rgba(0,0,0,0.15);
+}
+.sticky.editable .note-text {
+  outline: none;
+  min-height: 60px;
+  color: rgba(0,0,0,0.6);
+}
+.sticky.editable .note-text:empty::before {
+  content: attr(data-placeholder);
+  color: rgba(0,0,0,0.25);
+  font-style: italic;
+}
+
+/* ============ CONTEXT GUIDE SIDEBAR ============ */
+.guide-trigger {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 140px;
+  background: rgba(44,36,22,0.85);
+  color: #faf8f4;
+  border-radius: 8px 0 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 999;
+  writing-mode: vertical-rl;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  transition: width 0.2s, background 0.2s;
+  box-shadow: -2px 0 8px rgba(0,0,0,0.15);
+}
+.guide-trigger:hover {
+  width: 42px;
+  background: rgba(44,36,22,0.95);
+}
+
+.guide-panel {
+  position: fixed;
+  right: -420px;
+  top: 0;
+  width: 400px;
+  height: 100vh;
+  background: #faf8f4;
+  box-shadow: -4px 0 24px rgba(0,0,0,0.15);
+  z-index: 1000;
+  transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+  border-left: 1px solid rgba(0,0,0,0.08);
+}
+.guide-panel.open {
+  right: 0;
+}
+.guide-panel-header {
+  position: sticky;
+  top: 0;
+  background: #faf8f4;
+  padding: 20px 24px 14px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 2;
+}
+.guide-panel-header h2 {
+  font-family: var(--font-hand);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.guide-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: rgba(0,0,0,0.06);
+  border-radius: 50%;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  transition: background 0.15s;
+}
+.guide-close:hover {
+  background: rgba(0,0,0,0.12);
+}
+
+.guide-section {
+  padding: 18px 24px;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  border-left: 3px solid transparent;
+  transition: background 0.35s ease, border-left-color 0.35s ease;
+}
+.guide-section:last-child { border-bottom: none; }
+.guide-section.active {
+  background: rgba(255,249,196,0.22);
+  border-left-color: #ffc107;
+}
+
+.guide-section .gs-icon {
+  font-size: 1.3rem;
+  margin-right: 6px;
+}
+.guide-section h3 {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.guide-section p {
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  line-height: 1.55;
+  margin-bottom: 8px;
+}
+.guide-section .gs-detail {
+  background: rgba(0,0,0,0.03);
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+  margin-top: 6px;
+}
+.guide-section .gs-detail strong {
+  color: var(--text);
+}
+.gs-color-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+.gs-color-note .mini-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  box-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+/* ============ GUIDE NAV ============ */
+.guide-nav {
+  display: flex;
+  gap: 4px;
+  padding: 8px 24px 12px;
+  flex-wrap: wrap;
+}
+.guide-nav-dot {
+  flex-shrink: 0;
+  padding: 3px 10px;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-light);
+  background: rgba(0,0,0,0.04);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  white-space: nowrap;
+}
+.guide-nav-dot:hover { background: rgba(0,0,0,0.08); color: var(--text-dim); }
+.guide-nav-dot.active { background: rgba(44,36,22,0.15); color: var(--text); font-weight: 600; }
+
+/* ============ PROCESS TIMELINE ============ */
+.process-timeline {
+  display: flex; align-items: flex-start; justify-content: center; gap: 0;
+  margin: 0 auto 24px; max-width: 680px;
+  padding: 16px 20px; background: rgba(0,0,0,0.025); border-radius: 12px;
+}
+.pt-step { text-align: center; flex: 1; }
+.pt-num {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(0,0,0,0.08); color: var(--text-dim);
+  font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; margin: 0 auto 5px;
+}
+.pt-step.done .pt-num { background: #4caf50; color: white; }
+.pt-step.current .pt-num { background: #ffc107; color: var(--text); box-shadow: 0 0 0 3px rgba(255,193,7,0.25); }
+.pt-label { font-family: var(--font-body); font-size: 0.76rem; font-weight: 700; color: var(--text); }
+.pt-detail { font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-dim); margin-top: 2px; }
+.pt-connector { color: var(--text-light); font-size: 1.1rem; padding-top: 3px; flex-shrink: 0; width: 36px; text-align: center; }
+
+/* ============ ROUND BLOCKS ============ */
+.round-block { margin-bottom: 28px; }
+.round-header-bar {
+  display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; flex-wrap: wrap;
+}
+.round-num {
+  font-family: var(--font-mono); font-size: 0.62rem; text-transform: uppercase;
+  letter-spacing: 1.5px; color: white; background: var(--text);
+  padding: 3px 10px; border-radius: 10px; white-space: nowrap;
+}
+.round-title { font-family: var(--font-hand); font-size: 1.35rem; font-weight: 700; color: var(--text); }
+.round-meta { font-family: var(--font-mono); font-size: 0.62rem; color: var(--text-light); }
+
+/* ============ AUTHOR BADGES ============ */
+.author-badge {
+  position: absolute; top: -6px; left: -6px;
+  width: 22px; height: 22px; border-radius: 50%;
+  font-family: var(--font-mono); font-size: 0.6rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2); z-index: 2;
+}
+.author-badge.chris { background: #2196f3; color: white; }
+.author-badge.kalina { background: #9c27b0; color: white; }
+
+/* Kalina's sticky colors */
+.sticky.lavender { background: #e8d5f5; }
+.sticky.lavender-2 { background: #eddcf7; }
+.sticky.lavender-3 { background: #f2e6fa; }
+
+/* ============ CONCEPT BLOCKS ============ */
+.concept-block {
+  margin-bottom: 32px; padding: 24px;
+  background: rgba(0,0,0,0.015); border-radius: 16px; border: 1px solid var(--border);
+}
+.concept-block.c2 { border-left: 4px solid rgba(100,160,230,0.5); }
+.concept-block.c3 { border-left: 4px solid rgba(100,180,100,0.5); }
+
+/* ============ STIMULUS COLLAPSIBLE ============ */
+.stimulus-block {
+  margin-top: 20px; border: 2px dashed rgba(0,0,0,0.08);
+  border-radius: 12px; overflow: hidden;
+}
+.stimulus-block summary {
+  display: flex; align-items: baseline; gap: 10px;
+  padding: 14px 20px; cursor: pointer;
+  background: rgba(0,0,0,0.02); list-style: none; flex-wrap: wrap;
+}
+.stimulus-block summary::-webkit-details-marker { display: none; }
+.stimulus-block summary::before {
+  content: '▶'; font-size: 0.65rem; color: var(--text-light);
+  transition: transform 0.25s; flex-shrink: 0; margin-top: 3px;
+}
+.stimulus-block[open] summary::before { transform: rotate(90deg); }
+.stimulus-block[open] summary { border-bottom: 1px solid rgba(0,0,0,0.06); }
+.stimulus-block .stimulus-body { padding: 16px 20px; }
+.stimulus-block .round-num { background: var(--text-dim); }
+
+/* Pending brainstorm placeholder */
+.pending-brainstorm {
+  text-align: center; padding: 28px 20px;
+  color: var(--text-dim); font-family: var(--font-body); font-size: 0.88rem;
+  border: 2px dashed rgba(0,0,0,0.1); border-radius: 12px;
+  background: rgba(0,0,0,0.015); margin-bottom: 16px;
+}
+.pending-brainstorm .pending-icon { font-size: 1.8rem; margin-bottom: 8px; }
+
+/* ============ ZOOM CONTROL ============ */
+.zoom-bar {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 998;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(44,36,22,0.92);
+  backdrop-filter: blur(8px);
+  padding: 8px 14px;
+  border-radius: 28px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.06);
+  font-family: var(--font-mono);
+  user-select: none;
+  transition: opacity 0.3s, transform 0.3s;
+}
+.zoom-bar:hover { box-shadow: 0 6px 28px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.1); }
+.zoom-bar button {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  color: #faf8f4;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+}
+.zoom-bar button:hover { background: rgba(255,255,255,0.22); }
+.zoom-bar button:active { background: rgba(255,255,255,0.3); transform: scale(0.92); }
+.zoom-bar button.zoom-reset {
+  width: auto;
+  border-radius: 14px;
+  padding: 0 10px;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.zoom-pct {
+  color: #faf8f4;
+  font-size: 0.72rem;
+  min-width: 42px;
+  text-align: center;
+  font-weight: 500;
+  opacity: 0.85;
+}
+.zoom-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 140px;
+  height: 5px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+  transition: width 0.2s;
+}
+.zoom-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffc107;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  transition: transform 0.15s;
+}
+.zoom-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
+.zoom-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffc107;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+/* Track fill gradient for visual feedback */
+.zoom-slider::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+}
+.zoom-slider::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.15);
+}
+
+/* Scalable board wrapper — uses CSS zoom for proper reflow */
+.board-scaler {
+  zoom: 1;
+}
+
+/* Hide guide trigger on print */
+@media print {
+  .guide-trigger, .guide-panel, .zoom-bar { display: none; }
+}
+
+/* ============ PRINT ============ */
+@media print {
+  body { background: white; }
+  .board-scaler { zoom: 1 !important; }
+  .section { break-inside: avoid; animation: none; }
+  .sticky:hover { transform: none; box-shadow: 2px 3px 6px rgba(0,0,0,0.12); }
+  .guide-trigger, .guide-panel, .add-ideas-area, .zoom-bar { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ======== CONTEXT GUIDE SIDEBAR ======== -->
+<div class="guide-trigger" onclick="document.querySelector('.guide-panel').classList.toggle('open'); this.style.display='none'">📖 GUIDE</div>
+<div class="guide-panel" id="guidePanel">
+  <div class="guide-panel-header">
+    <h2>📖 Board Guide</h2>
+    <button class="guide-close" onclick="this.closest('.guide-panel').classList.remove('open'); document.querySelector('.guide-trigger').style.display='flex'">✕</button>
+  </div>
+
+  <div class="guide-nav">
+    <button class="guide-nav-dot active" data-target="guide-overview">Overview</button>
+    <button class="guide-nav-dot" data-target="guide-brett">🩷 Brett</button>
+    <button class="guide-nav-dot" data-target="guide-audience">🤍 Audience</button>
+    <button class="guide-nav-dot" data-target="guide-intersections">🟡 Intersections</button>
+    <button class="guide-nav-dot" data-target="guide-why-two">Why 3?</button>
+    <button class="guide-nav-dot" data-target="guide-ideation">💡 Ideation</button>
+    <button class="guide-nav-dot" data-target="guide-mediums">📡 Mediums</button>
+    <button class="guide-nav-dot" data-target="guide-path2">🔄 Path 2</button>
+    <button class="guide-nav-dot" data-target="guide-convergence">⭐ Converge</button>
+    <button class="guide-nav-dot" data-target="guide-colors">🎨 Colors</button>
+    <button class="guide-nav-dot" data-target="guide-risk">⚠️ Risk</button>
+  </div>
+
+  <!-- ─── OVERVIEW ─── -->
+  <div class="guide-section active" id="guide-overview" data-section="section-brett">
+    <h3><span class="gs-icon">🎯</span> What Is This Board?</h3>
+    <p>A digital artefact of our design thinking process — from sticky notes on a wall to three locked product concepts. This board documents every decision, iteration, and pivot along the way.</p>
+    <div class="gs-detail">
+      <strong>Design Thinking Process:</strong> Empathize → Define → Ideate → Prototype → Test.<br>
+      This board covers <strong>Empathize</strong> (48 pain points from interviews), <strong>Define</strong> (6 intersections → HMW questions), <strong>Ideate</strong> (78 ideas across 3 rounds), and an <strong>iteration loop</strong> back to Define (Path 2) when we discovered our concepts were overlapping. The result: 3 genuinely distinct product concepts ready for pitch pages.
+    </div>
+    <div class="gs-detail" style="margin-top:8px;">
+      <strong>How to read:</strong> Scroll top → bottom = chronological process. Each section builds on the previous one. The <strong>ℹ️ buttons</strong> next to headers explain <em>why</em> that section exists. The <strong>🔄 Path 2</strong> section shows where the team iterated — this is design thinking working as intended, not a mistake.
+    </div>
+  </div>
+
+  <!-- ─── BRETT ─── -->
+  <div class="guide-section" id="guide-brett" data-section="section-brett">
+    <h3><span class="gs-icon">🩷</span> Brett's Pain Points</h3>
+    <div class="gs-detail" style="margin-bottom:8px;">
+      <strong>Phase:</strong> Empathize · <strong>When:</strong> After Meeting #1 · <strong>Method:</strong> Client interview + team synthesis
+    </div>
+    <p><strong>Why:</strong> Before designing anything, we need to deeply understand what Brett actually struggles with — not what he says he wants, but the underlying frustrations. Empathy-first design prevents building solutions to problems that don't exist.</p>
+    <p>We clustered 20 raw pain points into 6 themes from our first client meeting. Pink post-its = Brett's side (creator). Each sticky is one pain directly from the interview.</p>
+    <div class="gs-detail" style="margin-top:8px;">
+      <strong>Key insight:</strong> Brett's biggest tension is wanting BOTH automation AND authenticity — the "two wives" problem (#19). Everything else flows from this contradiction.
+    </div>
+  </div>
+
+  <!-- ─── AUDIENCE ─── -->
+  <div class="guide-section" id="guide-audience" data-section="section-audience">
+    <h3><span class="gs-icon">🤍</span> Audience Pain Points</h3>
+    <div class="gs-detail" style="margin-bottom:8px;">
+      <strong>Phase:</strong> Empathize · <strong>When:</strong> After Meeting #1 · <strong>Method:</strong> Desk research + team analysis
+    </div>
+    <p><strong>Why:</strong> A product only works if it solves a real problem for real people. We can't just design for what Brett wants — we must understand what his potential audience actually struggles with when consuming news and analysis.</p>
+    <p>28 pain points clustered into 6 themes. White post-its = audience side (consumer).</p>
+    <div class="gs-color-note"><span class="mini-swatch" style="background:#fefefe; border:1px solid #ddd"></span> Pure white = primary pain (directly stated)</div>
+    <div class="gs-color-note"><span class="mini-swatch" style="background:#f4f3ef"></span> Warm/beige = secondary pain (related, less sharp)</div>
+    <div class="gs-color-note"><span class="mini-swatch" style="background:#efeee9"></span> Darker beige = implied pain (inferred, not stated)</div>
+  </div>
+
+  <!-- ─── INTERSECTIONS ─── -->
+  <div class="guide-section" id="guide-intersections" data-section="section-intersections">
+    <h3><span class="gs-icon">🟡</span> Intersections</h3>
+    <div class="gs-detail" style="margin-bottom:8px;">
+      <strong>Phase:</strong> Define · <strong>When:</strong> Week 5 · <strong>Method:</strong> Affinity mapping + cross-referencing
+    </div>
+    <p><strong>Why:</strong> The magic happens where Brett's pain meets audience pain. If we only solve Brett's problems, we build something nobody wants to use. If we only solve audience problems, Brett won't invest. Intersections are the only viable product territory — where both sides win.</p>
+    <p>We found 6 intersections. Orange-badged ones were selected for concept development. Each intersection became the seed for a "How Might We" question that frames the ideation.</p>
+    <div class="gs-detail" style="margin-top:8px;">
+      <strong>Path 1 selection:</strong> Intersections 2+3 → C2, Intersections 5+6 → C3. In Path 2 these pairings evolved — the team split content territories to create genuinely different products. See 🔄 Path 2 for the full story.
+    </div>
+  </div>
+
+  <!-- ─── WHY THREE ─── -->
+  <div class="guide-section" id="guide-why-two" data-section="section-intersections">
+    <h3><span class="gs-icon">❓</span> Why Three Concepts?</h3>
+    <p>We have 6 intersections but only need 3 concepts (minimum per I2P brief). C1 was always Brett's original ask. For C2 and C3, we paired intersections and then — crucially — split <strong>content territories</strong> to prevent overlap.</p>
+    <div class="gs-detail">
+      <strong>Farid's concept strategy:</strong><br>
+      <strong>C1</strong> = straight answer to the brief (due diligence)<br>
+      <strong>C2</strong> = the innovative, unexpected play<br>
+      <strong>C3</strong> = what the team actually recommends Brett builds
+    </div>
+    <div class="gs-detail" style="margin-top:6px;">
+      <strong>The "different products" test:</strong> If you can't explain each concept in one sentence and they sound completely different — your concepts aren't differentiated enough. Path 2 was born from this test.
+    </div>
+  </div>
+
+  <!-- ─── IDEATION ─── -->
+  <div class="guide-section" id="guide-ideation" data-section="section-ideation">
+    <h3><span class="gs-icon">💡</span> Ideation</h3>
+    <div class="gs-detail" style="margin-bottom:8px;">
+      <strong>Phase:</strong> Ideate · <strong>When:</strong> Week 6 · <strong>Method:</strong> Multi-round divergent brainstorming
+    </div>
+    <p><strong>Why:</strong> Design Thinking says <em>diverge before converging</em>. The goal is quantity, not quality. Wild ideas are encouraged — the best solutions often hide in ideas 40–80, after the obvious ones are exhausted.</p>
+    <div class="gs-detail" style="margin-top:8px;">
+      <strong>Our process:</strong><br>
+      <strong>Round 1 — Own Thinking:</strong> Chris and Kalina brainstormed independently, no AI. Pure instinct. 38 ideas total.<br>
+      <strong>Round 2 — Independent AI Ideation:</strong> Claude generated 20 fresh ideas per concept using creative lenses (analogy, reversal, "What Would X Do?") — fully independent from Round 1 to avoid bias.<br>
+      <strong>Session Review:</strong> Rapid-fire votes on all ideas (👍 👎 ⭐ 💡). Votes + sparks identified the strongest signals and surprising connections.<br>
+      <strong>Path 2 Re-Define:</strong> Concepts were overlapping → team went back to Define, split content territories, and converged on 3 distinct products.
+    </div>
+    <div class="gs-detail" style="margin-top:8px;">
+      <strong>Author badges:</strong> <span style="background:#2196f3; color:white; padding:1px 6px; border-radius:8px; font-size:0.7rem;">C</span> = Chris · <span style="background:#9c27b0; color:white; padding:1px 6px; border-radius:8px; font-size:0.7rem;">K</span> = Kalina · <span style="background:rgba(0,0,0,0.55); color:white; padding:1px 6px; border-radius:8px; font-size:0.7rem;">AI</span> = Claude. Ideas clustered by theme, not author.
+    </div>
+  </div>
+
+  <!-- ─── MEDIUM LANDSCAPE ─── -->
+  <div class="guide-section" id="guide-mediums" data-section="section-ideation">
+    <h3><span class="gs-icon">📡</span> Information Medium Landscape</h3>
+    <div class="gs-detail" style="margin-bottom:8px;">
+      <strong>Phase:</strong> Ideate (research input) · <strong>When:</strong> Parallel to brainstorming · <strong>Method:</strong> Desk research
+    </div>
+    <p><strong>Why this exists:</strong> During our ideation rounds, we noticed a pattern — many of our ideas were essentially the <em>same concept</em> but delivered through a different medium. A "daily drop" via email vs. audio vs. push notification vs. physical card are four different products, but the core idea is identical. We realized we were conflating <strong>what</strong> we deliver with <strong>how</strong> we deliver it.</p>
+    <div class="gs-detail" style="margin-top:8px;">
+      <strong>What we did:</strong> We mapped 65 distinct information mediums across 8 categories — from newsletters to AR to salon dinners — so we could separate the <em>idea</em> from the <em>delivery channel</em>. This was internal research for the team (and for the AI to cross-reference during concept development), not a deliverable.
+    </div>
+    <div class="gs-detail" style="margin-top:8px;">
+      <strong>How it helped:</strong> When converging into final concepts, this landscape let us make deliberate medium choices instead of defaulting to "app" or "newsletter." C2 uses physical cards + quiz format. C3 uses audio + deep HTML. These weren't accidental — they came from understanding the full space of what's available.
+    </div>
+  </div>
+
+  <!-- ─── PATH 2 RE-DEFINE ─── -->
+  <div class="guide-section" id="guide-path2" data-section="section-path2">
+    <h3><span class="gs-icon">🔄</span> Path 2 — Back to Define</h3>
+    <div class="gs-detail" style="margin-bottom:8px;">
+      <strong>Phase:</strong> Ideate → Define (iteration loop) · <strong>When:</strong> After session review · <strong>Method:</strong> HMW re-framing, content territory splitting
+    </div>
+    <p><strong>Why:</strong> Design thinking is not linear. After session review, we discovered our Path 1 HMW questions were creating overlapping concepts. The team applied a differentiation test: <em>"Can you explain each concept in one sentence and they sound like completely different products?"</em> They couldn't pass.</p>
+    <div class="gs-detail" style="margin-top:8px;">
+      <strong>The killer move:</strong> Split Brett's content into distinct <em>territories</em>.<br>
+      <strong>C2</strong> owns <strong>science + quirky + fun facts</strong> → "dinner table conversation"<br>
+      <strong>C3</strong> owns <strong>news + current affairs</strong> → "intellectual ammunition"<br>
+      When concepts own different content, they can't overlap. Different inputs → different outputs → different products.
+    </div>
+    <div class="gs-detail" style="margin-top:8px;">
+      <strong>B2B merge:</strong> Concept 4 (B2B Morning Briefing) was merged into C2 as a distribution channel — corporate lunch-hour license. This keeps the deliverable at 3 concepts while preserving the B2B opportunity.
+    </div>
+    <div class="gs-detail" style="margin-top:8px;">
+      <strong>What changed:</strong> HMW questions were rewritten. Ideas were redistributed between concepts based on content territory fit. The process timeline shows steps 3–4 for both concepts. This is the iteration loop working as designed — not a failure, but a refinement.
+    </div>
+  </div>
+
+  <!-- ─── CONVERGENCE ─── -->
+  <div class="guide-section" id="guide-convergence" data-section="section-convergence">
+    <h3><span class="gs-icon">⭐</span> Convergence Zone — 3 Final Concepts</h3>
+    <div class="gs-detail" style="margin-bottom:8px;">
+      <strong>Phase:</strong> Converge · <strong>When:</strong> Week 7 · <strong>Method:</strong> Selection, synthesis, differentiation test
+    </div>
+    <p>After two passes of divergence-convergence (Path 1 → Path 2), 78 ideas have been redistributed into 3 genuinely distinct concepts. Each targets a <strong>different content territory</strong>, a different <strong>user moment</strong>, and a different <strong>depth level</strong>.</p>
+    <div class="gs-detail" style="margin-top:8px;">
+      <strong>The 3 Concepts:</strong><br>
+      <strong>C1 — The Automated Pipeline</strong> · due diligence · answers Brett's original ask honestly, including its risks<br>
+      <strong>C2 — The Curiosity Game</strong> · innovative · science/quirky content → gamified daily interaction + B2B lunch-hour play<br>
+      <strong>C3 — The Dinner Table Drop</strong> · team recommendation · news/current affairs → spaced repetition + Polymarket-style predictions
+    </div>
+    <div class="gs-detail" style="margin-top:8px;">
+      <strong>Scoring dimensions</strong> (per Farid): Innovation, Feasibility, Impact, Business Impact. Each concept is scored on a 1–10 scale. Feasibility asks: can 2 ESADE students build this? Business Impact asks: can this become a viable business?
+    </div>
+    <div class="gs-detail" style="margin-top:8px;">
+      <strong>Deliverable:</strong> 3 Concept Pitch Pages (PDF via HTML). Due Monday midnight to Moodle. Each under 3 minutes to read. Self-contained — understandable without a presentation. Template: 7 sections per page (problem, concept, user journey, business model, feasibility, scorecard, risks).
+    </div>
+  </div>
+
+  <!-- ─── COLORS ─── -->
+  <div class="guide-section" id="guide-colors" data-section="section-ideation">
+    <h3><span class="gs-icon">🎨</span> Color Coding Summary</h3>
+    <div class="gs-color-note"><span class="mini-swatch" style="background:#ffb3ba"></span> <strong>Pink</strong> = Brett's pain points (creator side)</div>
+    <div class="gs-color-note"><span class="mini-swatch" style="background:#fefefe; border:1px solid #ddd"></span> <strong>White</strong> = Audience pain points (consumer side)</div>
+    <div class="gs-color-note"><span class="mini-swatch" style="background:#fff9c4"></span> <strong>Yellow</strong> = Intersections (where both pains overlap)</div>
+    <div class="gs-color-note"><span class="mini-swatch" style="background:#bbdefb"></span> <strong>Blue stickies</strong> = Concept 2 ideas · The Curiosity Game</div>
+    <div class="gs-color-note"><span class="mini-swatch" style="background:#c8e6c9"></span> <strong>Green stickies</strong> = Concept 3 ideas · The Dinner Table Drop</div>
+    <div class="gs-color-note"><span class="mini-swatch" style="background:#e8d5f5"></span> <strong>Lavender</strong> = Kalina's ideas (within C2 and C3)</div>
+    <div class="gs-color-note"><span class="mini-swatch" style="background:rgba(255,152,0,0.3); border:2px solid #ff9800"></span> <strong>Orange border</strong> = Selected for concept development</div>
+    <div class="gs-color-note" style="margin-top:6px; font-size:0.72rem; color:var(--text-dim); font-style:italic;">Note: In the Ideation section, blue/green refer to original concept groupings (Path 1). After Path 2, the content was redistributed — the sticky colors reflect where ideas originated, not where they ended up.</div>
+  </div>
+
+  <!-- ─── RISK ─── -->
+  <div class="guide-section" id="guide-risk" data-section="section-intersections">
+    <h3><span class="gs-icon">⚠️</span> Riskiest Assumptions</h3>
+    <p><strong>#1 — Willingness to pay:</strong> Brett wants to monetize, but we have zero evidence his audience would pay. No intersection exists for monetization — it's purely Brett's wish, not a shared pain.</p>
+    <div class="gs-detail" style="margin-top:8px;">
+      <strong>#2 — AI trust:</strong> C3 depends on AI-generated content that "never sounds like AI." This is a technical bet. If the output feels robotic, the core proposition collapses.
+    </div>
+    <div class="gs-detail" style="margin-top:8px;">
+      <strong>#3 — Engagement depth:</strong> C2's gamification assumes people will consistently return for 3 min/day. Retention in content apps drops steeply after week 2 — the spaced repetition mechanic in C3 addresses this, but C2 relies on novelty.
+    </div>
+    <div class="gs-detail" style="margin-top:8px;">
+      <strong>Worth exploring in prototype:</strong> Whether a premium price <em>itself</em> could be the product feature — exclusivity signals quality to professionals who use cost as a filter.
+    </div>
+  </div>
+</div>
+
+<!-- ======== ZOOM CONTROL ======== -->
+<div class="zoom-bar" id="zoomBar">
+  <button id="zoomOut" title="Zoom out (−)">−</button>
+  <input type="range" class="zoom-slider" id="zoomSlider" min="40" max="200" value="100" step="2">
+  <button id="zoomIn" title="Zoom in (+)">+</button>
+  <span class="zoom-pct" id="zoomPct">100%</span>
+  <button class="zoom-reset" id="zoomReset" title="Reset zoom">Reset</button>
+</div>
+
+<!-- ======== BOARD SCALER WRAPPER ======== -->
+<div class="board-scaler" id="boardScaler">
+
+<!-- ======== HEADER ======== -->
+<header class="board-header">
+  <h1>I2P Radical Concepts — Design Thinking Ideation Board</h1>
+  <div class="subtitle">Team: Chris &amp; Kalina &nbsp;|&nbsp; Client: Brett &nbsp;|&nbsp; March 2026</div>
+  <div class="process-label">Empathize → Define → Ideate → Prototype → Test</div>
+</header>
+
+<!-- ======== LEGEND ======== -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-swatch" style="background:var(--pink-1)"></div> Brett's Pain Points</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:var(--white-1); border:1px solid #ddd"></div> Audience Pain Points</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:var(--yellow-1)"></div> Intersections</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:var(--blue-1)"></div> Concept 2 Ideas</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:var(--green-1)"></div> Concept 3 Ideas</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:rgba(255,152,0,0.3); border:2px solid #ff9800"></div> Selected for Concepts</div>
+</div>
+
+<div class="board">
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SECTION 1: BRETT'S PAIN POINTS              -->
+<!-- ════════════════════════════════════════════ -->
+<section class="section" id="section-brett">
+  <div class="section-label pink">🩷 Brett's Pain Points <span class="section-count">20 pain points</span><button class="info-btn" onclick="openGuide('guide-brett')" title="Why this section?">ℹ</button></div>
+
+  <div class="cluster">
+    <div class="cluster-name">AI &amp; Content Quality</div>
+    <div class="stickies">
+      <div class="sticky pink r1"><span class="note-num">1</span><span class="note-text">AI noise and fake news</span></div>
+      <div class="sticky pink-2 r4"><span class="note-num">2</span><span class="note-text">Really good at filtering articles, AI is not</span></div>
+      <div class="sticky pink-3 r2"><span class="note-num">3</span><span class="note-text">Has a lot of content to share → has a good filtering system</span></div>
+      <div class="sticky pink r7"><span class="note-num">4</span><span class="note-text">AI Flatness → voice, summarization, typical tone destroys main parts</span></div>
+    </div>
+  </div>
+
+  <div class="cluster">
+    <div class="cluster-name">Time &amp; Production</div>
+    <div class="stickies">
+      <div class="sticky pink-2 r3"><span class="note-num">5</span><span class="note-text">No time to read all he wants</span></div>
+      <div class="sticky pink r6"><span class="note-num">6</span><span class="note-text">No time to create</span></div>
+      <div class="sticky pink-4 r1"><span class="note-num">7</span><span class="note-text">Need a way to create value in nearly no time</span></div>
+      <div class="sticky pink-2 r5"><span class="note-num">8</span><span class="note-text">Manual production = deal breaker</span></div>
+    </div>
+  </div>
+
+  <div class="cluster">
+    <div class="cluster-name">Platform &amp; Community</div>
+    <div class="stickies">
+      <div class="sticky pink r8"><span class="note-num">9</span><span class="note-text">No platform to engage with people about topics</span></div>
+      <div class="sticky pink-3 r2"><span class="note-num">10</span><span class="note-text">Wants to access a bigger community</span></div>
+      <div class="sticky pink r4"><span class="note-num">11</span><span class="note-text">No platform to share</span></div>
+    </div>
+  </div>
+
+  <div class="cluster">
+    <div class="cluster-name">Content Landscape Frustration</div>
+    <div class="stickies">
+      <div class="sticky pink-2 r5"><span class="note-num">12</span><span class="note-text">Cable news — repetitive, no differentiation</span></div>
+      <div class="sticky pink r3"><span class="note-num">13</span><span class="note-text">Doesn't watch TV — gets annoyed by the news</span></div>
+      <div class="sticky pink-4 r7"><span class="note-num">14</span><span class="note-text">The "I read it but forgot" problem → retention</span></div>
+    </div>
+  </div>
+
+  <div class="cluster">
+    <div class="cluster-name">Business &amp; Monetization</div>
+    <div class="stickies">
+      <div class="sticky pink r1"><span class="note-num">15</span><span class="note-text">Wants to make his hobby into a profitable business → money issues</span></div>
+    </div>
+  </div>
+
+  <div class="cluster">
+    <div class="cluster-name">Strategic Blind Spots</div>
+    <div class="stickies">
+      <div class="sticky pink-3 r6"><span class="note-num">16</span><span class="note-text">No validation beyond friends — encouragement ≠ demand</span></div>
+      <div class="sticky pink r2"><span class="note-num">17</span><span class="note-text">Doesn't know his unique value proposition — why Brett over The Daily?</span></div>
+      <div class="sticky pink-2 r8"><span class="note-num">18</span><span class="note-text">Copyright/legal risk — can't just regurgitate articles, needs original analysis</span></div>
+      <div class="sticky pink r4"><span class="note-num">19</span><span class="note-text">The "two wives" problem — wants full automation AND authenticity, these contradict</span></div>
+      <div class="sticky pink-4 r1"><span class="note-num">20</span><span class="note-text">Competing with professional teams of 20+ using zero resources</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- FLOW ARROW -->
+<div class="flow-arrow">
+  <svg viewBox="0 0 48 48" fill="none"><path d="M24 8v24M16 24l8 8 8-8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <span class="arrow-label">mapped against</span>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SECTION 2: AUDIENCE PAIN POINTS             -->
+<!-- ════════════════════════════════════════════ -->
+<section class="section" id="section-audience">
+  <div class="section-label white">🤍 Audience Pain Points <span class="section-count">28 pain points</span><button class="info-btn" onclick="openGuide('guide-audience')" title="Why this section?">ℹ</button></div>
+
+  <div class="cluster">
+    <div class="cluster-name">Trust &amp; Authenticity Crisis</div>
+    <div class="stickies">
+      <div class="sticky white r2"><span class="note-num">1</span><span class="note-text">Fake news distinction</span></div>
+      <div class="sticky white-2 r5"><span class="note-num">2</span><span class="note-text">Social media → fake news</span></div>
+      <div class="sticky white r8"><span class="note-num">3</span><span class="note-text">Authenticity of information</span></div>
+      <div class="sticky white-3 r1"><span class="note-num">4</span><span class="note-text">AI noise — it makes it feel the same</span></div>
+      <div class="sticky white r4"><span class="note-num">5</span><span class="note-text">AI seems unreliable — you don't know what's real or AI anymore</span></div>
+      <div class="sticky white-2 r7"><span class="note-num">6</span><span class="note-text">Skepticism toward AI content — the "AI smell" is a filter</span></div>
+    </div>
+  </div>
+
+  <div class="cluster">
+    <div class="cluster-name">Content Feels Dead</div>
+    <div class="stickies">
+      <div class="sticky white-3 r3"><span class="note-num">7</span><span class="note-text">Content feels increasingly impersonal and algorithmic</span></div>
+      <div class="sticky white r6"><span class="note-num">8</span><span class="note-text">Analysis and opinions are disappearing</span></div>
+      <div class="sticky white-4 r1"><span class="note-num">9</span><span class="note-text">No doom scrolling with interesting stuff</span></div>
+    </div>
+  </div>
+
+  <div class="cluster">
+    <div class="cluster-name">Time &amp; Format</div>
+    <div class="stickies">
+      <div class="sticky white r4"><span class="note-num">10</span><span class="note-text">No time to read all articles</span></div>
+      <div class="sticky white-2 r7"><span class="note-num">11</span><span class="note-text">No time / resources to invest in news/reading</span></div>
+      <div class="sticky white r2"><span class="note-num">12</span><span class="note-text">Don't want to read — audio only consumption</span></div>
+      <div class="sticky white-3 r5"><span class="note-num">13</span><span class="note-text">Podcasts too shallow (15 min) or too long (90 min) — gap in between</span></div>
+    </div>
+  </div>
+
+  <div class="cluster">
+    <div class="cluster-name">Information Overload &amp; Fragmentation</div>
+    <div class="stickies">
+      <div class="sticky white r8"><span class="note-num">14</span><span class="note-text">No curation of certain news</span></div>
+      <div class="sticky white-4 r3"><span class="note-num">15</span><span class="note-text">No source covers diverse interests</span></div>
+      <div class="sticky white r6"><span class="note-num">16</span><span class="note-text">Too many channels — too many perspectives</span></div>
+      <div class="sticky white-2 r1"><span class="note-num">17</span><span class="note-text">Too many sources → have to pay most of them</span></div>
+      <div class="sticky white r4"><span class="note-num">18</span><span class="note-text">Platform fatigue — too many platforms</span></div>
+      <div class="sticky white-3 r7"><span class="note-num">19</span><span class="note-text">Overload with info → nowhere to filter it</span></div>
+      <div class="sticky white r2"><span class="note-num">20</span><span class="note-text">Difficult to find very interesting niche articles</span></div>
+    </div>
+  </div>
+
+  <div class="cluster">
+    <div class="cluster-name">Retention</div>
+    <div class="stickies">
+      <div class="sticky white-2 r5"><span class="note-num">21</span><span class="note-text">The retention of news — read it but forgot it</span></div>
+      <div class="sticky white r8"><span class="note-num">22</span><span class="note-text">Want to go deeper but won't do the work themselves</span></div>
+    </div>
+  </div>
+
+  <div class="cluster">
+    <div class="cluster-name">Community &amp; Identity</div>
+    <div class="stickies">
+      <div class="sticky white r3"><span class="note-num">23</span><span class="note-text">Having a community to share fun facts with</span></div>
+      <div class="sticky white-3 r6"><span class="note-num">24</span><span class="note-text">Find yourself / identify with news anchor</span></div>
+      <div class="sticky white r1"><span class="note-num">25</span><span class="note-text">The dinner table gap — you want to drop something fascinating</span></div>
+      <div class="sticky white-2 r4"><span class="note-num">26</span><span class="note-text">Trust smart friends' takes more than media personalities</span></div>
+      <div class="sticky white r7"><span class="note-num">27</span><span class="note-text">Science info in an understandable way for non-science</span></div>
+      <div class="sticky white-4 r2"><span class="note-num">28</span><span class="note-text">Loneliness of being a curious person — nobody cares about what fascinates you</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- FLOW ARROW -->
+<div class="flow-arrow">
+  <svg viewBox="0 0 48 48" fill="none"><path d="M24 8v24M16 24l8 8 8-8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <span class="arrow-label">reveals 6 intersections</span>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SECTION 3: INTERSECTIONS                    -->
+<!-- ════════════════════════════════════════════ -->
+<section class="section" id="section-intersections">
+  <div class="section-label yellow">🟡 Intersections — Where Pain Meets Pain <span class="section-count">6 intersections</span><button class="info-btn" onclick="openGuide('guide-intersections')" title="Why this section?">ℹ</button></div>
+
+  <div class="stickies" style="gap:16px;">
+    <div class="sticky yellow r2">
+      <span class="note-num">1</span>
+      <span class="note-text"><strong>The Trust Crisis</strong><br>Both sides need a human trust layer between AI noise and real information</span>
+      <span class="connects">Brett AI &amp; Quality ↔ Audience Trust Crisis</span>
+    </div>
+
+    <div class="sticky yellow starred r5">
+      <div class="star-badge">Concept 2</div>
+      <span class="note-num">2</span>
+      <span class="note-text"><strong>Time Poverty vs Depth Hunger</strong><br>No time to create. No time to read. But BOTH want depth, not shallow headlines.</span>
+      <span class="connects">Brett Time &amp; Production ↔ Audience Time &amp; Format</span>
+    </div>
+
+    <div class="sticky yellow starred r1">
+      <div class="star-badge">Concept 2</div>
+      <span class="note-num">3</span>
+      <span class="note-text"><strong>The Retention Gap</strong><br>"I read it but forgot it." Nobody solves for memory/retention of news.</span>
+      <span class="connects">Brett Content Frustration ↔ Audience Retention</span>
+    </div>
+
+    <div class="sticky yellow r7">
+      <span class="note-num">4</span>
+      <span class="note-text"><strong>Curation IS the Product</strong><br>Brett's filtering superpower = exactly what the overloaded audience needs.</span>
+      <span class="connects">Brett AI &amp; Quality ↔ Audience Info Overload</span>
+    </div>
+
+    <div class="sticky yellow starred r3">
+      <div class="star-badge">Concept 3</div>
+      <span class="note-num">5</span>
+      <span class="note-text"><strong>The Lonely Curious Person</strong><br>Brett wants community. Audience wants the "dinner table moment" and smart friend's take.</span>
+      <span class="connects">Brett Platform ↔ Audience Community &amp; Identity</span>
+    </div>
+
+    <div class="sticky yellow starred r6">
+      <div class="star-badge">Concept 3</div>
+      <span class="note-num">6</span>
+      <span class="note-text"><strong>Authenticity vs Scale</strong><br>Brett wants automation but AI kills voice. Audience rejects AI-sounding content.</span>
+      <span class="connects">Brett Blind Spots ↔ Audience Content Feels Dead</span>
+    </div>
+  </div>
+</section>
+
+<!-- RISK CALLOUT -->
+<div class="risk-callout">
+  <span class="risk-icon">⚠️</span>
+  <div class="risk-text"><strong>RISKIEST ASSUMPTION:</strong> Brett wants monetization (Pain Point #15), but we have ZERO evidence the audience would pay. No intersection exists for this. This is the most dangerous assumption in the entire project.</div>
+</div>
+
+<!-- FLOW ARROW -->
+<div class="flow-arrow">
+  <svg viewBox="0 0 48 48" fill="none"><path d="M24 8v24M16 24l8 8 8-8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <span class="arrow-label">generates solution ideas</span>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SECTION 4: IDEATION                         -->
+<!-- ════════════════════════════════════════════ -->
+<section class="section" id="section-ideation">
+  <div class="section-label blue">💡 Ideation — Solution Ideas <span class="section-count">38 own + 40 AI · 65 mediums</span><button class="info-btn" onclick="openGuide('guide-ideation')" title="Why this section?">ℹ</button></div>
+
+  <!-- PROCESS TIMELINE -->
+  <div class="process-timeline">
+    <div class="pt-step done">
+      <div class="pt-num">1</div>
+      <div class="pt-label">Independent Brainstorm</div>
+      <div class="pt-detail">Chris: 11 · Kalina: 8</div>
+    </div>
+    <div class="pt-connector">→</div>
+    <div class="pt-step done">
+      <div class="pt-num">2</div>
+      <div class="pt-label">Independent AI Ideation</div>
+      <div class="pt-detail">20 fresh ideas · no bias</div>
+    </div>
+    <div class="pt-connector">→</div>
+    <div class="pt-step done">
+      <div class="pt-num">3</div>
+      <div class="pt-label">Session Review</div>
+      <div class="pt-detail">Rapid-fire votes · sparks</div>
+    </div>
+    <div class="pt-connector">→</div>
+    <div class="pt-step done">
+      <div class="pt-num">4</div>
+      <div class="pt-label">Re-Define → Converge</div>
+      <div class="pt-detail">Path 2 · new HMWs</div>
+    </div>
+  </div>
+
+  <div class="concept-block c2">
+
+  <div class="hmw-banner" style="opacity:0.6; text-decoration:line-through; font-size:0.85rem;">HMW make consuming deep analysis feel as effortless as scrolling — but leave knowledge that compounds over weeks?</div>
+  <div class="hmw-banner" style="border-left-color:#4caf50; background:rgba(76,175,80,0.06);">🔄 <strong>Path 2 HMW:</strong> How might we turn Brett's curation into something people remember, use, and talk about?</div>
+
+  <!-- ═══════ ROUND 1: OUR OWN THINKING ═══════ -->
+  <div class="round-block">
+    <div class="round-header-bar">
+      <span class="round-num">Round 1</span>
+      <span class="round-title">Our Own Thinking</span>
+      <span class="round-meta">19 ideas · no stimulus · pure instinct</span>
+    </div>
+
+    <!-- CLUSTER: Retention & Gamification -->
+    <div class="cluster">
+      <div class="cluster-name">🧠 Retention &amp; Gamification</div>
+      <div class="stickies">
+        <div class="sticky blue idea r2"><span class="author-badge chris">C</span><span class="note-num">C1</span><span class="note-text">Competition like Quistwell (German quiz app)</span></div>
+        <div class="sticky blue-2 idea r5"><span class="author-badge chris">C</span><span class="note-num">C7</span><span class="note-text">Interactive workflows, gamification for longevity</span></div>
+        <div class="sticky blue idea r8"><span class="author-badge chris">C</span><span class="note-num">C8</span><span class="note-text">Anki flash cards — spaced repetition for news</span></div>
+        <div class="sticky lavender idea r1"><span class="author-badge kalina">K</span><span class="note-num">K1</span><span class="note-text">The Forgetting Curve → end-of-week summary, quiz, flashy Q&amp;A</span></div>
+        <div class="sticky lavender-2 idea r4"><span class="author-badge kalina">K</span><span class="note-num">K5</span><span class="note-text">Fun quiz-gamified for retention, forecasts for audience engagement</span></div>
+      </div>
+    </div>
+
+    <!-- CLUSTER: Distribution & Visual Format -->
+    <div class="cluster">
+      <div class="cluster-name">📦 Distribution &amp; Visual Format</div>
+      <div class="stickies">
+        <div class="sticky blue idea r3"><span class="author-badge chris">C</span><span class="note-num">C5</span><span class="note-text">Voice notes via WhatsApp / Telegram channel</span></div>
+        <div class="sticky blue-3 idea r6"><span class="author-badge chris">C</span><span class="note-num">C10</span><span class="note-text">Animated videos of complex situations — "what would happen"</span></div>
+        <div class="sticky lavender idea r7"><span class="author-badge kalina">K</span><span class="note-num">K4</span><span class="note-text">Social media carousel post</span></div>
+        <div class="sticky lavender-3 idea r2"><span class="author-badge kalina">K</span><span class="note-num">K7</span><span class="note-text">Clickable link to HTML deep-dive analysis with full references</span></div>
+      </div>
+    </div>
+
+    <!-- CLUSTER: Micro-Formats & Time Caps -->
+    <div class="cluster">
+      <div class="cluster-name">⏱ Micro-Formats &amp; Time Caps</div>
+      <div class="stickies">
+        <div class="sticky blue-2 idea r1"><span class="author-badge chris">C</span><span class="note-num">C6</span><span class="note-text">Habits trainer — find 3min slot (brushing teeth, laundry)</span></div>
+        <div class="sticky lavender idea r5"><span class="author-badge kalina">K</span><span class="note-num">K3</span><span class="note-text">Stories max 2-3 min reading</span></div>
+        <div class="sticky lavender-2 idea r8"><span class="author-badge kalina">K</span><span class="note-num">K8</span><span class="note-text">Short videos with catchy graphs, deep analysis, no info overload</span></div>
+      </div>
+    </div>
+
+    <!-- CLUSTER: Weekly Cadence -->
+    <div class="cluster">
+      <div class="cluster-name">📅 Weekly Cadence &amp; Story Arcs</div>
+      <div class="stickies">
+        <div class="sticky blue idea r4"><span class="author-badge chris">C</span><span class="note-num">C4</span><span class="note-text">Weekly cycle — Mon headlines, Tue deep dive, Wed…</span></div>
+        <div class="sticky lavender idea r7"><span class="author-badge kalina">K</span><span class="note-num">K6</span><span class="note-text">One story → development over the week (e.g. Ukraine)</span></div>
+      </div>
+    </div>
+
+    <!-- CLUSTER: Tone & Positioning -->
+    <div class="cluster">
+      <div class="cluster-name">🎭 Tone &amp; Positioning</div>
+      <div class="stickies">
+        <div class="sticky blue idea r6"><span class="author-badge chris">C</span><span class="note-num">C3</span><span class="note-text">Comedy vibes — funny small animated shows</span></div>
+        <div class="sticky lavender-3 idea r3"><span class="author-badge kalina">K</span><span class="note-num">K2</span><span class="note-text">Newspaper for deep thinkers</span></div>
+      </div>
+    </div>
+
+    <!-- CLUSTER: Interactive Depth & Community -->
+    <div class="cluster">
+      <div class="cluster-name">🌳 Interactive Depth &amp; Community</div>
+      <div class="stickies">
+        <div class="sticky blue-3 idea r2"><span class="author-badge chris">C</span><span class="note-num">C9</span><span class="note-text">Decision tree simplification / interactive HTML daily mini-apps</span></div>
+        <div class="sticky blue idea r5"><span class="author-badge chris">C</span><span class="note-num">C11</span><span class="note-text">"What would Brett think?" / Community predictions (Polymarket-style)</span></div>
+      </div>
+    </div>
+
+    <!-- CLUSTER: B2B Pivot -->
+    <div class="cluster">
+      <div class="cluster-name">💼 B2B Pivot</div>
+      <div class="stickies">
+        <div class="sticky blue-2 idea r8"><span class="author-badge chris">C</span><span class="note-num">C2</span><span class="note-text">B2B for company employees — 15min daily briefing to start the day</span></div>
+      </div>
+    </div>
+
+    <!-- Editable area -->
+    <div class="add-ideas-area">
+      <div class="add-ideas-label">✏️ Add more ideas here</div>
+      <div class="stickies">
+        <div class="sticky blue editable r3"><span class="note-text" contenteditable="true" data-placeholder="Chris: type idea..."></span></div>
+        <div class="sticky lavender editable r6"><span class="note-text" contenteditable="true" data-placeholder="Kalina: type idea..."></span></div>
+        <div class="sticky blue editable r1"><span class="note-text" contenteditable="true" data-placeholder="Another idea..."></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ ROUND 2: INDEPENDENT AI IDEATION ═══════ -->
+  <details class="stimulus-block" style="border-color: rgba(33,150,243,0.2);">
+    <summary>
+      <span class="round-num" style="background:#2196f3;">Round 2</span>
+      <span class="round-title">Independent AI Ideation</span>
+      <span class="round-meta">20 fresh ideas · no bias from Round 1 · click to expand</span>
+    </summary>
+    <div class="stimulus-body">
+      <p style="font-size:0.78rem; color:var(--text-dim); margin:0 0 12px; font-style:italic;">Generated independently using multiple creative lenses: "What Would X Do?", reverse assumptions, analogy-based, tech-forward, wildcard.</p>
+      <div class="stickies">
+        <div class="sticky blue idea r5"><span class="note-num">1</span><span class="idea-title">Streak of Insight</span><span class="idea-desc">Duolingo-style daily "analysis rep" with XP for reading + retention quizzes</span></div>
+        <div class="sticky blue-2 idea r8"><span class="note-num">2</span><span class="idea-title">Binge Arc</span><span class="idea-desc">Netflix autoplay for analysis: one piece flows into the next via your knowledge graph</span></div>
+        <div class="sticky blue idea r3"><span class="note-num">3</span><span class="idea-title">10-Second Thesis</span><span class="idea-desc">TikTok-format vertical video: single core argument before you decide to go deeper</span></div>
+        <div class="sticky blue-3 idea r6"><span class="note-num">4</span><span class="idea-title">Wednesday Drop</span><span class="idea-desc">Spotify curated "analysis playlist" matched to your commute length and topic taste</span></div>
+        <div class="sticky blue idea r1"><span class="note-num">5</span><span class="idea-title">The Broadsheet</span><span class="idea-desc">Physical weekly newspaper mailed to subscribers; no screens, no notifications, just ink and ideas</span></div>
+        <div class="sticky blue-2 idea r4"><span class="note-num">6</span><span class="idea-title">Listener's Digest</span><span class="idea-desc">No reading at all — every analysis narrated by rotating cast of voice actors with distinct styles</span></div>
+        <div class="sticky blue idea r7"><span class="note-num">7</span><span class="idea-title">Reader-Rendered</span><span class="idea-desc">Users rewrite articles in their own words; summarizing for others IS the retention mechanism</span></div>
+        <div class="sticky blue-3 idea r2"><span class="note-num">8</span><span class="idea-title">The Argument Club</span><span class="idea-desc">Every piece requires taking a position BEFORE reading the author's conclusion</span></div>
+        <div class="sticky blue idea r5"><span class="note-num">9</span><span class="idea-title">Analysis Reps</span><span class="idea-desc">Fitness model: short daily "sets" of reading with progressive overload, adding complexity weekly</span></div>
+        <div class="sticky blue-2 idea r8"><span class="note-num">10</span><span class="idea-title">Mise en Place Mind</span><span class="idea-desc">Cooking model: pre-read "ingredient briefs" (context, actors, history) before the main dish</span></div>
+        <div class="sticky blue idea r3"><span class="note-num">11</span><span class="idea-title">Boss Level Brief</span><span class="idea-desc">Gaming model: each article is a "level" with optional side-quests (primary sources, data)</span></div>
+        <div class="sticky blue-3 idea r6"><span class="note-num">12</span><span class="idea-title">Spaced Dispatch</span><span class="idea-desc">Key arguments from past articles reappear weeks later for retrieval practice</span></div>
+        <div class="sticky blue idea r1"><span class="note-num">13</span><span class="idea-title">Ghost Annotator</span><span class="idea-desc">AI highlights the 3 sentences containing 80% of an article's argument before you start</span></div>
+        <div class="sticky blue-2 idea r4"><span class="note-num">14</span><span class="idea-title">Ambient Briefing</span><span class="idea-desc">AR glasses surface a one-paragraph brief when you walk past a relevant location or person</span></div>
+        <div class="sticky blue idea r7"><span class="note-num">15</span><span class="idea-title">Earworm Intelligence</span><span class="idea-desc">Voice AI synthesizes weekly reading into a 3-minute "earworm" designed for passive recall</span></div>
+        <div class="sticky blue-3 idea r2"><span class="note-num">16</span><span class="idea-title">Wrist Digest</span><span class="idea-desc">Smartwatch haptic pulses deliver one analytical sentence per hour, complete argument by bedtime</span></div>
+        <div class="sticky blue idea r5"><span class="note-num">17</span><span class="idea-title">Memory Palace Builder</span><span class="idea-desc">Spatial computing: articles placed as objects in your home; revisiting rooms triggers recall</span></div>
+        <div class="sticky blue-2 idea r8"><span class="note-num">18</span><span class="idea-title">The Analyst on Retainer</span><span class="idea-desc">A real human expert texts you a 2-sentence brief + answers 3 follow-up questions daily</span></div>
+        <div class="sticky blue idea r3"><span class="note-num">19</span><span class="idea-title">Compounding Knowledge Fund</span><span class="idea-desc">Every fully-read article "invests" into a visible knowledge portfolio with ROI over months</span></div>
+        <div class="sticky blue-3 idea r6"><span class="note-num">20</span><span class="idea-title">My Kid's Version</span><span class="idea-desc">Each analysis rewritten as a story with characters and conflict, as if for a curious 10-year-old</span></div>
+      </div>
+    </div>
+  </details>
+
+  <!-- ═══════ C2 SESSION DEBRIEF ═══════ -->
+  <div class="debrief">
+    <div class="debrief-title">📋 C2 Session Debrief — What Resonated</div>
+
+    <div style="margin-bottom:16px;">
+      <p style="font-size:0.78rem; color:var(--text-dim); margin:0 0 10px;">Rapid-fire review of 20 AI ideas. Votes:</p>
+      <div style="display:flex; flex-wrap:wrap; gap:6px; font-size:0.75rem;">
+        <span class="vote-tag yes">🔥 #2 Binge Arc</span>
+        <span class="vote-tag yes">🔥 #7 Reader-Rendered</span>
+        <span class="vote-tag yes">🔥 #8 Argument Club</span>
+        <span class="vote-tag yes">🔥 #11 Boss Level Brief</span>
+        <span class="vote-tag maybe">🤔 #15 Earworm (mnemonic)</span>
+        <span class="vote-tag maybe">🤔 #17 Memory Palace</span>
+        <span class="vote-tag no">❌ #1 Streak</span>
+        <span class="vote-tag no">❌ #4 Wednesday Drop</span>
+        <span class="vote-tag no">❌ #5 Broadsheet</span>
+        <span class="vote-tag no">❌ #6 Listener's Digest</span>
+        <span class="vote-tag no">❌ #9 Analysis Reps</span>
+        <span class="vote-tag no">❌ #12 Spaced Dispatch</span>
+        <span class="vote-tag no">❌ #20 Kid's Version</span>
+      </div>
+    </div>
+
+    <div class="spark-card">
+      <div class="spark-label">💡 Spark Idea — emerged during discussion</div>
+      <h4>Choose-Your-Path Interactive Analysis</h4>
+      <p>Triggered by #8 Argument Club. Like video games with branching outcomes — give the reader a situation, let them choose A or B, then show the implications. Example: "If lung volume were 12L instead of 4L, you could stay underwater 15 minutes." Interactive cause-and-effect that makes analysis stick through decision-making, not passive reading.</p>
+    </div>
+
+    <div class="spark-card">
+      <div class="spark-label">💡 Key Insight</div>
+      <h4>"We want them to remember by being good enough, not by explicitly teaching them"</h4>
+      <p>Triggered by #15 Earworm and discussion of mnemonics ("Donkey Bridge" in German). The insight: don't design retention mechanisms (flashcards, quizzes). Design content that's inherently memorable because it's surprising, visceral, or story-driven. Retention should be a side effect, not a feature.</p>
+    </div>
+  </div>
+
+  </div><!-- /concept-block c2 -->
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- CONCEPT 3: COMMUNITY + AUTHENTICITY         -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="concept-block c3" style="margin-top:32px;">
+    <div class="section-label green-label" style="font-size:1.3rem; margin-bottom:8px;">💚 Concept 3 — Community + Authenticity <span style="font-size:0.72rem; font-weight:400; color:var(--text-dim);">→ Path 2: becomes The Dinner Table Drop (news + AI trust)</span></div>
+    <div class="hmw-banner" style="border-left-color:#4caf50; opacity:0.6; text-decoration:line-through; font-size:0.85rem;">HMW give every curious person their 'smartest friend at the dinner table' — at scale — without losing the human voice that makes it worth trusting?</div>
+    <div class="hmw-banner" style="border-left-color:#2196f3; background:rgba(33,150,243,0.06);">🔄 <strong>Path 2 HMW:</strong> How might we deliver deep, trustworthy content powered by AI that never sounds like AI?</div>
+
+    <!-- PROCESS TIMELINE C3 -->
+    <div class="process-timeline" style="margin-top:12px;">
+      <div class="pt-step done"><div class="pt-num">1</div><div class="pt-label">Independent Brainstorm</div><div class="pt-detail">Chris: 12 · Kalina: 7</div></div>
+      <div class="pt-connector">→</div>
+      <div class="pt-step done"><div class="pt-num">2</div><div class="pt-label">Independent AI Ideation</div><div class="pt-detail">20 fresh ideas · no bias</div></div>
+      <div class="pt-connector">→</div>
+      <div class="pt-step done"><div class="pt-num">3</div><div class="pt-label">Session Review</div><div class="pt-detail">Rapid-fire votes · sparks</div></div>
+      <div class="pt-connector">→</div>
+      <div class="pt-step done"><div class="pt-num">4</div><div class="pt-label">Re-Define → Converge</div><div class="pt-detail">Path 2 · new HMWs</div></div>
+    </div>
+
+    <!-- ═══════ ROUND 1: OUR OWN THINKING ═══════ -->
+    <div class="round-block">
+      <div class="round-header-bar">
+        <span class="round-num">Round 1</span>
+        <span class="round-title">Our Own Thinking</span>
+        <span class="round-meta">19 ideas · no stimulus · pure instinct</span>
+      </div>
+
+      <!-- CLUSTER: Games & Gamification -->
+      <div class="cluster">
+        <div class="cluster-name">🃏 Games &amp; Gamification</div>
+        <div class="stickies">
+          <div class="sticky green idea r2"><span class="author-badge chris">C</span><span class="note-num">C7</span><span class="note-text">Physical cards — Cards Against Humanity style for fun facts at dinner table</span></div>
+          <div class="sticky green-2 idea r5"><span class="author-badge chris">C</span><span class="note-num">C11</span><span class="note-text">Gamification — "who knows the weirdest fact wins"</span></div>
+          <div class="sticky green idea r8"><span class="author-badge chris">C</span><span class="note-num">C12</span><span class="note-text">Quiz format — 3 wrong, 1 right. Engage through testing</span></div>
+          <div class="sticky lavender idea r1"><span class="author-badge kalina">K</span><span class="note-num">K2</span><span class="note-text">Fun fact guessing game (like NYT Connections)</span></div>
+          <div class="sticky lavender-2 idea r4"><span class="author-badge kalina">K</span><span class="note-num">K7</span><span class="note-text">Reader loyalty / knowledge badges for retention</span></div>
+        </div>
+      </div>
+
+      <!-- CLUSTER: Brett's Human Touch -->
+      <div class="cluster">
+        <div class="cluster-name">🎤 Brett's Human Touch</div>
+        <div class="stickies">
+          <div class="sticky green idea r3"><span class="author-badge chris">C</span><span class="note-num">C2</span><span class="note-text">Voice note input — Brett does voice overs, check if emotionally engaging enough</span></div>
+          <div class="sticky green-3 idea r6"><span class="author-badge chris">C</span><span class="note-num">C3</span><span class="note-text">Community voting / Brett grades fun facts by wow factor</span></div>
+          <div class="sticky lavender idea r1"><span class="author-badge kalina">K</span><span class="note-num">K5</span><span class="note-text">Brett shares topic → selects &amp; comments on best community comments</span></div>
+          <div class="sticky lavender-3 idea r4"><span class="author-badge kalina">K</span><span class="note-num">K6</span><span class="note-text">YouTube "experts answer real people's questions" format</span></div>
+        </div>
+      </div>
+
+      <!-- CLUSTER: Community Spaces -->
+      <div class="cluster">
+        <div class="cluster-name">🌍 Community Spaces</div>
+        <div class="stickies">
+          <div class="sticky green-2 idea r7"><span class="author-badge chris">C</span><span class="note-num">C4</span><span class="note-text">City meetups — Barcelona, running club vibes for discussion</span></div>
+          <div class="sticky green idea r2"><span class="author-badge chris">C</span><span class="note-num">C8</span><span class="note-text">Discord / Reddit for sharing fun fact stories and reactions</span></div>
+          <div class="sticky green-3 idea r5"><span class="author-badge chris">C</span><span class="note-num">C10</span><span class="note-text">Salon show — Brett engages people directly</span></div>
+          <div class="sticky green idea r8"><span class="author-badge chris">C</span><span class="note-num">C5</span><span class="note-text">"Breathe the community" (concept TBD)</span></div>
+        </div>
+      </div>
+
+      <!-- CLUSTER: Scale Brett's Brain -->
+      <div class="cluster">
+        <div class="cluster-name">🎓 Scale Brett's Brain</div>
+        <div class="stickies">
+          <div class="sticky green idea r4"><span class="author-badge chris">C</span><span class="note-num">C1</span><span class="note-text">Train people in Brett's filtering/scanning ability (also B2B)</span></div>
+          <div class="sticky lavender idea r7"><span class="author-badge kalina">K</span><span class="note-num">K1</span><span class="note-text">B2B industry inside fun facts — morning briefing connected to your work</span></div>
+          <div class="sticky lavender-2 idea r2"><span class="author-badge kalina">K</span><span class="note-num">K3</span><span class="note-text">AI summary curated by Brett + personality profile for personalized fun facts</span></div>
+        </div>
+      </div>
+
+      <!-- CLUSTER: Smart Content Discovery -->
+      <div class="cluster">
+        <div class="cluster-name">🎯 Smart Content Discovery</div>
+        <div class="stickies">
+          <div class="sticky green-2 idea r6"><span class="author-badge chris">C</span><span class="note-num">C6</span><span class="note-text">Based on user input — map what they know, give them what they DON'T know</span></div>
+          <div class="sticky green idea r3"><span class="author-badge chris">C</span><span class="note-num">C9</span><span class="note-text">Physical/digital content for commute (train etc.)</span></div>
+          <div class="sticky lavender idea r8"><span class="author-badge kalina">K</span><span class="note-num">K4</span><span class="note-text">Top 5 crazy stories + click for knowledge explainer video (source podcasts)</span></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ═══════ ROUND 2: INDEPENDENT AI IDEATION C3 ═══════ -->
+    <details class="stimulus-block" style="border-color: rgba(76,175,80,0.2);">
+      <summary>
+        <span class="round-num" style="background:#4caf50;">Round 2</span>
+        <span class="round-title">Independent AI Ideation</span>
+        <span class="round-meta">20 fresh ideas · no bias from Round 1 · click to expand</span>
+      </summary>
+      <div class="stimulus-body">
+        <p style="font-size:0.78rem; color:var(--text-dim); margin:0 0 12px; font-style:italic;">Generated independently using multiple creative lenses: "What Would X Do?", reverse assumptions, analogy-based, tech-forward, wildcard.</p>
+        <div class="stickies">
+          <div class="sticky green idea r3"><span class="note-num">1</span><span class="idea-title">The Book Club Model</span><span class="idea-desc">Brett selects one topic monthly; members get curated reading list, live Q&A, community discussion</span></div>
+          <div class="sticky green-2 idea r6"><span class="note-num">2</span><span class="idea-title">The Oprah Endorsement Stack</span><span class="idea-desc">"Brett Approved" stamp becomes trusted signal across books, podcasts, articles, products</span></div>
+          <div class="sticky green idea r1"><span class="note-num">3</span><span class="idea-title">The Rogan Long-Form Table</span><span class="idea-desc">Weekly unscripted 3-hour conversations where Brett's genuine curiosity drives, unedited</span></div>
+          <div class="sticky green-3 idea r4"><span class="note-num">4</span><span class="idea-title">The Values Franchise</span><span class="idea-desc">License "Brett's Curation Principles" to vetted local hosts running their own communities</span></div>
+          <div class="sticky green idea r7"><span class="note-num">5</span><span class="idea-title">The Audience Curates</span><span class="idea-desc">Readers surface interesting links; Brett reacts, adds context, selects the weekly winner</span></div>
+          <div class="sticky green-2 idea r2"><span class="note-num">6</span><span class="idea-title">The Anti-Expert</span><span class="idea-desc">Brett only covers topics he knows nothing about yet, documenting live learning with full uncertainty</span></div>
+          <div class="sticky green idea r5"><span class="note-num">7</span><span class="idea-title">The Vulnerability Archive</span><span class="idea-desc">Brett publishes every wrong prediction and bad take — trust through radical intellectual honesty</span></div>
+          <div class="sticky green-3 idea r8"><span class="note-num">8</span><span class="idea-title">No Brett at Center</span><span class="idea-desc">Rotating cast of obsessive strangers each own one weird niche; Brett is the silent editor</span></div>
+          <div class="sticky green idea r3"><span class="note-num">9</span><span class="idea-title">The Parish Model</span><span class="idea-desc">Weekly "congregation" newsletter every Sunday morning, ritualistic and comforting</span></div>
+          <div class="sticky green-2 idea r6"><span class="note-num">10</span><span class="idea-title">The Ultras Fandom</span><span class="idea-desc">Superfans get exclusive access to drafts, research scraps, discarded ideas before publishing</span></div>
+          <div class="sticky green idea r1"><span class="note-num">11</span><span class="idea-title">The Tasting Room</span><span class="idea-desc">Paid membership "taproom" where experimental ideas ship before Brett decides what goes mainstream</span></div>
+          <div class="sticky green-3 idea r4"><span class="note-num">12</span><span class="idea-title">The Off-Menu Special</span><span class="idea-desc">Private weekly piece only long-term subscribers receive, never indexed or shared publicly</span></div>
+          <div class="sticky green idea r7"><span class="note-num">13</span><span class="idea-title">Voice Clone Companion</span><span class="idea-desc">AI trained on Brett's reasoning answers "What would Brett think about this?" conversationally</span></div>
+          <div class="sticky green-2 idea r2"><span class="note-num">14</span><span class="idea-title">Spatial Audio Dinner Table</span><span class="idea-desc">Binaural podcast that sonically places Brett and guests around a dinner table in your ears</span></div>
+          <div class="sticky green idea r5"><span class="note-num">15</span><span class="idea-title">AR Article Annotations</span><span class="idea-desc">Point phone at any news article; Brett's reactions and connections appear layered over text</span></div>
+          <div class="sticky green-3 idea r8"><span class="note-num">16</span><span class="idea-title">Provenance Blockchain</span><span class="idea-desc">Every recommendation minted with timestamp proving Brett said it first — verifiable track record</span></div>
+          <div class="sticky green idea r3"><span class="note-num">17</span><span class="idea-title">Curiosity Matchmaker</span><span class="idea-desc">Algorithm pairs two subscribers who'd have the most interesting conversation, based on reading</span></div>
+          <div class="sticky green-2 idea r6"><span class="note-num">18</span><span class="idea-title">The Disagreement Engine</span><span class="idea-desc">Community submits strongest counterargument to Brett's take; best gets published alongside</span></div>
+          <div class="sticky green idea r1"><span class="note-num">19</span><span class="idea-title">The Physical Newspaper Drop</span><span class="idea-desc">Monthly broadsheet mailed to subscribers, designed for analog reading, zero notifications</span></div>
+          <div class="sticky green-3 idea r4"><span class="note-num">20</span><span class="idea-title">The Dinner Table Kit</span><span class="idea-desc">Quarterly box: one book, one documentary QR, three conversation cards, one Brett voice memo</span></div>
+        </div>
+      </div>
+    </details>
+
+    <!-- ═══════ C3 SESSION DEBRIEF ═══════ -->
+    <div class="debrief c3-debrief">
+      <div class="debrief-title">📋 C3 Session Debrief — What Resonated</div>
+
+      <div style="margin-bottom:16px;">
+        <p style="font-size:0.78rem; color:var(--text-dim); margin:0 0 10px;">Rapid-fire review of 20 AI ideas. Votes:</p>
+        <div style="display:flex; flex-wrap:wrap; gap:6px; font-size:0.75rem;">
+          <span class="vote-tag split">🔥/❌ #3 Rogan Table (C: yes, K: no)</span>
+          <span class="vote-tag yes">🔥 #14 AI Dinner Table</span>
+          <span class="vote-tag yes">🔥 #20 Dinner Table Kit</span>
+          <span class="vote-tag maybe">🤔 #4 Values Franchise</span>
+          <span class="vote-tag maybe">🤔 #6 Anti-Expert</span>
+          <span class="vote-tag maybe">🤔 #17 Curiosity Matchmaker</span>
+          <span class="vote-tag no">❌ #1 Book Club</span>
+          <span class="vote-tag no">❌ #2 Oprah Endorsement</span>
+          <span class="vote-tag no">❌ #7 Vulnerability Archive</span>
+          <span class="vote-tag no">❌ #8 No Brett at Center</span>
+          <span class="vote-tag no">❌ #9 Parish Model</span>
+          <span class="vote-tag no">❌ #10 Ultras Fandom</span>
+          <span class="vote-tag no">❌ #13 Voice Clone</span>
+          <span class="vote-tag no">❌ #15 AR Annotations</span>
+          <span class="vote-tag no">❌ #16 Blockchain</span>
+        </div>
+      </div>
+
+      <div class="spark-card" style="border-left-color:#ff5722;">
+        <div class="spark-label" style="color:#ff5722;">🔥🔥🔥 Biggest Spark — both got excited</div>
+        <h4>AI Personality Debate Livestream</h4>
+        <p>Triggered by #14 Spatial Audio Dinner Table. The idea: create AI personas with distinct personalities (like MasterClass experts) and have them DEBATE each other about a topic. Brett moves "from table to table with coffee" as moderator. Could run 24/7 as a livestream. Combines Brett's human curation with AI's scale. Content is generated continuously, Brett just picks which debates are worth having and adds his real voice when it matters.</p>
+      </div>
+
+      <div class="spark-card">
+        <div class="spark-label">💡 Spark Idea</div>
+        <h4>Brett Films Himself Scouring the Web</h4>
+        <p>Triggered by #3 Rogan Table. Chris's insight: don't script it. Just film Brett doing what he already does — scrolling, filtering, getting excited about articles. The raw process IS the content. Then clip it. His personality shows through the selection, not the performance.</p>
+      </div>
+
+      <div class="spark-card">
+        <div class="spark-label">💡 Spark Idea</div>
+        <h4>Physical Dinner Table Kit</h4>
+        <p>Triggered by #20. Something tangible: cards, a book, conversation starters, a QR to a Brett voice memo. Shipped quarterly. Gets left on coffee tables. Colleagues notice it. Word-of-mouth vector that digital content can't replicate.</p>
+      </div>
+    </div>
+
+    <!-- ═══════ STRATEGIC CONSTRAINTS (from session discussion) ═══════ -->
+    <div style="margin-top:20px; padding:20px; background:rgba(244,67,54,0.04); border:2px solid rgba(244,67,54,0.12); border-radius:14px;">
+      <div class="debrief-title" style="color:#c62828;">⚠️ Strategic Constraints — From Session Discussion</div>
+
+      <div class="constraint-card">
+        <strong>Brett has ZERO existing community</strong>
+        <p>No followers, no email list, no social presence. Every C3 idea that assumes an audience already exists is dead on arrival. The concept must include a bootstrapping mechanism — how does person #1 find this?</p>
+      </div>
+
+      <div class="constraint-card">
+        <strong>All models so far are B2C — but B2B might be the real opportunity</strong>
+        <p>Kalina spotted this: "Every model we think of is only B2C." Corporate gifting, industry morning briefings, team subscriptions — these are distribution channels that don't require Brett to be famous first. The gap analysis flagged this too.</p>
+      </div>
+
+      <div class="constraint-card">
+        <strong>"We don't need 10 business ideas, we need 1 or 2 that work well"</strong>
+        <p>Kalina's pushback. The design thinking divergence phase is done. Time to converge hard. Concepts must be specific enough that Brett can see the first 3 months of action, not just the vision.</p>
+      </div>
+
+      <div class="constraint-card">
+        <strong>Concepts must survive Brett's skepticism</strong>
+        <p>He'll reject anything that assumes community he doesn't have. Concept 1 is what he somewhat wants. Concepts 2+3 are what we believe he should do — but they need a realistic path from zero, or he'll dismiss them.</p>
+      </div>
+    </div>
+
+  </div><!-- /concept-block c3 -->
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- MEDIUM LANDSCAPE                             -->
+  <!-- ═══════════════════════════════════════════ -->
+  <details style="margin-top:32px; border:2px dashed rgba(0,0,0,0.08); border-radius:14px; overflow:hidden;">
+    <summary style="display:flex; align-items:baseline; gap:10px; padding:16px 20px; cursor:pointer; background:rgba(0,0,0,0.02); list-style:none; font-family:var(--font-serif); font-size:0.95rem; font-weight:600;">
+      <span style="content:'▶'; transition:transform 0.25s;">📡</span>
+      <span>Information Medium Landscape</span>
+      <span style="font-weight:400; font-size:0.78rem; color:var(--text-dim); margin-left:auto;">65 mediums across 8 categories · reference scan</span>
+      <button class="info-btn" onclick="event.stopPropagation(); openGuide('guide-mediums')" title="Why this section?" style="margin-left:8px;">ℹ</button>
+    </summary>
+    <div style="padding:20px; font-size:0.82rem; line-height:1.6;">
+      <p style="color:var(--text-dim); margin:0 0 16px; font-style:italic;">Every product idea requires a MEDIUM — a way to deliver content from Brett to his audience. This is a complete landscape scan.</p>
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:16px;">
+
+        <div style="background:rgba(33,150,243,0.05); padding:14px; border-radius:10px; border-left:3px solid #2196f3;">
+          <strong>📝 Text-Based (11)</strong>
+          <div style="margin-top:8px; font-size:0.78rem; color:var(--text);">Newsletter · Long-form essay · Blog · Annotated digest · Substack/Beehiiv · Thread/micro-essay · LinkedIn articles · Zine · Book/ebook · Research report · Scrollytelling article</div>
+          <div style="margin-top:6px; font-size:0.72rem; color:var(--text-dim);">⭐ Highest leverage: Solo narrative podcast + annotated digest newsletter</div>
+        </div>
+
+        <div style="background:rgba(76,175,80,0.05); padding:14px; border-radius:10px; border-left:3px solid #4caf50;">
+          <strong>🎧 Audio (8)</strong>
+          <div style="margin-top:8px; font-size:0.78rem; color:var(--text);">Interview podcast · Solo/narrative podcast · Audio newsletter · Voice note series · Audiobook · Live social audio · Ambient audio · Spatial audio</div>
+          <div style="margin-top:6px; font-size:0.72rem; color:var(--text-dim);">⭐ Underexplored: Voice notes (WhatsApp/Telegram) — intimate &amp; scalable</div>
+        </div>
+
+        <div style="background:rgba(156,39,176,0.05); padding:14px; border-radius:10px; border-left:3px solid #9c27b0;">
+          <strong>🎬 Video (8)</strong>
+          <div style="margin-top:8px; font-size:0.78rem; color:var(--text);">YouTube essay · Short-form (Reels/Shorts) · Livestream · Documentary/mini-doc · Screen recording · Animated explainer · Video newsletter · Video podcast</div>
+          <div style="margin-top:6px; font-size:0.72rem; color:var(--text-dim);">⭐ YouTube essays = only video with long-term search discoverability</div>
+        </div>
+
+        <div style="background:rgba(255,152,0,0.05); padding:14px; border-radius:10px; border-left:3px solid #ff9800;">
+          <strong>🎮 Interactive Digital (9)</strong>
+          <div style="margin-top:8px; font-size:0.78rem; color:var(--text);">Data dashboard · Quiz/assessment · Digital course · AI chatbot/agent · Simulation/game · Annotated reading platform · Interactive map/timeline · AR filter · VR experience</div>
+          <div style="margin-top:6px; font-size:0.72rem; color:var(--text-dim);">⭐ Most accessible: AI agent trained on Brett's writing (no-code tools)</div>
+        </div>
+
+        <div style="background:rgba(121,85,72,0.05); padding:14px; border-radius:10px; border-left:3px solid #795548;">
+          <strong>📦 Physical / Tangible (7)</strong>
+          <div style="margin-top:8px; font-size:0.78rem; color:var(--text);">Print newsletter/broadsheet · Book · Card deck · Physical zine · Subscription box · Broadside/poster · Annotated book club edition</div>
+          <div style="margin-top:6px; font-size:0.72rem; color:var(--text-dim);">⭐ Physical = scarcity signal. Gets left on desks. Never algorithmically buried.</div>
+        </div>
+
+        <div style="background:rgba(233,30,99,0.05); padding:14px; border-radius:10px; border-left:3px solid #e91e63;">
+          <strong>🎪 In-Person / Live (7)</strong>
+          <div style="margin-top:8px; font-size:0.78rem; color:var(--text);">Dinner salon · Workshop/masterclass · Conference · Office hours · Walking tour · Retreat · Reading group/book club</div>
+          <div style="margin-top:6px; font-size:0.72rem; color:var(--text-dim);">⭐ Dinner salon = low cost, high intimacy, strongest word-of-mouth</div>
+        </div>
+
+        <div style="background:rgba(0,150,136,0.05); padding:14px; border-radius:10px; border-left:3px solid #009688;">
+          <strong>💬 Social / Community (7)</strong>
+          <div style="margin-top:8px; font-size:0.78rem; color:var(--text);">Discord · Slack community · Circle/Mighty Networks · WhatsApp/Telegram broadcast · Reddit/forum · Twitter list/community · Annotation layer</div>
+          <div style="margin-top:6px; font-size:0.72rem; color:var(--text-dim);">⭐ Community transforms readers into participants. Creator becomes curator.</div>
+        </div>
+
+        <div style="background:rgba(63,81,181,0.05); padding:14px; border-radius:10px; border-left:3px solid #3f51b5;">
+          <strong>🚀 Hybrid / Emerging (8)</strong>
+          <div style="margin-top:8px; font-size:0.78rem; color:var(--text);">AI-personalized newsletter · Creator AI clone · Spatial/Vision Pro · Phygital (NFC/QR) · Wearable content · AI-generated podcast · Live translation · Async video Q&amp;A</div>
+          <div style="margin-top:6px; font-size:0.72rem; color:var(--text-dim);">⭐ NotebookLM AI podcast = early proof-of-concept for personalized audio</div>
+        </div>
+
+      </div>
+    </div>
+  </details>
+
+</section>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- PATH 2: WHY WE ITERATED                    -->
+<!-- ════════════════════════════════════════════ -->
+<div class="flow-arrow">
+  <svg viewBox="0 0 48 48" fill="none"><path d="M24 8v24M16 24l8 8 8-8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <span class="arrow-label">session review revealed overlap → back to Define</span>
+</div>
+
+<section class="section" id="section-path2" style="background:linear-gradient(135deg, rgba(255,152,0,0.04), rgba(233,30,99,0.02));">
+  <div class="section-label" style="color:#e65100; font-size:1.2rem;">🔄 Path 2 — We Went Back to Define<button class="info-btn" onclick="openGuide('guide-path2')" title="Why this section?">ℹ</button></div>
+
+  <p style="font-size:0.82rem; color:var(--text-dim); margin:0 0 20px; line-height:1.6;">
+    After brainstorming 78 ideas and reviewing them rapid-fire in session, we hit a wall: <strong>our concepts didn't sound like different products.</strong> They all orbited "Brett delivers content to curious people" — the only difference was the delivery mechanism. Kalina called it: <em>"I don't like concept 3 at all. It doesn't sound different to me than concept 2."</em>
+  </p>
+  <p style="font-size:0.82rem; color:var(--text-dim); margin:0 0 24px; line-height:1.6;">
+    The root cause: our original HMW questions were too specific in framing, which made the concepts inherit the same DNA. We returned to the Define phase, re-examined our 6 intersections, and created sharper HMW questions that force genuinely different products.
+  </p>
+
+  <!-- Before / After comparison -->
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px;">
+    <div style="padding:16px; background:rgba(244,67,54,0.05); border-radius:12px; border:1px solid rgba(244,67,54,0.15);">
+      <div style="font-weight:700; font-size:0.75rem; color:#c62828; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.05em;">❌ Path 1 — Concepts Overlapped</div>
+      <div style="font-size:0.75rem; line-height:1.5; color:var(--text);">
+        <div style="margin-bottom:8px; padding:8px; background:rgba(0,0,0,0.03); border-radius:6px;"><strong>C2:</strong> "HMW make consuming deep analysis feel effortless but leave knowledge that compounds?"</div>
+        <div style="padding:8px; background:rgba(0,0,0,0.03); border-radius:6px;"><strong>C3:</strong> "HMW give every curious person their smartest friend at the dinner table at scale?"</div>
+      </div>
+      <div style="margin-top:10px; font-size:0.72rem; color:#c62828; font-style:italic;">Both produce: "Brett delivers curated content in different wrappers." Same WHO, same WHAT.</div>
+    </div>
+
+    <div style="padding:16px; background:rgba(76,175,80,0.05); border-radius:12px; border:1px solid rgba(76,175,80,0.15);">
+      <div style="font-weight:700; font-size:0.75rem; color:#2e7d32; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.05em;">✅ Path 2 — Genuinely Different Products</div>
+      <div style="font-size:0.75rem; line-height:1.5; color:var(--text);">
+        <div style="margin-bottom:8px; padding:8px; background:rgba(76,175,80,0.06); border-radius:6px;"><strong>C2:</strong> "HMW turn Brett's curation into something people <em>remember, use, and talk about</em>?"</div>
+        <div style="padding:8px; background:rgba(33,150,243,0.06); border-radius:6px;"><strong>C3:</strong> "HMW deliver deep trustworthy content powered by AI that <em>never sounds like AI</em>?"</div>
+      </div>
+      <div style="margin-top:10px; font-size:0.72rem; color:#2e7d32; font-style:italic;">C2 = curiosity game (science/quirky). C3 = news intelligence (spaced repetition). Different content, format, depth.</div>
+    </div>
+  </div>
+
+  <!-- The killer move -->
+  <div class="spark-card" style="border-left-color:#ff9800;">
+    <div class="spark-label" style="color:#e65100;">🔑 The Killer Move — Splitting Content Territories</div>
+    <h4 style="margin:4px 0 6px;">C2 owns science + quirky. C3 owns news.</h4>
+    <p style="margin:0;">Same team ideas, redistributed into genuinely different products. C2 is <strong>light, surprising, gamified</strong> — designed to make you interesting at dinner. C3 is <strong>deep, compounding, prediction-driven</strong> — designed to make you smarter over weeks. Different content territory, different user moment, different product experience.</p>
+  </div>
+
+  <!-- B2B merge -->
+  <div style="padding:14px 16px; background:rgba(33,150,243,0.05); border-radius:10px; border-left:3px solid #2196f3; margin-top:14px; font-size:0.78rem; line-height:1.5;">
+    <strong>💼 B2B merged into C2, not a separate concept:</strong> The B2B angle (corporate morning briefings, lunch-hour freshness for teams) is a <em>distribution channel</em> for The Curiosity Game — companies buy licenses, can infuse their own topics. Same product, different buyer. This gives C2 a business model without needing Brett to be famous first.
+  </div>
+
+  <!-- How ideas were redistributed -->
+  <div style="margin-top:20px; padding:16px; background:rgba(0,0,0,0.02); border-radius:12px;">
+    <div style="font-weight:700; font-size:0.78rem; margin-bottom:12px;">📦 How Our Ideas Were Redistributed</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; font-size:0.72rem; line-height:1.5;">
+      <div>
+        <div style="font-weight:600; color:#9e9e9e; margin-bottom:4px;">C1 — The Automated Pipeline</div>
+        <div style="color:var(--text-dim);">Brett's original ask. Due diligence — show it, score it honestly, explain the risk.</div>
+      </div>
+      <div>
+        <div style="font-weight:600; color:#4caf50; margin-bottom:4px;">C2 — The Curiosity Game</div>
+        <div style="color:var(--text-dim);">Cards Against Humanity for fun facts · quiz format · "guess what happened" · gamification · physical dinner cards · B2B licenses · Brett's quirky/science curation</div>
+      </div>
+      <div>
+        <div style="font-weight:600; color:#2196f3; margin-bottom:4px;">C3 — The Dinner Table Drop</div>
+        <div style="color:var(--text-dim);">Spaced repetition news · Polymarket predictions · follow story over week · two-layer format (fast surface + deep HTML) · AI does work, Brett's brain is the product</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FLOW ARROW -->
+<div class="flow-arrow">
+  <svg viewBox="0 0 48 48" fill="none"><path d="M24 8v24M16 24l8 8 8-8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <span class="arrow-label">converge into 3 final concepts</span>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- SECTION 5: CONVERGENCE ZONE                 -->
+<!-- ════════════════════════════════════════════ -->
+<section class="section" id="section-convergence">
+  <div class="section-label yellow">⭐ Convergence Zone — Final Concepts <span class="section-count">3 concepts · locked</span><button class="info-btn" onclick="openGuide('guide-convergence')" title="Why this section?">ℹ</button></div>
+
+  <div class="convergence-cards" style="grid-template-columns:repeat(3, 1fr); gap:16px;">
+
+    <!-- C1 -->
+    <div class="concept-card c1" style="padding:16px 18px;">
+      <div class="cc-num">Concept 1</div>
+      <div class="cc-title" style="font-size:1.05rem;">The Automated Pipeline</div>
+      <span style="display:inline-block; font-size:0.6rem; font-family:var(--font-mono); background:rgba(0,0,0,0.06); padding:2px 8px; border-radius:8px; color:var(--text-dim); margin-bottom:8px;">DUE DILIGENCE</span>
+      <div style="font-size:0.78rem; color:var(--text); margin-bottom:8px; line-height:1.5;">
+        Brett's original ask, scoped honestly. RSS ingest → AI summarization → script → Brett records → multi-platform distribution. We show it, score it fairly, and explain the risk: <em>it produces content nobody asked for.</em>
+      </div>
+      <div style="font-size:0.7rem; color:var(--text-dim); margin-bottom:10px; font-style:italic;">
+        HMW: How might we automate Brett's content creation so it takes under 1 hour per episode?
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:4px 10px; font-size:0.65rem; font-family:var(--font-mono);">
+        <span style="color:#4caf50;">■ Feasibility: HIGH</span>
+        <span style="color:#f44336;">■ Innovation: LOW</span>
+        <span style="color:#ff9800;">■ Impact: MED</span>
+        <span style="color:#9e9e9e;">■ Business: LOW</span>
+      </div>
+    </div>
+
+    <!-- C2 -->
+    <div class="concept-card c2" style="padding:16px 18px; border-top:3px solid #4caf50;">
+      <div class="cc-num">Concept 2</div>
+      <div class="cc-title" style="font-size:1.05rem;">The Curiosity Game</div>
+      <span style="display:inline-block; font-size:0.6rem; font-family:var(--font-mono); background:rgba(76,175,80,0.12); padding:2px 8px; border-radius:8px; color:#2e7d32; margin-bottom:8px;">INNOVATIVE</span>
+      <div style="font-size:0.78rem; color:var(--text); margin-bottom:8px; line-height:1.5;">
+        Brett's quirky stories &amp; science obsession → a <strong>daily interactive game that replaces doom scrolling</strong>. "Guess what happened" scenarios, quizzes (3 fake, 1 real), physical fun fact cards for the dinner table. You don't read — you <em>play</em>.
+      </div>
+      <div style="font-size:0.7rem; color:var(--text-dim); margin-bottom:8px; font-style:italic;">
+        HMW: How might we turn Brett's curation into something people remember, use, and talk about?
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px;">
+        <span style="font-size:0.62rem; background:rgba(76,175,80,0.08); padding:2px 6px; border-radius:8px; color:#2e7d32;">🎮 Quizzes</span>
+        <span style="font-size:0.62rem; background:rgba(76,175,80,0.08); padding:2px 6px; border-radius:8px; color:#2e7d32;">🃏 Physical cards</span>
+        <span style="font-size:0.62rem; background:rgba(76,175,80,0.08); padding:2px 6px; border-radius:8px; color:#2e7d32;">🔬 Science</span>
+        <span style="font-size:0.62rem; background:rgba(76,175,80,0.08); padding:2px 6px; border-radius:8px; color:#2e7d32;">💼 B2B</span>
+        <span style="font-size:0.62rem; background:rgba(76,175,80,0.08); padding:2px 6px; border-radius:8px; color:#2e7d32;">📱 3 min/day</span>
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:4px 10px; font-size:0.65rem; font-family:var(--font-mono);">
+        <span style="color:#4caf50;">■ Innovation: HIGH</span>
+        <span style="color:#ff9800;">■ Feasibility: MED-LOW</span>
+        <span style="color:#4caf50;">■ Impact: HIGH</span>
+        <span style="color:#4caf50;">■ Business: HIGH</span>
+      </div>
+    </div>
+
+    <!-- C3 -->
+    <div class="concept-card c3" style="padding:16px 18px; border-top:3px solid #2196f3;">
+      <div class="cc-num">Concept 3</div>
+      <div class="cc-title" style="font-size:1.05rem;">The Dinner Table Drop</div>
+      <span style="display:inline-block; font-size:0.6rem; font-family:var(--font-mono); background:rgba(33,150,243,0.12); padding:2px 8px; border-radius:8px; color:#1565c0; margin-bottom:8px;">TEAM RECOMMENDATION</span>
+      <div style="font-size:0.78rem; color:var(--text); margin-bottom:8px; line-height:1.5;">
+        Daily intellectual ammunition to <strong>make you the smartest person at dinner</strong>. Brett curates 3 news stories. The system resurfaces them with new developments. Polymarket-style predictions gamify engagement. Two layers: 2-min audio + deep HTML dive. AI does the heavy lifting — Brett's brain is the editorial product.
+      </div>
+      <div style="font-size:0.7rem; color:var(--text-dim); margin-bottom:8px; font-style:italic;">
+        HMW: How might we deliver deep, trustworthy content powered by AI that never sounds like AI?
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px;">
+        <span style="font-size:0.62rem; background:rgba(33,150,243,0.08); padding:2px 6px; border-radius:8px; color:#1565c0;">📰 News</span>
+        <span style="font-size:0.62rem; background:rgba(33,150,243,0.08); padding:2px 6px; border-radius:8px; color:#1565c0;">🔁 Spaced repetition</span>
+        <span style="font-size:0.62rem; background:rgba(33,150,243,0.08); padding:2px 6px; border-radius:8px; color:#1565c0;">📊 Predictions</span>
+        <span style="font-size:0.62rem; background:rgba(33,150,243,0.08); padding:2px 6px; border-radius:8px; color:#1565c0;">🎧 Audio + HTML</span>
+        <span style="font-size:0.62rem; background:rgba(33,150,243,0.08); padding:2px 6px; border-radius:8px; color:#1565c0;">🧠 Compounds</span>
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:4px 10px; font-size:0.65rem; font-family:var(--font-mono);">
+        <span style="color:#4caf50;">■ Innovation: MED-HIGH</span>
+        <span style="color:#ff9800;">■ Feasibility: MED</span>
+        <span style="color:#4caf50;">■ Impact: HIGH</span>
+        <span style="color:#ff9800;">■ Business: MED</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer style="text-align:center; padding:40px 24px 30px; color:var(--text-light); font-size:0.75rem; font-family:var(--font-mono);">
+  I2P Radical Concepts — ESADE MIE — Sprint 1 — March 2026<br>
+  20 Brett PPs + 28 Audience PPs → 6 Intersections → 78 ideas → Session Review → Path 2 Re-Define → 3 Final Concepts
+</footer>
+
+</div>
+
+</div><!-- /board-scaler -->
+
+<script>
+// ============ ZOOM CONTROL ============
+// Uses CSS zoom (not transform) so layout reflows naturally —
+// scroll position stays put, page height adjusts, no clipping.
+(function() {
+  const scaler = document.getElementById('boardScaler');
+  const slider = document.getElementById('zoomSlider');
+  const pct = document.getElementById('zoomPct');
+  const btnIn = document.getElementById('zoomIn');
+  const btnOut = document.getElementById('zoomOut');
+  const btnReset = document.getElementById('zoomReset');
+
+  let zoom = 100;
+  const MIN = 40, MAX = 200, STEP_FINE = 5, STEP_KEY = 5;
+
+  // Restore saved zoom
+  try {
+    const saved = localStorage.getItem('i2p-board-zoom');
+    if (saved) zoom = Math.max(MIN, Math.min(MAX, parseInt(saved, 10)));
+  } catch(e) {}
+
+  function applyZoom(preserveScroll) {
+    // Capture scroll ratio before changing zoom so we can restore position
+    const docH = document.documentElement.scrollHeight - window.innerHeight;
+    const scrollRatio = docH > 0 ? window.scrollY / docH : 0;
+
+    // Apply CSS zoom (reflows layout, adjusts scroll height naturally)
+    scaler.style.zoom = zoom / 100;
+
+    // Restore scroll position proportionally
+    if (preserveScroll) {
+      requestAnimationFrame(() => {
+        const newDocH = document.documentElement.scrollHeight - window.innerHeight;
+        window.scrollTo({ top: scrollRatio * newDocH, behavior: 'instant' });
+      });
+    }
+
+    // Update UI
+    pct.textContent = zoom + '%';
+    slider.value = zoom;
+    const pctPos = ((zoom - MIN) / (MAX - MIN)) * 100;
+    slider.style.background = `linear-gradient(to right, rgba(255,193,7,0.5) 0%, rgba(255,193,7,0.5) ${pctPos}%, rgba(255,255,255,0.15) ${pctPos}%, rgba(255,255,255,0.15) 100%)`;
+
+    try { localStorage.setItem('i2p-board-zoom', zoom); } catch(e) {}
+  }
+
+  // Slider — continuous drag
+  slider.addEventListener('input', () => {
+    zoom = parseInt(slider.value, 10);
+    applyZoom(true);
+  });
+
+  // Buttons — fine steps
+  btnIn.addEventListener('click', () => {
+    zoom = Math.min(MAX, zoom + STEP_FINE);
+    applyZoom(true);
+  });
+  btnOut.addEventListener('click', () => {
+    zoom = Math.max(MIN, zoom - STEP_FINE);
+    applyZoom(true);
+  });
+  btnReset.addEventListener('click', () => {
+    zoom = 100;
+    applyZoom(true);
+  });
+
+  // Keyboard: Ctrl/Cmd + / - / 0
+  document.addEventListener('keydown', (e) => {
+    const mod = e.ctrlKey || e.metaKey;
+    if (!mod) return;
+    if (e.key === '=' || e.key === '+') {
+      e.preventDefault();
+      zoom = Math.min(MAX, zoom + STEP_KEY);
+      applyZoom(true);
+    } else if (e.key === '-') {
+      e.preventDefault();
+      zoom = Math.max(MIN, zoom - STEP_KEY);
+      applyZoom(true);
+    } else if (e.key === '0') {
+      e.preventDefault();
+      zoom = 100;
+      applyZoom(true);
+    }
+  });
+
+  // Ctrl/Cmd + scroll wheel on the board for quick zoom
+  scaler.addEventListener('wheel', (e) => {
+    if (!(e.ctrlKey || e.metaKey)) return;
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -STEP_FINE : STEP_FINE;
+    zoom = Math.max(MIN, Math.min(MAX, zoom + delta));
+    applyZoom(true);
+  }, { passive: false });
+
+  // Initial apply (no scroll preservation needed on load)
+  applyZoom(false);
+})();
+
+// ============ GUIDE SCROLL SYNC ============
+(function() {
+  const panel = document.getElementById('guidePanel');
+  const guideSections = panel.querySelectorAll('.guide-section[data-section]');
+  const navDots = panel.querySelectorAll('.guide-nav-dot');
+  const mainSections = document.querySelectorAll('.section[id]');
+
+  // Map: main section ID → array of guide section IDs that should activate
+  const sectionMap = {};
+  guideSections.forEach(gs => {
+    const target = gs.dataset.section;
+    if (!sectionMap[target]) sectionMap[target] = [];
+    sectionMap[target].push(gs.id);
+  });
+
+  let currentActive = null;
+
+  function activateGuide(mainSectionId) {
+    if (currentActive === mainSectionId) return;
+    currentActive = mainSectionId;
+
+    // Deactivate all guide sections and nav dots
+    guideSections.forEach(gs => gs.classList.remove('active'));
+    navDots.forEach(nd => nd.classList.remove('active'));
+
+    // Find matching guide sections
+    const targets = sectionMap[mainSectionId] || [];
+    let firstTarget = null;
+
+    targets.forEach(guideId => {
+      const el = document.getElementById(guideId);
+      if (el) {
+        el.classList.add('active');
+        if (!firstTarget) firstTarget = el;
+      }
+      // Activate matching nav dot
+      navDots.forEach(nd => {
+        if (nd.dataset.target === guideId) nd.classList.add('active');
+      });
+    });
+
+    // Smooth scroll guide panel to first matching section
+    if (firstTarget && panel.classList.contains('open')) {
+      const panelRect = panel.getBoundingClientRect();
+      const targetRect = firstTarget.getBoundingClientRect();
+      const headerHeight = 110; // sticky header + nav height
+      const offset = targetRect.top - panelRect.top + panel.scrollTop - headerHeight;
+      panel.scrollTo({ top: Math.max(0, offset), behavior: 'smooth' });
+    }
+  }
+
+  // IntersectionObserver watches main board sections
+  const observer = new IntersectionObserver((entries) => {
+    let best = null;
+    let bestRatio = 0;
+
+    entries.forEach(entry => {
+      if (entry.isIntersecting && entry.intersectionRatio > bestRatio) {
+        bestRatio = entry.intersectionRatio;
+        best = entry.target.id;
+      }
+    });
+
+    // Fallback: find most visible section manually
+    if (!best) {
+      const viewH = window.innerHeight;
+      mainSections.forEach(sec => {
+        const rect = sec.getBoundingClientRect();
+        const visible = Math.min(rect.bottom, viewH) - Math.max(rect.top, 0);
+        const ratio = visible / rect.height;
+        if (ratio > bestRatio) {
+          bestRatio = ratio;
+          best = sec.id;
+        }
+      });
+    }
+
+    if (best) activateGuide(best);
+  }, {
+    root: null,
+    rootMargin: '-15% 0px -40% 0px',
+    threshold: [0, 0.1, 0.25, 0.5]
+  });
+
+  mainSections.forEach(sec => observer.observe(sec));
+
+  // Also listen to scroll for continuous tracking
+  let scrollTick = false;
+  window.addEventListener('scroll', () => {
+    if (scrollTick) return;
+    scrollTick = true;
+    requestAnimationFrame(() => {
+      const viewH = window.innerHeight;
+      let best = null;
+      let bestScore = -Infinity;
+
+      mainSections.forEach(sec => {
+        const rect = sec.getBoundingClientRect();
+        // Score: how centered the section is in the viewport
+        const center = rect.top + rect.height / 2;
+        const viewCenter = viewH * 0.35; // weight toward top
+        const score = -Math.abs(center - viewCenter);
+        if (score > bestScore && rect.bottom > 0 && rect.top < viewH) {
+          bestScore = score;
+          best = sec.id;
+        }
+      });
+
+      if (best) activateGuide(best);
+      scrollTick = false;
+    });
+  }, { passive: true });
+
+  // Nav dot clicks → scroll main page to section + highlight guide
+  navDots.forEach(dot => {
+    dot.addEventListener('click', () => {
+      const guideId = dot.dataset.target;
+      const guideSec = document.getElementById(guideId);
+      if (!guideSec) return;
+
+      // Scroll guide to clicked section
+      const panelRect = panel.getBoundingClientRect();
+      const targetRect = guideSec.getBoundingClientRect();
+      const headerHeight = 110;
+      const offset = targetRect.top - panelRect.top + panel.scrollTop - headerHeight;
+      panel.scrollTo({ top: Math.max(0, offset), behavior: 'smooth' });
+
+      // Also scroll main page to corresponding section
+      const mainId = guideSec.dataset.section;
+      const mainSec = document.getElementById(mainId);
+      if (mainSec) {
+        mainSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      // Activate immediately
+      navDots.forEach(nd => nd.classList.remove('active'));
+      dot.classList.add('active');
+    });
+  });
+})();
+
+// ============ OPEN GUIDE TO SPECIFIC SECTION ============
+function openGuide(targetId) {
+  const panel = document.getElementById('guidePanel');
+  const trigger = document.querySelector('.guide-trigger');
+
+  // Open the panel
+  panel.classList.add('open');
+  if (trigger) trigger.style.display = 'none';
+
+  // Wait for panel to render, then scroll to target section
+  requestAnimationFrame(() => {
+    const target = document.getElementById(targetId);
+    if (!target) return;
+
+    // Activate that section
+    panel.querySelectorAll('.guide-section').forEach(s => s.classList.remove('active'));
+    target.classList.add('active');
+
+    // Activate matching nav dot
+    panel.querySelectorAll('.guide-nav-dot').forEach(d => {
+      d.classList.toggle('active', d.dataset.target === targetId);
+    });
+
+    // Scroll panel to target
+    const panelRect = panel.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    const headerHeight = 110;
+    const offset = targetRect.top - panelRect.top + panel.scrollTop - headerHeight;
+    panel.scrollTo({ top: Math.max(0, offset), behavior: 'smooth' });
+  });
+}
+</script>
+
+</body>
+</html>
