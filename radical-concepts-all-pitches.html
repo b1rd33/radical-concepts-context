@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radical Concepts — All Concept Pitches</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --text-xs: clamp(0.65rem, 0.55rem + 0.25vw, 0.78rem);
+            --text-sm: clamp(0.78rem, 0.65rem + 0.35vw, 0.92rem);
+            --text-base: clamp(0.9rem, 0.75rem + 0.4vw, 1.1rem);
+            --text-lg: clamp(1rem, 0.8rem + 0.55vw, 1.3rem);
+            --text-xl: clamp(1.1rem, 0.85rem + 0.7vw, 1.5rem);
+            --text-2xl: clamp(1.6rem, 1.2rem + 1.2vw, 2.5rem);
+            --text-3xl: clamp(2rem, 1.4rem + 1.8vw, 3.2rem);
+            --text-hero: clamp(3rem, 2rem + 3vw, 6rem);
+            --text-stat: clamp(4rem, 2.5rem + 5vw, 9rem);
+            --space-slide: clamp(2.5rem, 2rem + 3vw, 6rem);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            color: #1A1A2E;
+            background: #111827;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        a { color: inherit; text-decoration: none; }
+
+        .slides-container {
+            scroll-snap-type: y mandatory;
+            overflow-y: auto;
+            height: 100vh;
+        }
+
+        .slide {
+            min-height: 100vh;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: var(--space-slide);
+            position: relative;
+        }
+
+        .slide-inner { max-width: 1100px; width: 100%; margin: 0 auto; }
+
+        /* ─── NAV: concept-level pills ─── */
+        .nav-concepts {
+            position: fixed;
+            right: clamp(1rem, 1rem + 0.5vw, 2rem);
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            z-index: 100;
+        }
+
+        .nav-concept-btn {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            border: none; cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-concept-btn:hover { background: rgba(255,255,255,0.5); transform: scale(1.3); }
+        .nav-concept-btn.active { transform: scale(1.3); }
+        .nav-concept-btn[data-concept="overview"].active { background: #9CA3AF; }
+        .nav-concept-btn[data-concept="c1"].active { background: #4682B4; }
+        .nav-concept-btn[data-concept="c2"].active { background: #FF6B6B; }
+        .nav-concept-btn[data-concept="c3"].active { background: #C9A96E; }
+        .nav-concept-btn[data-concept="compare"].active { background: #9CA3AF; }
+
+        .nav-gap { height: 6px; }
+
+        .label {
+            font-size: var(--text-xs); font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.16em;
+            margin-bottom: clamp(0.75rem, 0.5rem + 0.5vw, 1.25rem);
+            opacity: 0.6;
+        }
+
+        .more-link {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            font-size: var(--text-sm); font-weight: 500; opacity: 0.5;
+            margin-top: clamp(1rem, 0.75rem + 0.5vw, 1.5rem);
+            transition: opacity 0.2s;
+            border-bottom: 1px solid currentColor; padding-bottom: 1px;
+        }
+        .more-link:hover { opacity: 1; }
+        .more-link::after { content: '\2193'; font-size: var(--text-base); }
+
+        /* ─── SHARED SLIDE STYLES ─── */
+        .header-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            position: absolute; top: 2.5rem;
+            left: var(--space-slide); right: var(--space-slide);
+        }
+        .team-name { font-size: var(--text-sm); font-weight: 500; letter-spacing: 0.06em; opacity: 0.7; }
+        .client-logo { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; font-size: var(--text-sm); }
+        .logo-mark {
+            width: 34px; height: 34px; background: rgba(255,255,255,0.2);
+            border-radius: 6px; display: flex; align-items: center; justify-content: center;
+            font-size: 0.72rem; font-weight: 700;
+        }
+        .concept-number { font-size: var(--text-xs); font-weight: 600; text-transform: uppercase; letter-spacing: 0.16em; opacity: 0.6; margin-bottom: 1.5rem; }
+
+        .slide-title-h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: var(--text-hero); font-weight: 400;
+            line-height: 1.05; margin-bottom: 1.5rem;
+        }
+
+        .tagline { font-size: var(--text-xl); line-height: 1.5; opacity: 0.8; max-width: 650px; }
+
+        /* Problem */
+        .big-stat { display: flex; align-items: baseline; gap: clamp(0.75rem, 0.5rem + 0.5vw, 1.25rem); margin-bottom: 2rem; }
+        .big-stat .number { font-family: 'DM Serif Display', serif; font-size: var(--text-stat); line-height: 1; }
+        .big-stat .unit { font-size: var(--text-xl); font-weight: 300; max-width: 350px; line-height: 1.35; }
+        .problem-details { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1rem, 0.75rem + 0.75vw, 2rem); margin-top: 2.5rem; }
+        .problem-detail { border-top: 2px solid; padding-top: 1rem; }
+        .problem-detail .detail-number { font-family: 'DM Serif Display', serif; font-size: var(--text-2xl); margin-bottom: 0.25rem; }
+        .problem-detail .detail-text { font-size: var(--text-sm); line-height: 1.45; }
+
+        /* Insights */
+        .insights-h2 { font-family: 'DM Serif Display', serif; font-size: var(--text-2xl); font-weight: 400; margin-bottom: clamp(1.5rem, 1rem + 1vw, 3rem); max-width: 700px; }
+        .insight-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: clamp(0.75rem, 0.5rem + 0.5vw, 1.5rem); }
+        .insight-card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: clamp(1rem, 0.75rem + 0.75vw, 1.75rem); }
+        .insight-card .insight-num { font-size: var(--text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.75rem; }
+        .insight-card p { font-size: var(--text-base); line-height: 1.5; }
+        .insight-card .insight-source { font-size: var(--text-xs); opacity: 0.4; margin-top: 0.75rem; }
+
+        /* Concept */
+        .concept-h2 { font-family: 'DM Serif Display', serif; font-size: var(--text-3xl); font-weight: 400; margin-bottom: 1rem; max-width: 700px; }
+        .concept-desc { font-size: var(--text-lg); max-width: 600px; margin-bottom: clamp(1.5rem, 1rem + 1vw, 3rem); line-height: 1.6; }
+        .flow-horizontal { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; position: relative; }
+        .flow-horizontal::before { content: ''; position: absolute; top: 32px; left: 32px; right: 32px; height: 2px; z-index: 0; }
+        .flow-item { text-align: center; position: relative; z-index: 1; padding: 0 clamp(0.25rem, 0.15rem + 0.3vw, 0.75rem); }
+        .flow-icon { width: clamp(48px, 3vw + 24px, 64px); height: clamp(48px, 3vw + 24px, 64px); margin: 0 auto 1rem; border-radius: 16px; display: flex; align-items: center; justify-content: center; }
+        .flow-icon svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .flow-item h3 { font-size: var(--text-sm); font-weight: 600; margin-bottom: 0.35rem; }
+        .flow-item p { font-size: var(--text-xs); line-height: 1.4; }
+        .concept-callout { margin-top: clamp(1.5rem, 1rem + 1vw, 3rem); padding: clamp(1rem, 0.75rem + 0.5vw, 1.25rem) clamp(1.25rem, 1rem + 0.5vw, 1.5rem); color: #fff; border-radius: 8px; font-size: var(--text-base); font-weight: 500; max-width: 700px; }
+
+        /* Scorecard */
+        .impact-headline { font-family: 'DM Serif Display', serif; font-size: var(--text-3xl); font-weight: 400; margin-bottom: 0.75rem; }
+        .impact-sub { font-size: var(--text-base); max-width: 600px; margin-bottom: clamp(1.5rem, 1rem + 1vw, 3rem); line-height: 1.6; }
+        .scorecard { display: grid; grid-template-columns: repeat(2, 1fr); gap: clamp(0.75rem, 0.5rem + 0.5vw, 1.25rem); }
+        .score-card { background: #fff; border-radius: 12px; padding: clamp(1.25rem, 1rem + 0.5vw, 2rem); text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+        .score-card .dimension { font-size: var(--text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 0.75rem; }
+        .score-card .score-visual { display: flex; justify-content: center; gap: clamp(0.2rem, 0.15rem + 0.15vw, 0.35rem); margin-bottom: 1rem; }
+        .score-card .dot { width: clamp(12px, 0.8vw + 6px, 18px); height: clamp(12px, 0.8vw + 6px, 18px); border-radius: 50%; }
+        .score-card .rationale { font-size: var(--text-xs); line-height: 1.45; }
+
+        .honest-limitation { margin-top: clamp(1.5rem, 1rem + 1vw, 2.5rem); padding: clamp(1rem, 0.75rem + 0.5vw, 1.25rem) clamp(1.25rem, 1rem + 0.5vw, 1.5rem); background: #111827; color: #fff; border-radius: 8px; font-size: var(--text-sm); line-height: 1.55; max-width: 700px; }
+        .honest-limitation strong { font-weight: 600; }
+
+        /* Next Steps */
+        .next-h2 { font-family: 'DM Serif Display', serif; font-size: var(--text-2xl); font-weight: 400; margin-bottom: clamp(1.5rem, 1rem + 1vw, 2.5rem); }
+        .next-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: clamp(0.75rem, 0.5rem + 0.5vw, 1.25rem); }
+        .next-card { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: clamp(1rem, 0.75rem + 0.5vw, 1.5rem); }
+        .next-card .next-type { font-size: var(--text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; }
+        .next-card h3 { font-size: var(--text-base); font-weight: 600; margin-bottom: 0.35rem; }
+        .next-card p { font-size: var(--text-sm); opacity: 0.7; line-height: 1.45; }
+
+        .next-concept-btn {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            margin-top: clamp(1.5rem, 1rem + 1vw, 2.5rem);
+            padding: 0.75rem 1.75rem;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 999px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: var(--text-sm); font-weight: 600;
+            color: #fff; cursor: pointer;
+            transition: background 0.2s, transform 0.2s;
+        }
+        .next-concept-btn:hover { background: rgba(255,255,255,0.25); transform: translateY(-1px); }
+        .next-concept-btn::after { content: '\2192'; }
+
+        /* ═══ C1 COLORS — Steel Blue ═══ */
+        .c1-title { background: #4682B4; color: #fff; }
+        .c1-problem { background: #F0F5FA; color: #1A1F2E; }
+        .c1-problem .label { color: #2D6A9F; }
+        .c1-problem .big-stat .number { color: #2D6A9F; }
+        .c1-problem .big-stat .unit { color: #6B7D8D; }
+        .c1-problem .problem-detail { border-color: #D6E4F0; }
+        .c1-problem .detail-number { color: #4682B4; }
+        .c1-problem .detail-text { color: #6B7D8D; }
+        .c1-insights { background: #1A1F2E; color: #fff; }
+        .c1-insights .label, .c1-insights .insight-num { color: #2D6A9F; }
+        .c1-concept { background: #fff; color: #1A1F2E; }
+        .c1-concept .label { color: #2D6A9F; }
+        .c1-concept .concept-desc, .c1-concept .flow-item p { color: #6B7D8D; }
+        .c1-concept .flow-horizontal::before { background: #D6E4F0; }
+        .c1-concept .flow-icon { background: #D6E4F0; color: #4682B4; }
+        .c1-concept .concept-callout { background: #4682B4; }
+        .c1-impact { background: #F0F5FA; color: #1A1F2E; }
+        .c1-impact .label { color: #2D6A9F; }
+        .c1-impact .impact-sub { color: #6B7D8D; }
+        .c1-impact .score-card .dimension, .c1-impact .score-card .rationale { color: #6B7D8D; }
+        .c1-impact .dot { background: #D6E4F0; }
+        .c1-impact .dot.filled { background: #4682B4; }
+        .c1-next { background: #4682B4; color: #fff; }
+        .c1-next .label { color: #D6E4F0; }
+        .c1-next .next-type { color: #2D6A9F; }
+
+        /* ═══ C2 COLORS — Coral Monochrome ═══ */
+        .c2-title { background: linear-gradient(135deg, #FF6B6B 0%, #FF8E72 100%); color: #fff; }
+        .c2-problem { background: #FFF5F3; color: #1A1A2E; }
+        .c2-problem .label { color: #E85555; }
+        .c2-problem .big-stat .number { color: #FF6B6B; }
+        .c2-problem .big-stat .unit { color: #7A7A8C; }
+        .c2-problem .problem-detail { border-color: rgba(255,107,107,0.25); }
+        .c2-problem .detail-number { color: #E85555; }
+        .c2-problem .detail-text { color: #7A7A8C; }
+        .c2-insights { background: #1A1A2E; color: #fff; }
+        .c2-insights .label, .c2-insights .insight-num { color: #E85555; }
+        .c2-concept { background: #fff; color: #1A1A2E; }
+        .c2-concept .label { color: #E85555; }
+        .c2-concept .concept-desc, .c2-concept .flow-item p { color: #7A7A8C; }
+        .c2-concept .flow-horizontal::before { background: rgba(255,107,107,0.25); }
+        .c2-concept .flow-icon { background: #FCE6E6; color: #E85555; }
+        .c2-concept .concept-callout { background: #FF6B6B; }
+        .c2-impact { background: #FFF5F3; color: #1A1A2E; }
+        .c2-impact .label { color: #E85555; }
+        .c2-impact .impact-sub { color: #7A7A8C; }
+        .c2-impact .score-card .dimension, .c2-impact .score-card .rationale { color: #7A7A8C; }
+        .c2-impact .dot { background: rgba(255,107,107,0.2); }
+        .c2-impact .dot.filled { background: #FF6B6B; }
+        .c2-next { background: #FF6B6B; color: #fff; }
+        .c2-next .label { color: rgba(255,255,255,0.6); }
+        .c2-next .next-type { color: #FFD5CC; }
+
+        /* ═══ C3 COLORS — Navy/Gold ═══ */
+        .c3-title { background: #1B2A4A; color: #fff; }
+        .c3-problem { background: #F5F3EF; color: #0F1923; }
+        .c3-problem .label { color: #C9A96E; }
+        .c3-problem .big-stat .number { color: #C9A96E; white-space: nowrap; }
+        .c3-problem .big-stat .unit { color: #6B6F7B; }
+        .c3-problem .problem-detail { border-color: #E8E0D0; }
+        .c3-problem .detail-number { color: #1B2A4A; }
+        .c3-problem .detail-text { color: #6B6F7B; }
+        .c3-insights { background: #0F1923; color: #fff; }
+        .c3-insights .label, .c3-insights .insight-num { color: #C9A96E; }
+        .c3-concept { background: #fff; color: #0F1923; }
+        .c3-concept .label { color: #C9A96E; }
+        .c3-concept .concept-desc, .c3-concept .flow-item p { color: #6B6F7B; }
+        .c3-concept .flow-horizontal::before { background: #E8E0D0; }
+        .c3-concept .flow-icon { background: #E8E0D0; color: #1B2A4A; }
+        .c3-concept .concept-callout { background: #1B2A4A; }
+        .c3-impact { background: #F5F3EF; color: #0F1923; }
+        .c3-impact .label { color: #C9A96E; }
+        .c3-impact .impact-sub { color: #6B6F7B; }
+        .c3-impact .score-card .dimension, .c3-impact .score-card .rationale { color: #6B6F7B; }
+        .c3-impact .dot { background: #E8E0D0; }
+        .c3-impact .dot.filled { background: #C9A96E; }
+        .c3-next { background: #1B2A4A; color: #fff; }
+        .c3-next .label { color: #E8E0D0; }
+        .c3-next .next-type { color: #C9A96E; }
+
+        /* ═══ OVERVIEW & COMPARE ═══ */
+        .slide--overview { background: #111827; color: #fff; }
+        .slide--compare { background: #111827; color: #fff; }
+        .slide--compare .label { color: #C9A96E; }
+        .compare-table { width: 100%; border-collapse: collapse; }
+        .compare-table th { font-size: var(--text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.4); text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .compare-table td { font-size: var(--text-sm); padding: 0.75rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.06); vertical-align: top; }
+        .compare-table tr:last-child td { border-bottom: none; }
+        .compare-table .dim-label { font-weight: 600; color: rgba(255,255,255,0.6); white-space: nowrap; }
+        .compare-table .score-dots-sm { display: flex; gap: 3px; }
+        .compare-table .sd-sm { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.12); }
+        .sd-sm.f1 { background: #4682B4; }
+        .sd-sm.f2 { background: #FF6B6B; }
+        .sd-sm.f3 { background: #C9A96E; }
+
+        /* ─── APPENDIX ─── */
+        .appendix { background: #fff; padding: 5rem var(--space-slide); color: #1A1A2E; }
+        .appendix-inner { max-width: 820px; margin: 0 auto; }
+        .appendix .label { color: #6B7280; opacity: 1; }
+        .appendix h2 { font-family: 'DM Serif Display', serif; font-size: var(--text-2xl); font-weight: 400; margin-bottom: 2.5rem; }
+        .appendix-concept-label { font-family: 'DM Serif Display', serif; font-size: var(--text-lg); font-weight: 400; margin: 2rem 0 1rem; padding-bottom: 0.5rem; }
+        .appendix-section { margin-bottom: 2rem; }
+        .appendix-section h3 { font-size: var(--text-base); font-weight: 600; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 2px solid #E5E7EB; }
+        .appendix-section ul { list-style: none; padding: 0; }
+        .appendix-section ul li { padding: 0.5rem 0; font-size: var(--text-sm); color: #555; border-bottom: 1px solid #eee; }
+        .appendix-section ul li:last-child { border-bottom: none; }
+        .appendix-section ul li a { color: #4682B4; text-decoration: underline; text-underline-offset: 2px; font-weight: 500; }
+        .appendix-section ul li a:hover { color: #2D6A9F; }
+        .tag { display: inline-block; font-size: var(--text-xs); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; background: #F3F4F6; color: #6B7280; padding: 0.12rem 0.45rem; border-radius: 3px; margin-right: 0.3rem; }
+        .back-to-slides { display: inline-flex; align-items: center; gap: 0.4rem; font-size: var(--text-sm); font-weight: 500; color: #4682B4; margin-top: 2rem; border-bottom: 1px solid #4682B4; padding-bottom: 1px; cursor: pointer; }
+
+        /* BACK TO MENU BTN (in header-bar) */
+        .back-to-menu {
+            font-family: 'DM Sans', sans-serif;
+            font-size: var(--text-xs); font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.08em;
+            background: rgba(255,255,255,0.15); color: #fff;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 999px; padding: 0.4rem 1rem;
+            cursor: pointer; transition: background 0.2s, transform 0.2s;
+        }
+        .back-to-menu:hover { background: rgba(255,255,255,0.3); transform: translateY(-1px); }
+
+        /* FLOATING APPENDIX PILL */
+        .appendix-pill { position: fixed; bottom: 2rem; right: clamp(2.5rem, 2rem + 1vw, 4rem); background: #111827; color: #fff; font-family: 'DM Sans', sans-serif; font-size: var(--text-xs); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; padding: 0.6rem 1.4rem; border-radius: 999px; border: none; cursor: pointer; z-index: 101; box-shadow: 0 2px 12px rgba(0,0,0,0.25); transition: background 0.2s, transform 0.2s; }
+        .appendix-pill:hover { background: #374151; transform: translateY(-1px); }
+        .appendix-pill.in-appendix { background: #4682B4; }
+
+        /* ─── VIEW SYSTEM ─── */
+        .view { display: none; }
+        .view.active { display: block; animation: viewFadeIn 0.3s ease; }
+        @keyframes viewFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* ─── OVERVIEW ─── */
+        .overview-page { min-height: 100vh; background: #111827; color: #fff; }
+        .overview-hero {
+            min-height: 100vh; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; padding: var(--space-slide);
+            position: relative;
+        }
+        .overview-header {
+            position: absolute; top: 2.5rem; left: var(--space-slide); right: var(--space-slide);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .overview-center { text-align: center; max-width: 700px; margin-bottom: 3rem; }
+        .overview-title {
+            font-family: 'DM Serif Display', serif; font-size: var(--text-hero);
+            font-weight: 400; line-height: 1.05; margin-bottom: 1rem;
+        }
+        .overview-subtitle { font-size: var(--text-xl); opacity: 0.6; line-height: 1.5; }
+        .concept-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; max-width: 1100px; width: 100%; }
+        .concept-card {
+            border-radius: 16px; padding: clamp(1.5rem, 1rem + 1vw, 2.5rem); color: #fff;
+            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+            display: flex; flex-direction: column; min-height: 240px;
+        }
+        .concept-card:hover { transform: translateY(-6px); box-shadow: 0 16px 48px rgba(0,0,0,0.4); }
+        .concept-card--c1 { background: #4682B4; }
+        .concept-card--c2 { background: linear-gradient(135deg, #FF6B6B 0%, #FF8E72 100%); }
+        .concept-card--c3 { background: #1B2A4A; }
+        .card-label { font-size: var(--text-xs); font-weight: 600; text-transform: uppercase; letter-spacing: 0.16em; opacity: 0.6; margin-bottom: 1rem; }
+        .card-title { font-family: 'DM Serif Display', serif; font-size: var(--text-2xl); font-weight: 400; margin-bottom: 0.75rem; }
+        .card-tagline { font-size: var(--text-sm); opacity: 0.7; line-height: 1.5; flex-grow: 1; }
+        .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; font-size: var(--text-sm); }
+        .card-score { opacity: 0.6; }
+        .card-score strong { opacity: 1; font-weight: 700; }
+        .card-cta { font-weight: 600; opacity: 0.8; }
+        .scroll-hint { text-align: center; font-size: var(--text-sm); opacity: 0.3; margin-top: 2rem; animation: bounce 2s infinite; }
+        @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
+        .overview-compare { padding: 4rem var(--space-slide); max-width: 1100px; margin: 0 auto; }
+        .overview-compare h2 { font-family: 'DM Serif Display', serif; font-size: var(--text-2xl); font-weight: 400; margin-bottom: 2rem; color: #fff; }
+
+        /* ─── CONCEPT NAV (end of each pitch) ─── */
+        .concept-nav { display: flex; gap: 0.75rem; margin-top: 2rem; flex-wrap: wrap; }
+        .concept-nav-link {
+            padding: 0.6rem 1.5rem; border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1);
+            color: #fff; font-family: 'DM Sans', sans-serif; font-size: var(--text-sm);
+            font-weight: 500; cursor: pointer; transition: all 0.2s; text-decoration: none;
+        }
+        .concept-nav-link:hover { background: rgba(255,255,255,0.25); transform: translateY(-1px); }
+
+        /* ─── PER-VIEW NAV DOTS ─── */
+        .nav-dots {
+            position: fixed; right: clamp(1rem, 1rem + 0.5vw, 2rem); top: 50%;
+            transform: translateY(-50%); display: flex; flex-direction: column;
+            gap: 0.5rem; z-index: 100;
+        }
+        .nav-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: rgba(255,255,255,0.2); border: none; cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .nav-dot:hover { background: rgba(255,255,255,0.5); transform: scale(1.3); }
+        .nav-dot.active { transform: scale(1.3); }
+        #view-c1 .nav-dot.active { background: #4682B4; }
+        #view-c2 .nav-dot.active { background: #FF6B6B; }
+        #view-c3 .nav-dot.active { background: #C9A96E; }
+
+        /* RESPONSIVE */
+        @media (max-width: 900px) {
+            .problem-details { grid-template-columns: 1fr; gap: 1.25rem; }
+            .insight-grid { grid-template-columns: 1fr; }
+            .flow-horizontal { grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+            .flow-horizontal::before { display: none; }
+            .scorecard { grid-template-columns: 1fr; }
+            .next-grid { grid-template-columns: 1fr; }
+            .nav-dots { display: none; }
+            .concept-cards { grid-template-columns: 1fr; }
+            .concept-card { min-height: 180px; }
+            .header-bar { position: relative; top: auto; left: auto; right: auto; margin-bottom: 2rem; }
+        }
+
+        /* PRINT */
+        @page { margin: 1.5cm; size: A4; }
+        @media print {
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+            body { font-size: 11pt; overflow: visible !important; }
+            .slides-container { height: auto !important; overflow: visible !important; scroll-snap-type: none !important; }
+            .slide { min-height: auto; page-break-after: always; padding: 2rem; }
+            .nav-concepts, .appendix-pill { display: none !important; }
+            .appendix { page-break-before: always; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="appendix-pill" id="appendixPill">Appendix</button>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- VIEW: OVERVIEW                              -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="view active" id="view-overview">
+<div class="overview-page">
+    <div class="overview-hero">
+        <div class="overview-header">
+            <div class="team-name">Team Radical &middot; I2P 2026</div>
+            <div class="client-logo"><div class="logo-mark">RC</div> Radical Concepts</div>
+        </div>
+        <div class="overview-center">
+            <div class="concept-number">I2P Deliverable 1 &mdash; Concept Pitches</div>
+            <h1 class="overview-title">Three concepts for Brett Moore</h1>
+            <p class="overview-subtitle">From AI-powered production to learning science &mdash; three distinct paths to turn Brett's expertise into a sustainable media product.</p>
+        </div>
+        <div class="concept-cards">
+            <div class="concept-card concept-card--c1" onclick="showView('view-c1')">
+                <div class="card-label">Concept 1 of 3</div>
+                <h2 class="card-title">Brett on Autopilot</h2>
+                <p class="card-tagline">AI-assisted production for daily podcasting &mdash; in under an hour, every morning, by himself.</p>
+                <div class="card-footer"><span class="card-score">Score: <strong>13/20</strong></span><span class="card-cta">View Pitch &rarr;</span></div>
+            </div>
+            <div class="concept-card concept-card--c2" onclick="showView('view-c2')">
+                <div class="card-label">Concept 2 of 3</div>
+                <h2 class="card-title">The Curiosity Game</h2>
+                <p class="card-tagline">A daily 3-minute game that turns science into social currency &mdash; making you the most interesting person at lunch.</p>
+                <div class="card-footer"><span class="card-score">Score: <strong>16/20</strong></span><span class="card-cta">View Pitch &rarr;</span></div>
+            </div>
+            <div class="concept-card concept-card--c3" onclick="showView('view-c3')">
+                <div class="card-label">Concept 3 of 3</div>
+                <h2 class="card-title">The Dinner Table Drop</h2>
+                <p class="card-tagline">A weekly news tracker built on learning science &mdash; helping you actually understand and remember what matters.</p>
+                <div class="card-footer"><span class="card-score">Score: <strong>15/20</strong></span><span class="card-cta">View Pitch &rarr;</span></div>
+            </div>
+        </div>
+        <div class="scroll-hint">Scroll for comparison &darr;</div>
+    </div>
+    <div class="overview-compare">
+        <h2>How the three concepts stack up</h2>
+        <table class="compare-table">
+            <thead><tr><th></th><th style="color:#4682B4;">C1 Autopilot</th><th style="color:#FF6B6B;">C2 Curiosity</th><th style="color:#C9A96E;">C3 Dinner Table</th></tr></thead>
+            <tbody>
+                <tr><td class="dim-label">Impact</td><td><div class="score-dots-sm"><span class="sd-sm f1"></span><span class="sd-sm f1"></span><span class="sd-sm f1"></span><span class="sd-sm"></span><span class="sd-sm"></span></div></td><td><div class="score-dots-sm"><span class="sd-sm f2"></span><span class="sd-sm f2"></span><span class="sd-sm f2"></span><span class="sd-sm f2"></span><span class="sd-sm"></span></div></td><td><div class="score-dots-sm"><span class="sd-sm f3"></span><span class="sd-sm f3"></span><span class="sd-sm f3"></span><span class="sd-sm f3"></span><span class="sd-sm"></span></div></td></tr>
+                <tr><td class="dim-label">Innovation</td><td><div class="score-dots-sm"><span class="sd-sm f1"></span><span class="sd-sm f1"></span><span class="sd-sm"></span><span class="sd-sm"></span><span class="sd-sm"></span></div></td><td><div class="score-dots-sm"><span class="sd-sm f2"></span><span class="sd-sm f2"></span><span class="sd-sm f2"></span><span class="sd-sm f2"></span><span class="sd-sm f2"></span></div></td><td><div class="score-dots-sm"><span class="sd-sm f3"></span><span class="sd-sm f3"></span><span class="sd-sm f3"></span><span class="sd-sm f3"></span><span class="sd-sm"></span></div></td></tr>
+                <tr><td class="dim-label">Feasibility</td><td><div class="score-dots-sm"><span class="sd-sm f1"></span><span class="sd-sm f1"></span><span class="sd-sm f1"></span><span class="sd-sm f1"></span><span class="sd-sm f1"></span></div></td><td><div class="score-dots-sm"><span class="sd-sm f2"></span><span class="sd-sm f2"></span><span class="sd-sm f2"></span><span class="sd-sm"></span><span class="sd-sm"></span></div></td><td><div class="score-dots-sm"><span class="sd-sm f3"></span><span class="sd-sm f3"></span><span class="sd-sm f3"></span><span class="sd-sm f3"></span><span class="sd-sm"></span></div></td></tr>
+                <tr><td class="dim-label">Business</td><td><div class="score-dots-sm"><span class="sd-sm f1"></span><span class="sd-sm f1"></span><span class="sd-sm f1"></span><span class="sd-sm"></span><span class="sd-sm"></span></div></td><td><div class="score-dots-sm"><span class="sd-sm f2"></span><span class="sd-sm f2"></span><span class="sd-sm f2"></span><span class="sd-sm f2"></span><span class="sd-sm"></span></div></td><td><div class="score-dots-sm"><span class="sd-sm f3"></span><span class="sd-sm f3"></span><span class="sd-sm f3"></span><span class="sd-sm"></span><span class="sd-sm"></span></div></td></tr>
+                <tr><td class="dim-label">Total</td><td style="font-weight:700;font-size:var(--text-lg);">13/20</td><td style="font-weight:700;font-size:var(--text-lg);">16/20</td><td style="font-weight:700;font-size:var(--text-lg);">15/20</td></tr>
+                <tr><td class="dim-label">Weakness</td><td style="opacity:0.6;">Innovation 2/5</td><td style="opacity:0.6;">Feasibility 3/5</td><td style="opacity:0.6;">Business 3/5</td></tr>
+                <tr><td class="dim-label">Riskiest Test</td><td style="opacity:0.6;">Can AI scripts survive Brett's edit?</td><td style="opacity:0.6;">Will people complete daily quizzes?</td><td style="opacity:0.6;">Does Wed resurface improve retention?</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- VIEW: C1 — BRETT ON AUTOPILOT               -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="view" id="view-c1">
+<nav class="nav-dots"><button class="nav-dot active"></button><button class="nav-dot"></button><button class="nav-dot"></button><button class="nav-dot"></button><button class="nav-dot"></button><button class="nav-dot"></button></nav>
+<div class="slides-container">
+<section class="slide c1-title" id="c1-title">
+    <div class="header-bar"><button class="back-to-menu" onclick="showView('view-overview')">&larr; Menu</button><div class="team-name">Team Radical &middot; I2P 2026</div><div class="client-logo"><div class="logo-mark">RC</div> Radical Concepts</div></div>
+    <div class="slide-inner">
+        <div class="concept-number">Concept 1 of 3</div>
+        <h1 class="slide-title-h1">Brett on Autopilot</h1>
+        <p class="tagline">An AI-assisted production system that turns Brett's daily reading into a published podcast episode&nbsp;&mdash; in under an hour, every morning, by himself.</p>
+    </div>
+</section>
+
+<section class="slide c1-problem" id="c1-problem">
+    <div class="slide-inner">
+        <div class="label">The Problem</div>
+        <div class="big-stat"><div class="number">47%</div><div class="unit">of all podcasts die before episode&nbsp;3 &mdash; solo creators can't sustain the production burden</div></div>
+        <div class="problem-details">
+            <div class="problem-detail"><div class="detail-number">4&ndash;8 hrs</div><div class="detail-text">Traditional podcast production time per episode</div></div>
+            <div class="problem-detail"><div class="detail-number">14+</div><div class="detail-text">News sources Brett reads daily &mdash; editorial judgment exists, production time doesn't</div></div>
+            <div class="problem-detail"><div class="detail-number">~$150&ndash;200</div><div class="detail-text">Monthly cost of a composable AI pipeline &mdash; economics now work for one person</div></div>
+        </div>
+        <a href="#appendix" class="more-link">Full problem analysis</a>
+    </div>
+</section>
+
+<section class="slide c1-insights" id="c1-insights">
+    <div class="slide-inner">
+        <div class="label">Research &amp; Insights</div>
+        <h2 class="insights-h2">Quality control is the binding constraint. Not technology.</h2>
+        <div class="insight-grid">
+            <div class="insight-card"><div class="insight-num">Insight 01</div><p>WaPo's AI podcast failed 68&ndash;84% of scripts &mdash; fabricated quotes, misattributions. <strong>AI-assisted, not fully automated.</strong></p><div class="insight-source">Semafor Dec 2025; creator accounts</div></div>
+            <div class="insight-card"><div class="insight-num">Insight 02</div><p>Composable pipeline (n8n + GPT-4o + ElevenLabs) = <strong>~$150&ndash;200/month.</strong> Break-even at 150&ndash;200 downloads.</p><div class="insight-source">Buzzsprout/IAB Podcast Ad Revenue Study 2024</div></div>
+            <div class="insight-card"><div class="insight-num">Insight 03</div><p><strong>47% of listeners</strong> would stop if AI voices used. Brett records his own voice; <strong>AI stays invisible.</strong></p><div class="insight-source">Sounds Profitable 2025; Cumulus/Signal Hill 2025</div></div>
+            <div class="insight-card"><div class="insight-num">Insight 04</div><p><strong>70+ active AI copyright lawsuits.</strong> But Morning Brew, 1440, Axios all operate safely by rewriting in original voice.</p><div class="insight-source">Advance Local v. Cohere; Bartz v. Anthropic</div></div>
+        </div>
+        <a href="#appendix" class="more-link">Full research &amp; sources</a>
+    </div>
+</section>
+
+<section class="slide c1-concept" id="c1-concept">
+    <div class="slide-inner">
+        <div class="label">The Concept</div>
+        <h2 class="concept-h2">An AI pipeline that makes daily publishing sustainable</h2>
+        <p class="concept-desc">Not a new format. Not a new audience. A production system that lets one person do what used to take a team.</p>
+        <div class="flow-horizontal">
+            <div class="flow-item"><div class="flow-icon"><svg viewBox="0 0 24 24"><path d="M4 11a9 9 0 0 1 9-9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg></div><h3>Morning Scan</h3><p>AI monitors 14+ sources overnight</p></div>
+            <div class="flow-item"><div class="flow-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div><h3>Editorial Gate</h3><p>Brett picks stories, adds notes (15&nbsp;min)</p></div>
+            <div class="flow-item"><div class="flow-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><h3>Script Draft</h3><p>AI generates, Brett reviews and edits</p></div>
+            <div class="flow-item"><div class="flow-icon"><svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></div><h3>Recording</h3><p>Brett's voice (20&ndash;30&nbsp;min). AI post-production.</p></div>
+            <div class="flow-item"><div class="flow-icon"><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div><h3>Distribution</h3><p>One-click publish everywhere + show notes</p></div>
+        </div>
+        <div class="concept-callout">AI is invisible infrastructure. Brett is the product.</div>
+    </div>
+</section>
+
+<section class="slide c1-impact" id="c1-impact">
+    <div class="slide-inner">
+        <div class="label">Why This Matters</div>
+        <div class="impact-headline">~$150&ndash;200/month pipeline. Break-even at 150&ndash;200 downloads.</div>
+        <p class="impact-sub">Daily cadence = 5.5&times; more ad inventory. No platform restrictions. 6&ndash;12 months to profitability.</p>
+        <div class="scorecard">
+            <div class="score-card"><div class="dimension">Impact</div><div class="score-visual"><div class="dot filled"></div><div class="dot filled"></div><div class="dot filled"></div><div class="dot"></div><div class="dot"></div></div><div class="rationale">Solves production bottleneck. Doesn't address why anyone would listen.</div></div>
+            <div class="score-card"><div class="dimension">Innovation</div><div class="score-visual"><div class="dot filled"></div><div class="dot filled"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><div class="rationale">The obvious solution. Multiple platforms already exist. No defensible moat.</div></div>
+            <div class="score-card"><div class="dimension">Feasibility</div><div class="score-visual"><div class="dot filled"></div><div class="dot filled"></div><div class="dot filled"></div><div class="dot filled"></div><div class="dot filled"></div></div><div class="rationale">All tools production-ready. Working prototype within days.</div></div>
+            <div class="score-card"><div class="dimension">Business Impact</div><div class="score-visual"><div class="dot filled"></div><div class="dot filled"></div><div class="dot filled"></div><div class="dot"></div><div class="dot"></div></div><div class="rationale">Economics work but podcast monetization is slow.</div></div>
+        </div>
+        <div class="honest-limitation"><strong>Honest limitation:</strong> Solves production but not differentiation. "Why would anyone listen?" is not answered by the pipeline.</div>
+    </div>
+</section>
+
+<section class="slide c1-next" id="c1-next">
+    <div class="slide-inner">
+        <div class="label">Next Steps</div>
+        <h2 class="next-h2">What we need to move forward</h2>
+        <div class="next-grid">
+            <div class="next-card"><div class="next-type">Riskiest Assumption</div><h3>Can AI scripts survive Brett's edit?</h3><p>WaPo: 68&ndash;84% failure. If Brett rewrites &gt;50%, time savings collapse.</p></div>
+            <div class="next-card"><div class="next-type">Validate</div><h3>10-day pipeline test</h3><p>Track: script edit rate (&lt;30%), Brett time (&lt;60&nbsp;min), errors (&lt;2), quality (&ge;3.5/5).</p></div>
+            <div class="next-card"><div class="next-type">Prototype</div><h3>Full pipeline: RSS &rarr; AI &rarr; Brett &rarr; publish</h3><p>If edit rate &gt;50%, pivot to AI-assisted research only.</p></div>
+            <div class="next-card"><div class="next-type">Client Decision</div><h3>AI-drafted or Brett-written scripts?</h3><p>Daily commitment? Which niche: general, vertical, or evening recap?</p></div>
+        </div>
+        <div class="concept-nav">
+            <button class="concept-nav-link" onclick="showView('view-overview')">&larr; All Concepts</button>
+            <button class="concept-nav-link" onclick="showView('view-c2')">C2: The Curiosity Game &rarr;</button>
+            <button class="concept-nav-link" onclick="showView('view-c3')">C3: The Dinner Table Drop &rarr;</button>
+        </div>
+    </div>
+</section>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- VIEW: C2 — THE CURIOSITY GAME               -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="view" id="view-c2">
+<nav class="nav-dots"><button class="nav-dot active"></button><button class="nav-dot"></button><button class="nav-dot"></button><button class="nav-dot"></button><button class="nav-dot"></button><button class="nav-dot"></button></nav>
+<div class="slides-container">
+<section class="slide c2-title" id="c2-title">
+    <div class="header-bar"><button class="back-to-menu" onclick="showView('view-overview')">&larr; Menu</button><div class="team-name">Team Radical &middot; I2P 2026</div><div class="client-logo"><div class="logo-mark">RC</div> Radical Concepts</div></div>
+    <div class="slide-inner">
+        <div class="concept-number">Concept 2 of 3</div>
+        <h1 class="slide-title-h1">The Curiosity Game</h1>
+        <p class="tagline">A daily 3-minute game that turns science and quirky stories into social currency&nbsp;&mdash; making you the most interesting person at lunch.</p>
+    </div>
+</section>
+
+<section class="slide c2-problem" id="c2-problem">
+    <div class="slide-inner">
+        <div class="label">The Problem</div>
+        <div class="big-stat"><div class="number">64%</div><div class="unit">of Americans identify as doomscrollers &mdash; 2+ hrs/day on feeds negatively correlated with life satisfaction</div></div>
+        <div class="problem-details">
+            <div class="problem-detail"><div class="detail-number">2+ hrs/day</div><div class="detail-text">Time spent on social feeds that reduce life satisfaction</div></div>
+            <div class="problem-detail"><div class="detail-number">60%</div><div class="detail-text">Open their phones intending to learn, not scroll mindlessly</div></div>
+            <div class="problem-detail"><div class="detail-number">0</div><div class="detail-text">Products that make learning as easy and habit-forming as scrolling</div></div>
+        </div>
+        <a href="#appendix" class="more-link">Full problem analysis</a>
+    </div>
+</section>
+
+<section class="slide c2-insights" id="c2-insights">
+    <div class="slide-inner">
+        <div class="label">Research &amp; Insights</div>
+        <h2 class="insights-h2">Quizzing beats passive reading. The mechanics are proven. Nobody combined them.</h2>
+        <div class="insight-grid">
+            <div class="insight-card"><div class="insight-num">Insight 01</div><p>272 studies: testing effect (d&nbsp;=&nbsp;0.56) &mdash; quizzed readers retain <strong>25&ndash;50% more</strong> than passive readers.</p><div class="insight-source">Adesope et al. 2017, 272 studies</div></div>
+            <div class="insight-card"><div class="insight-num">Insight 02</div><p>Duolingo grew DAU <strong>4.5&times; in 3 years</strong>. Streaks = 3&times; daily return. These mechanics are <strong>proven and replicable.</strong></p><div class="insight-source">Duolingo Q4 2025 earnings</div></div>
+            <div class="insight-card"><div class="insight-num">Insight 03</div><p>15+ products scanned: <strong>nobody combines daily + science + quiz + shareable.</strong> Closest competitor archived Feb 2024.</p><div class="insight-source">Competitive analysis, 15+ products scanned</div></div>
+            <div class="insight-card"><div class="insight-num">Insight 04</div><p>CrunchLabs converted YouTube to <strong>~$10M/month.</strong> At 0.05&ndash;0.10% conversion: <strong>5,000&ndash;20,000 installs, no paid acquisition.</strong></p><div class="insight-source">Landrum 2021; CrunchLabs data</div></div>
+        </div>
+        <a href="#appendix" class="more-link">Full research &amp; sources</a>
+    </div>
+</section>
+
+<section class="slide c2-concept" id="c2-concept">
+    <div class="slide-inner">
+        <div class="label">The Concept</div>
+        <h2 class="concept-h2">A daily curiosity quiz that makes you interesting</h2>
+        <p class="concept-desc">Not a podcast. Not a newsletter. A 3-minute game you play, share, and actually remember.</p>
+        <div class="flow-horizontal">
+            <div class="flow-item"><div class="flow-icon"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><h3>Morning Buzz</h3><p>Push: "Today's curiosity drop is live"</p></div>
+            <div class="flow-item"><div class="flow-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg></div><h3>Play 3 min</h3><p>Quirky setup, science question, prediction</p></div>
+            <div class="flow-item"><div class="flow-icon"><svg viewBox="0 0 24 24"><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg></div><h3>See the Reveal</h3><p>Brett's commentary + real answer + context</p></div>
+            <div class="flow-item"><div class="flow-icon"><svg viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></div><h3>Track Streak</h3><p>Score, streak counter, friend comparison</p></div>
+            <div class="flow-item"><div class="flow-icon"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></div><h3>Share at Lunch</h3><p>"I got 4/5, beat me."</p></div>
+        </div>
+        <div class="concept-callout">The white space is the moat &mdash; no product combines all four.</div>
+    </div>
+</section>
+
+<section class="slide c2-impact" id="c2-impact">
+    <div class="slide-inner">
+        <div class="label">Why This Matters</div>
+        <div class="impact-headline">Dual revenue: B2C freemium + B2B licensing in a $2.6B market</div>
+        <p class="impact-sub">Brett's existing audience is the distribution channel. Kahoot (9B+ participants, 70% Fortune 500) validates the quiz-to-B2B path.</p>
+        <div class="scorecard">
+            <div class="score-card"><div class="dimension">Impact</div><div class="score-visual"><div class="dot filled"></div><div class="dot filled"></div><div class="dot filled"></div><div class="dot filled"></div><div class="dot"></div></div><div class="rationale">New content category replacing doom scrolling with active recall.</div></div>
+            <div class="score-card"><div class="dimension">Innovation</div><div class="score-visual"><div class="dot filled"></div><div class="dot filled"></div><div class="dot filled"></div><div class="dot filled"></div><div class="dot filled"></div></div><div class="rationale">Nobody occupies daily + science + quiz + shareable. Closest competitor is dead.</div></div>
+            <div class="score-card"><div class="dimension">Feasibility</div><div class="score-visual"><div class="dot filled"></div><div class="dot filled"></div><div class="dot filled"></div><div class="dot"></div><div class="dot"></div></div><div class="rationale">Needs interactive front-end, game mechanics, content pipeline.</div></div>
+            <div class="score-card"><div class="dimension">Business Impact</div><div class="score-visual"><div class="dot filled"></div><div class="dot filled"></div><div class="dot filled"></div><div class="dot filled"></div><div class="dot"></div></div><div class="rationale">Dual revenue in $2.6B growing 4&times; by 2032.</div></div>
+        </div>
+        <div class="honest-limitation"><strong>Honest limitation:</strong> Feasibility at 3/5 is real. The white space is both opportunity and risk. Without daily retention, the model collapses.</div>
+    </div>
+</section>
+
+<section class="slide c2-next" id="c2-next">
+    <div class="slide-inner">
+        <div class="label">Next Steps</div>
+        <h2 class="next-h2">What we need to move forward</h2>
+        <div class="next-grid">
+            <div class="next-card"><div class="next-type">Riskiest Assumption</div><h3>Will people complete a daily quiz consistently?</h3><p>No direct comparable. Without daily habit, no business.</p></div>
+            <div class="next-card"><div class="next-type">Validate</div><h3>10 daily quizzes via WhatsApp</h3><p>Track: day-1 completion (&ge;60%), day-5 return (&ge;30%), share rate (&ge;1 per 5).</p></div>
+            <div class="next-card"><div class="next-type">Prototype</div><h3>HTML/Google Form daily quizzes</h3><p>If day-5 return &lt;15%, pivot format. If shares = 0, rethink result card.</p></div>
+            <div class="next-card"><div class="next-type">Client Decision</div><h3>Gamification fit for Brett's brand?</h3><p>B2B revenue model interesting, or pure consumer?</p></div>
+        </div>
+        <div class="concept-nav">
+            <button class="concept-nav-link" onclick="showView('view-overview')">&larr; All Concepts</button>
+            <button class="concept-nav-link" onclick="showView('view-c1')">&larr; C1: Brett on Autopilot</button>
+            <button class="concept-nav-link" onclick="showView('view-c3')">C3: The Dinner Table Drop &rarr;</button>
+        </div>
+    </div>
+</section>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- VIEW: C3 — THE DINNER TABLE DROP             -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="view" id="view-c3">
+<nav class="nav-dots"><button class="nav-dot active"></button><button class="nav-dot"></button><button class="nav-dot"></button><button class="nav-dot"></button><button class="nav-dot"></button><button class="nav-dot"></button></nav>
+<div class="slides-container">
+<section class="slide c3-title" id="c3-title">
+    <div class="header-bar"><button class="back-to-menu" onclick="showView('view-overview')">&larr; Menu</button><div class="team-name">Team Radical &middot; I2P 2026</div><div class="client-logo"><div class="logo-mark">RC</div> Radical Concepts</div></div>
+    <div class="slide-inner">
+        <div class="concept-number">Concept 3 of 3</div>
+        <h1 class="slide-title-h1">The Dinner Table Drop</h1>
+        <p class="tagline">A weekly news tracker that uses learning science and Brett's editorial lens to help you actually understand and remember what's happening in the world.</p>
+    </div>
+</section>
+
+<section class="slide c3-problem" id="c3-problem">
+    <div class="slide-inner">
+        <div class="label">The Problem</div>
+        <div class="big-stat"><div class="number">1 in 16</div><div class="unit">headlines recalled after watching a full TV newscast &mdash; within a week, readers forget over half</div></div>
+        <div class="problem-details">
+            <div class="problem-detail"><div class="detail-number">56%</div><div class="detail-text">Of news content forgotten within one week of reading</div></div>
+            <div class="problem-detail"><div class="detail-number">75%</div><div class="detail-text">Of Americans are overconfident about their news judgment</div></div>
+            <div class="problem-detail"><div class="detail-number">40%</div><div class="detail-text">Of global audiences now avoid news &mdash; overwhelm, not apathy</div></div>
+        </div>
+        <a href="#appendix" class="more-link">Full problem analysis</a>
+    </div>
+</section>
+
+<section class="slide c3-insights" id="c3-insights">
+    <div class="slide-inner">
+        <div class="label">Research &amp; Insights</div>
+        <h2 class="insights-h2">People forget most news. Retrieval practice fixes it. Nobody's tried.</h2>
+        <div class="insight-grid">
+            <div class="insight-card"><div class="insight-num">Insight 01</div><p>Passive readers forget <strong>56% within a week.</strong> Tested readers forgot only 13% &mdash; a <strong>77% reduction.</strong></p><div class="insight-source">Roediger &amp; Karpicke 2006; Meeter et al. 2005</div></div>
+            <div class="insight-card"><div class="insight-num">Insight 02</div><p>Social media creates an <strong>"illusion of being informed"</strong> &mdash; 75% overconfident about news judgment.</p><div class="insight-source">Pennycook &amp; Rand 2021 (PNAS)</div></div>
+            <div class="insight-card"><div class="insight-num">Insight 03</div><p><strong>40% avoid news</strong> &mdash; up from 29% in 2017. Tortoise Media's "slow journalism" attracted <strong>110K+ paying members.</strong></p><div class="insight-source">Reuters 2025 (97,055 adults, 48 markets)</div></div>
+            <div class="insight-card"><div class="insight-num">Insight 04</div><p>50+ products scanned: <strong>zero combine</strong> spaced repetition + quizzes + editorial curation + source transparency.</p><div class="insight-source">Competitive analysis, 50+ products scanned</div></div>
+        </div>
+        <a href="#appendix" class="more-link">Full research &amp; sources</a>
+    </div>
+</section>
+
+<section class="slide c3-concept" id="c3-concept">
+    <div class="slide-inner">
+        <div class="label">The Concept</div>
+        <h2 class="concept-h2">A weekly news experience built on learning science</h2>
+        <p class="concept-desc">Not another newsletter. A system that tracks stories across a full week and makes sure you remember what matters.</p>
+        <div class="flow-horizontal">
+            <div class="flow-item"><div class="flow-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 9 8 12 2 12"/></svg></div><h3>Monday Drop</h3><p>3 curated stories with Brett's take</p></div>
+            <div class="flow-item"><div class="flow-icon"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></div><h3>Wednesday Resurface</h3><p>Stories return + quiz on key facts</p></div>
+            <div class="flow-item"><div class="flow-icon"><svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div><h3>Friday Synthesis</h3><p>"Here's what actually mattered."</p></div>
+            <div class="flow-item"><div class="flow-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><h3>Deep Dive</h3><p>Full source map, counterarguments</p></div>
+            <div class="flow-item"><div class="flow-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div><h3>Prediction</h3><p>Stake your call, track accuracy</p></div>
+        </div>
+        <div class="concept-callout">"Everyone else reacts in 5 minutes. We react in 5 days."</div>
+    </div>
+</section>
+
+<section class="slide c3-impact" id="c3-impact">
+    <div class="slide-inner">
+        <div class="label">Why This Matters</div>
+        <div class="impact-headline">6&ndash;12% free-to-paid conversion. $36K&ndash;$60K/year from a 10K list.</div>
+        <p class="impact-sub">Brett's audience maps onto the 18&ndash;20% who pay for news. Near-zero CAC. Exit multiples: 3.5&ndash;6&times; revenue.</p>
+        <div class="scorecard">
+            <div class="score-card"><div class="dimension">Impact</div><div class="score-visual"><div class="dot filled"></div><div class="dot filled"></div><div class="dot filled"></div><div class="dot filled"></div><div class="dot"></div></div><div class="rationale">Addresses deepest pain: trust erosion, retention gap, illusion of being informed.</div></div>
+            <div class="score-card"><div class="dimension">Innovation</div><div class="score-visual"><div class="dot filled"></div><div class="dot filled"></div><div class="dot filled"></div><div class="dot filled"></div><div class="dot"></div></div><div class="rationale">Spaced repetition for news genuinely novel. 50+ scan found zero combining all four.</div></div>
+            <div class="score-card"><div class="dimension">Feasibility</div><div class="score-visual"><div class="dot filled"></div><div class="dot filled"></div><div class="dot filled"></div><div class="dot filled"></div><div class="dot"></div></div><div class="rationale">Most achievable. Core is curated content + scheduled delivery.</div></div>
+            <div class="score-card"><div class="dimension">Business Impact</div><div class="score-visual"><div class="dot filled"></div><div class="dot filled"></div><div class="dot filled"></div><div class="dot"></div><div class="dot"></div></div><div class="rationale">Strong unit economics but structurally hard &mdash; only 18&ndash;20% pay for news.</div></div>
+        </div>
+        <div class="honest-limitation"><strong>Honest limitation:</strong> Business Impact at 3/5 is real. Strongest scientific foundation but hardest monetization path. Sustainable creator business, not venture-scale.</div>
+    </div>
+</section>
+
+<section class="slide c3-next" id="c3-next">
+    <div class="slide-inner">
+        <div class="label">Next Steps</div>
+        <h2 class="next-h2">What we need to move forward</h2>
+        <div class="next-grid">
+            <div class="next-card"><div class="next-type">Riskiest Assumption</div><h3>Will Wednesday resurface improve retention?</h3><p>Without spaced repetition layer, this is just another newsletter.</p></div>
+            <div class="next-card"><div class="next-type">Validate</div><h3>A/B test with ~50 people</h3><p>Group A: Mon+Fri only. Group B: Mon+Wed quiz+Fri. Target: B recalls &ge;50% more.</p></div>
+            <div class="next-card"><div class="next-type">Prototype</div><h3>WhatsApp + Google Form + voice note</h3><p>If Group B &lt;20% improvement, pivot to pure editorial newsletter.</p></div>
+            <div class="next-card"><div class="next-type">Client Decision</div><h3>Weekly cadence + quiz as core mechanic?</h3><p>"Show Your Work" transparency model? Freemium or pure paid?</p></div>
+        </div>
+        <div class="concept-nav">
+            <button class="concept-nav-link" onclick="showView('view-overview')">&larr; All Concepts</button>
+            <button class="concept-nav-link" onclick="showView('view-c1')">&larr; C1: Brett on Autopilot</button>
+            <button class="concept-nav-link" onclick="showView('view-c2')">&larr; C2: The Curiosity Game</button>
+        </div>
+    </div>
+</section>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- VIEW: APPENDIX                              -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="view" id="view-appendix">
+<div class="appendix" id="appendix">
+    <div class="appendix-inner">
+        <div class="label">Appendix</div>
+        <h2>References &amp; Sources &mdash; All Concepts</h2>
+
+        <div class="appendix-concept-label" id="appendix-c1" style="color:#4682B4; border-bottom: 2px solid #4682B4;">Concept 1 &mdash; Brett on Autopilot</div>
+
+        <div class="appendix-section">
+            <h3>1. Production Pipeline &amp; Cost Architecture</h3>
+            <p>The recommended stack is <strong>n8n (self-hosted) + GPT-4o-mini + GPT-4o + ElevenLabs + Buzzsprout</strong>, costing ~$55&ndash;85/month at mid-range or ~$150&ndash;220/month at premium. The pipeline has six layers: RSS ingestion (monitoring 14+ sources), AI summarization, script generation, TTS voice synthesis, audio post-processing, and automated distribution. TTS dominates the budget &mdash; LLM costs are under $5/month even with premium models.</p>
+            <p>Realistic human oversight is <strong>30&ndash;60 minutes/day</strong> for script review and audio QA. Zero-oversight pipelines show 68&ndash;84% failure rates (see Washington Post below).</p>
+            <ul>
+                <li><span class="tag">Benchmark</span> Traditional production: 4&ndash;8 hours. AI-assisted hybrid: 1&ndash;3 hours. Fully automated: 5&ndash;15 minutes.</li>
+                <li><span class="tag">Benchmark</span> Total cost: $50&ndash;200/month vs traditional $500&ndash;2,000+ per episode.</li>
+                <li><span class="tag">Source</span> <a href="https://n8n.io" target="_blank">n8n documentation</a> &middot; <a href="https://elevenlabs.io/pricing" target="_blank">ElevenLabs pricing</a> &middot; <a href="https://www.buzzsprout.com/pricing" target="_blank">Buzzsprout pricing</a></li>
+            </ul>
+        </div>
+
+        <div class="appendix-section">
+            <h3>2. Voice Technology &amp; Listener Perception</h3>
+            <p>Voice cloning can pass detection tests, but <strong>audience acceptance is a separate and unresolved problem.</strong> A 2025 PLoS One study found voice clones fooled 58% of listeners &mdash; but Sounds Profitable&rsquo;s 2025 report found <strong>47% of podcast consumers would be less likely to keep listening</strong> to a show using AI voices.</p>
+            <ul>
+                <li><span class="tag">Data</span> 56% of listeners say podcast hosts are the influencer type that &ldquo;matters most&rdquo; &mdash; 3&times; the share for social media influencers (Cumulus/Signal Hill 2025)</li>
+                <li><span class="tag">Data</span> AI voices reduce cognitive engagement at the neural level vs. human voices (PMC EEG study, 2023)</li>
+                <li><span class="tag">Source</span> <a href="https://doi.org/10.1371/journal.pone.0332692" target="_blank">Lavan et al. PLoS One 2025</a> &middot; <a href="https://soundsprofitable.com/article/how-do-humans-feel-about-ai-voices-in-podcasting/" target="_blank">Sounds Profitable 2025</a> &middot; <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10701901/" target="_blank">PMC EEG study</a></li>
+            </ul>
+        </div>
+
+        <div class="appendix-section">
+            <h3>3. Failure Cases &amp; Quality Benchmarks</h3>
+            <p><strong>Washington Post AI Podcast (Dec 2025):</strong> 68&ndash;84% of scripts failed editorial standards. Fabricated quotes, misattributed statements. The most important cautionary case for C1.</p>
+            <p><strong>What worked:</strong> Solo creators who maintained human oversight succeeded. The Newsworthy reached 800K downloads/month by year 5 with a staff of one.</p>
+            <ul>
+                <li><span class="tag">Source</span> <a href="https://www.semafor.com/article/12/11/2025/washington-posts-ai-generated-podcasts-rife-with-errors-fictional-quotes" target="_blank">Semafor investigation</a> &middot; <a href="https://americanpressinstitute.org/when-ai-news-products-dont-meet-editorial-standards/" target="_blank">American Press Institute</a></li>
+            </ul>
+        </div>
+
+        <div class="appendix-section">
+            <h3>4. Content Licensing &amp; Legal Risk</h3>
+            <p><strong>70+ active AI copyright lawsuits</strong> as of late 2025. Key cases: <em>Advance Local v. Cohere</em> (AI summaries may infringe even if non-verbatim), <em>Bartz v. Anthropic</em> ($1.5B settlement), <em>NYT v. OpenAI</em> (ongoing).</p>
+            <p><strong>Safe models:</strong> Morning Brew ($75M exit), 1440 (4M+ subs), Axios ($525M exit) all use human editorial rewriting &mdash; extract facts, rewrite in original voice, link to sources.</p>
+            <ul>
+                <li><span class="tag">Source</span> Advance Local v. Cohere (S.D.N.Y., Nov 2025) &middot; Bartz v. Anthropic ($1.5B settlement) &middot; NYT v. OpenAI (Dec 2023) &middot; Tennessee ELVIS Act (2024) &middot; EU AI Act</li>
+            </ul>
+        </div>
+
+        <div class="appendix-section">
+            <h3>5. Competitive Landscape &amp; Market Data</h3>
+            <p><strong>Market:</strong> Global podcast market $31.49B (2025). AI in podcasting $4.06B with 32.2% CAGR. The Daily costs ~$23&ndash;29K/episode with 50+ staff; C1 produces comparable format at &lt;$10/episode.</p>
+            <p><strong>Gap:</strong> Most daily news podcasts require large teams OR sacrifice quality. The combination of <strong>AI-assisted production + human editorial voice + daily cadence</strong> is underserved.</p>
+            <ul>
+                <li><span class="tag">Source</span> Grand View Research &middot; NYRB May 2025 &middot; <a href="https://support.spotify.com/us/creators/article/spotify-for-creators-community-guidelines/" target="_blank">Spotify guidelines</a> &middot; <a href="https://podcasters.apple.com/support/891-content-and-subscription-guidelines" target="_blank">Apple guidelines</a></li>
+            </ul>
+        </div>
+
+        <div class="appendix-section">
+            <h3>6. Monetization &amp; Break-Even Economics</h3>
+            <p>At $25 CPM mid-roll with 2 ads/episode, break-even is ~150&ndash;200 downloads/episode. Daily cadence gives <strong>5.5&times; more ad inventory</strong> than weekly shows. Reality: median podcast gets &lt;50 downloads/episode; $1,000/month requires top-5% performance.</p>
+            <ul>
+                <li><span class="tag">Source</span> IAB CPM benchmarks &middot; Buzzsprout industry data &middot; The Newsworthy public data</li>
+            </ul>
+        </div>
+
+        <div class="appendix-section">
+            <h3>7. Client Context</h3>
+            <ul>
+                <li><span class="tag">Interview</span> Meeting #1 with Brett &mdash; 14+ daily news sources, editorial preferences, interest in automation</li>
+                <li><span class="tag">Interview</span> Meeting #5 with Farid &mdash; 4-dimension scorecard requirement, presentations under 3 minutes, MLP framing</li>
+            </ul>
+        </div>
+
+        <div class="appendix-concept-label" id="appendix-c2" style="color:#FF6B6B; border-bottom: 2px solid #FF6B6B;">Concept 2 &mdash; The Curiosity Game</div>
+
+        <div class="appendix-section">
+            <h3>1. Retention Science &amp; the Testing Effect</h3>
+            <p><strong>Quizzing people on material makes them remember 25&ndash;50% more</strong> than passive reading. Adesope et al. 2017 (272 studies): testing effect d = 0.56. Roediger &amp; Karpicke 2006: passive readers forgot 56% after one week while tested readers forgot only 13%.</p>
+            <ul>
+                <li><span class="tag">Source</span> <a href="https://doi.org/10.3102/0034654316689306" target="_blank">Adesope et al. 2017</a> &middot; Karpicke &amp; Blunt 2011 (<em>Science</em>) &middot; Roediger &amp; Karpicke 2006</li>
+            </ul>
+        </div>
+
+        <div class="appendix-section">
+            <h3>2. Gamification Mechanics &mdash; Duolingo as the Model</h3>
+            <p>Duolingo&rsquo;s DAU grew <strong>4.5&times; in three years</strong> (13M &rarr; 50M+). Revenue exceeded $1B+ annually by end 2025.</p>
+            <ul>
+                <li><span class="tag">Data</span> <strong>Streaks</strong> &mdash; 3&times; more likely to return daily, 60% commitment increase</li>
+                <li><span class="tag">Data</span> <strong>Leaderboards</strong> &mdash; 40% engagement lift from social competition</li>
+                <li><span class="tag">Data</span> <strong>DAU/MAU ratio</strong> &mdash; 37%, exceptional for any consumer app</li>
+                <li><span class="tag">Source</span> Duolingo Q4 2025 earnings &middot; Yu-kai Chou Octalysis &middot; BJ Fogg B=MAP &middot; Nir Eyal Hook Model</li>
+            </ul>
+        </div>
+
+        <div class="appendix-section">
+            <h3>3. Doom Scrolling &amp; the Passive Consumption Problem</h3>
+            <p><strong>64% of Americans identify as doomscrollers</strong> (Payless Power 2025). Over 60% of app sessions diverge from the user&rsquo;s original intention (CMU study, 34K screenshots). The gap isn&rsquo;t access to information &mdash; it&rsquo;s that <strong>no product makes learning as easy and habit-forming as scrolling.</strong></p>
+            <ul>
+                <li><span class="tag">Source</span> <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9580444/" target="_blank">Satici et al. 2023</a> &middot; <a href="https://paylesspower.com/blog/the-real-cost-of-doomscrolling/" target="_blank">Payless Power 2025</a> &middot; <a href="https://theharrispoll.com/briefs/gen-z-social-media-smart-phones/" target="_blank">Harris Poll 2024</a></li>
+            </ul>
+        </div>
+
+        <div class="appendix-section">
+            <h3>4. Social Currency &amp; Viral Sharing</h3>
+            <p><strong>Berger &amp; Milkman 2012:</strong> awe-inspiring science content is the #1 most-shared category online. <strong>Loewenstein 1994:</strong> curiosity = gap between what you know and want to know. A quiz format exploits this gap perfectly.</p>
+            <ul>
+                <li><span class="tag">Benchmark</span> Wordle &mdash; 5.3B plays in 2024, 99% next-day return</li>
+                <li><span class="tag">Benchmark</span> Spotify Wrapped &mdash; 500M shares annually</li>
+                <li><span class="tag">Benchmark</span> NYT Games &mdash; 11.1B plays, daily habit + share culture</li>
+                <li><span class="tag">Source</span> <a href="https://doi.org/10.1509/jmr.10.0353" target="_blank">Berger &amp; Milkman 2012</a> &middot; Loewenstein 1994 &middot; Wohn &amp; Ahmadi 2019</li>
+            </ul>
+        </div>
+
+        <div class="appendix-section">
+            <h3>5. Competitive Landscape &amp; the White Space</h3>
+            <p><strong>No product combines daily + science + quiz + shareable.</strong> 15+ products scanned across daily games, science education, gamified learning, and shareable content.</p>
+            <ul>
+                <li><span class="tag">Competitor</span> Kurzgesagt (24.8M subs) &mdash; Science content, but video not interactive</li>
+                <li><span class="tag">Competitor</span> Wordle (NYT) &mdash; Daily shareable, but word puzzles not knowledge</li>
+                <li><span class="tag">Competitor</span> Duolingo (50M+ DAU) &mdash; Gamified daily learning, but languages not curiosity</li>
+                <li><span class="tag">Competitor</span> <a href="https://brilliant.org" target="_blank">Brilliant.org</a> ($100M+ raised) &mdash; Closest in content, but not daily, no share mechanic</li>
+                <li><span class="tag">Competitor</span> Columbia &ldquo;Science Scramble&rdquo; &mdash; Closest direct competitor, archived Feb 2024</li>
+                <li><span class="tag">Case</span> Kahoot (9B+ participants) &mdash; Simple format, pivoted to B2B. 70% of Fortune 500. Validates quiz-to-B2B path.</li>
+            </ul>
+        </div>
+
+        <div class="appendix-section">
+            <h3>6. B2B Corporate Learning Market</h3>
+            <p>Corporate e-learning: $104&ndash;125B market. Microlearning segment: $2.6B &rarr; $10.4B by 2032. No one has &ldquo;daily gamified curiosity content&rdquo; as a B2B employee engagement tool.</p>
+            <ul>
+                <li><span class="tag">Data</span> Employees get only <strong>24 minutes/week</strong> for learning &mdash; 1% of work time (Bersin/Deloitte)</li>
+                <li><span class="tag">Data</span> Microlearning: 25&ndash;60% higher retention, 130% productivity lift vs. traditional</li>
+                <li><span class="tag">Data</span> C2 recommended pricing: $3&ndash;7/user/month ($36&ndash;84/year)</li>
+                <li><span class="tag">Source</span> Grand View Research &middot; Training Industry Report 2025 &middot; Bersin by Deloitte</li>
+            </ul>
+        </div>
+
+        <div class="appendix-section">
+            <h3>7. Science YouTube Audience &amp; Creator-Product Fit</h3>
+            <p>Science YouTube viewers are <strong>65&ndash;93% male</strong>, concentrated in 25&ndash;36 age band, disproportionately college-educated (Landrum 2021). 73% of adults self-identify as &ldquo;lifelong learners&rdquo; (Pew).</p>
+            <ul>
+                <li><span class="tag">Case</span> CrunchLabs (Mark Rober) &mdash; YouTube to ~$10M/month in subscriptions</li>
+                <li><span class="tag">Case</span> <a href="https://brilliant.org" target="_blank">Brilliant.org</a> &mdash; Sponsored 208+ science channels, validates paying segment</li>
+                <li><span class="tag">Data</span> At 0.05&ndash;0.10% conversion, launch yields 5,000&ndash;20,000 installs. LTV:CAC 12:1+</li>
+                <li><span class="tag">Source</span> <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8668831/" target="_blank">Landrum 2021</a> &middot; Pew Research &middot; CrunchLabs/Brilliant.org public data</li>
+            </ul>
+        </div>
+
+        <div class="appendix-section">
+            <h3>8. Client Context</h3>
+            <ul>
+                <li><span class="tag">Interview</span> Meeting #1 with Brett &mdash; Content taste, quirky stories, WhatsApp curation habits</li>
+                <li><span class="tag">Interview</span> Meeting #5 with Farid &mdash; 4-dimension scorecard requirement, presentations under 3 minutes, MLP framing</li>
+            </ul>
+        </div>
+
+        <div class="appendix-concept-label" id="appendix-c3" style="color:#C9A96E; border-bottom: 2px solid #C9A96E;">Concept 3 &mdash; The Dinner Table Drop</div>
+
+        <div class="appendix-section">
+            <h3>1. Spaced Repetition &amp; Memory Science</h3>
+            <p>Roediger &amp; Karpicke 2006: passive readers forgot <strong>56%</strong> while tested readers forgot only <strong>13%</strong> &mdash; a <strong>77% reduction in forgetting</strong>. Meeter et al. 2005 (14,000 participants, 500K data points) proved news follows the same forgetting dynamics. Higher consumption does NOT slow forgetting.</p>
+            <ul>
+                <li><span class="tag">Data</span> Cepeda et al. (2008): optimal gap for 1-month retention is <strong>~1 week</strong> &mdash; supports DTD&rsquo;s weekly cadence</li>
+                <li><span class="tag">Data</span> Adesope et al. (2017): testing effect d = 0.56, 25&ndash;50% retention improvement</li>
+                <li><span class="tag">Source</span> Roediger &amp; Karpicke 2006 &middot; <a href="https://doi.org/10.3758/BF03193232" target="_blank">Meeter et al. 2005</a> &middot; <a href="https://doi.org/10.3102/0034654316689306" target="_blank">Adesope et al. 2017</a> &middot; Murre &amp; Dros 2015</li>
+            </ul>
+        </div>
+
+        <div class="appendix-section">
+            <h3>2. Trust in Media &amp; News Consumption</h3>
+            <p>Trust has collapsed, avoidance is rising, analysis infrastructure is disappearing &mdash; but demand for depth is growing.</p>
+            <ul>
+                <li><span class="tag">Data</span> <strong>28%</strong> of Americans trust mass media &mdash; Gallup 2025, all-time low since 1972</li>
+                <li><span class="tag">Data</span> <strong>40%</strong> of global audiences actively avoid news &mdash; Reuters 2025, up from 29% in 2017</li>
+                <li><span class="tag">Data</span> 3,500 US newspapers closed since 2005; 213 counties are now news deserts</li>
+                <li><span class="tag">Source</span> <a href="https://news.gallup.com" target="_blank">Gallup 2025</a> &middot; <a href="https://reutersinstitute.politics.ox.ac.uk/digital-news-report" target="_blank">Reuters DNR 2025</a> &middot; Edelman Trust Barometer 2025/2026</li>
+            </ul>
+        </div>
+
+        <div class="appendix-section">
+            <h3>3. News Retention &amp; the &ldquo;Illusion of Being Informed&rdquo;</h3>
+            <p>After watching a full newscast, the average viewer recalls just <strong>6% of headlines unaided</strong> (1 in 16). 75% are overconfident about their news judgment (Pennycook &amp; Rand 2021). 75% of news articles shared on social media are shared without clicking the link.</p>
+            <ul>
+                <li><span class="tag">Source</span> <a href="https://baeuml.app.uni-regensburg.de/paper/papers_open/AB21_Cognition.pdf" target="_blank">B&auml;uml 2021</a> &middot; <a href="https://www.pnas.org/doi/10.1073/pnas.2019527118" target="_blank">Pennycook &amp; Rand 2021</a> &middot; <a href="https://www.psu.edu/news/research/story/social-media-users-probably-wont-read-beyond-headline-researchers-say" target="_blank">Penn State 2020</a></li>
+            </ul>
+        </div>
+
+        <div class="appendix-section">
+            <h3>4. News Avoidance Psychology</h3>
+            <p>40% of global audiences avoid news (Reuters 2025). Reasons: mood impact 39%, worn out 31%, too much conflict 30%. Research shows selective avoiders are <strong>actively open to formats that are explanatory, curated, and solutions-oriented</strong>.</p>
+            <ul>
+                <li><span class="tag">Data</span> The Trust Project: ~300 news orgs, trust jumped <strong>8% after implementing</strong> transparency indicators</li>
+                <li><span class="tag">Case</span> Tortoise Media &mdash; &ldquo;ThinkIn&rdquo; events where public participates in editorial decisions</li>
+                <li><span class="tag">Source</span> <a href="https://reutersinstitute.politics.ox.ac.uk/digital-news-report" target="_blank">Reuters DNR 2023&ndash;2025</a> &middot; Toff &amp; Palmer 2019 &middot; The Trust Project</li>
+            </ul>
+        </div>
+
+        <div class="appendix-section">
+            <h3>5. Competitive White Space &mdash; 50+ Product Scan</h3>
+            <p><strong>Zero products combine all four axes:</strong> spaced repetition, quizzes on news, human editorial curation, and source transparency.</p>
+            <ul>
+                <li><span class="tag">Competitor</span> <strong>Morning Brew</strong> (4M+ subs, acquired ~$75M) &mdash; No depth, no retention</li>
+                <li><span class="tag">Competitor</span> <strong>Tortoise Media</strong> (110K+ paying members) &mdash; Closest in philosophy, no learning science</li>
+                <li><span class="tag">Competitor</span> <strong>Ground News</strong> (1M+ users) &mdash; Transparency via bias ratings, zero retention mechanics</li>
+                <li><span class="tag">Competitor</span> <strong>Stratechery</strong> ($15/mo, 40K+ paid) &mdash; Deep analysis, no retention mechanics</li>
+                <li><span class="tag">Competitor</span> <strong>GeoBarta</strong> (launched 2026) &mdash; Only partial overlap; geography not news, no editorial curation</li>
+            </ul>
+        </div>
+
+        <div class="appendix-section">
+            <h3>6. Newsletter Economics &amp; Monetization</h3>
+            <p>Personality-driven newsletters convert <strong>6&ndash;12% free-to-paid</strong> vs. 2&ndash;5% for brand-driven. Annual subscriber survival: <strong>70% for annual plans vs. 34% for monthly</strong> (FT Strategies).</p>
+            <ul>
+                <li><span class="tag">Case</span> <strong>The Free Press</strong> &mdash; 170K paid / 1.5M total = 11.3% conversion, ~$20M/year</li>
+                <li><span class="tag">Case</span> <strong>Morning Brew</strong> &mdash; Acquired ~$75M &middot; <strong>Axios</strong> &mdash; Acquired $525M</li>
+                <li><span class="tag">Data</span> C3 model: $10/month, 3&ndash;5% conversion from 10K list = $36K&ndash;$60K/year in Year 1</li>
+                <li><span class="tag">Source</span> Substack/ConvertKit benchmarks &middot; Reuters &ldquo;Paying for News&rdquo; 2023 &middot; FT Strategies</li>
+            </ul>
+        </div>
+
+        <div class="appendix-section">
+            <h3>7. Audience &amp; Demographics</h3>
+            <p>News payers skew older, educated, higher income: 60% male, 79% medium-to-high income. Brett&rsquo;s science YouTube audience (65&ndash;93% male, 25&ndash;36 age band) maps directly onto the demographic that already pays for online news.</p>
+            <ul>
+                <li><span class="tag">Source</span> <a href="https://reutersinstitute.politics.ox.ac.uk/digital-news-report" target="_blank">Reuters DNR 2023&ndash;2025</a> &middot; Pew 2025&ndash;2026 &middot; <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8668831/" target="_blank">Landrum 2021</a></li>
+            </ul>
+        </div>
+
+        <div class="appendix-section">
+            <h3>8. Client Context</h3>
+            <ul>
+                <li><span class="tag">Data</span> Meeting #1 with Brett &mdash; 14+ daily news sources, editorial preferences, WhatsApp curation habits</li>
+                <li><span class="tag">Data</span> Meeting #5 with Farid &mdash; 4-dimension scorecard requirement, presentations under 3 minutes, MLP framing</li>
+                <li><span class="tag">Data</span> Meeting #7 &mdash; HMW brainstorming, final 3 concepts selected</li>
+            </ul>
+        </div>
+
+        <a class="back-to-slides" id="backToSlides">&uarr; Back to presentation</a>
+    </div>
+</div>
+</div>
+
+<script>
+    // ─── VIEW SWITCHING ───
+    let previousView = 'view-overview';
+    let inAppendixMode = false;
+    const appendixPill = document.getElementById('appendixPill');
+
+    function showView(viewId) {
+        // Reset appendix state
+        if (inAppendixMode) {
+            inAppendixMode = false;
+            appendixPill.textContent = 'Appendix';
+            appendixPill.classList.remove('in-appendix');
+        }
+        // Remember where we came from (not appendix)
+        const current = document.querySelector('.view.active');
+        if (current && current.id !== 'view-appendix') previousView = current.id;
+        // Switch views
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(viewId).classList.add('active');
+        // Set scroll mode
+        if (viewId === 'view-overview' || viewId === 'view-appendix') {
+            document.body.style.overflow = 'auto';
+            window.scrollTo(0, 0);
+        } else {
+            document.body.style.overflow = 'hidden';
+            const sc = document.querySelector('#' + viewId + ' .slides-container');
+            if (sc) sc.scrollTo(0, 0);
+        }
+        if (viewId === 'view-appendix') {
+            inAppendixMode = true;
+            appendixPill.textContent = '\u2191 Back';
+            appendixPill.classList.add('in-appendix');
+        }
+    }
+
+    // ─── PER-VIEW NAV DOTS ───
+    document.querySelectorAll('.view:not(#view-overview):not(#view-appendix)').forEach(view => {
+        const sc = view.querySelector('.slides-container');
+        if (!sc) return;
+        const slides = sc.querySelectorAll('.slide');
+        const dots = view.querySelectorAll('.nav-dot');
+        dots.forEach((dot, i) => {
+            dot.addEventListener('click', () => {
+                if (slides[i]) slides[i].scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+        const obs = new IntersectionObserver(entries => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    const idx = Array.from(slides).indexOf(e.target);
+                    dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+                }
+            });
+        }, { root: sc, threshold: 0.5 });
+        slides.forEach(s => obs.observe(s));
+    });
+
+    // ─── APPENDIX PILL (context-aware) ───
+    appendixPill.addEventListener('click', () => {
+        if (inAppendixMode) {
+            showView(previousView);
+        } else {
+            // Determine which concept we're in
+            const active = document.querySelector('.view.active');
+            const conceptId = active ? active.id : '';
+            showView('view-appendix');
+            // Scroll to concept-specific section after view switch
+            const anchorMap = { 'view-c1': 'appendix-c1', 'view-c2': 'appendix-c2', 'view-c3': 'appendix-c3' };
+            const anchor = anchorMap[conceptId];
+            if (anchor) {
+                setTimeout(() => {
+                    document.getElementById(anchor).scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 50);
+            }
+        }
+    });
+
+    // ─── "MORE LINK" ANCHORS → APPENDIX ───
+    document.querySelectorAll('a[href^="#appendix"]').forEach(link => {
+        link.addEventListener('click', e => {
+            e.preventDefault();
+            showView('view-appendix');
+        });
+    });
+
+    // ─── BACK TO SLIDES ───
+    document.getElementById('backToSlides').addEventListener('click', e => {
+        e.preventDefault();
+        showView(previousView);
+    });
+
+    // ─── KEYBOARD NAVIGATION ───
+    document.addEventListener('keydown', e => {
+        const active = document.querySelector('.view.active');
+        if (!active) return;
+        const id = active.id;
+
+        // In overview or appendix — Escape goes back
+        if (id === 'view-overview' || id === 'view-appendix') {
+            if (e.key === 'Escape' && id === 'view-appendix') showView(previousView);
+            return;
+        }
+
+        // In a concept view — arrow keys navigate slides
+        const sc = active.querySelector('.slides-container');
+        if (!sc) return;
+        const slides = Array.from(sc.querySelectorAll('.slide'));
+        const dots = Array.from(active.querySelectorAll('.nav-dot'));
+        const currentIdx = dots.findIndex(d => d.classList.contains('active'));
+
+        if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+            e.preventDefault();
+            const next = currentIdx + 1;
+            if (next < slides.length) slides[next].scrollIntoView({ behavior: 'smooth' });
+        } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+            e.preventDefault();
+            const prev = currentIdx - 1;
+            if (prev >= 0) slides[prev].scrollIntoView({ behavior: 'smooth' });
+        } else if (e.key === 'Escape') {
+            showView('view-overview');
+        } else if (e.key === 'Home') {
+            e.preventDefault();
+            slides[0].scrollIntoView({ behavior: 'smooth' });
+        } else if (e.key === 'End') {
+            e.preventDefault();
+            slides[slides.length - 1].scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+
+    // Start on overview (scrollable)
+    document.body.style.overflow = 'auto';
+</script>
+
+</body>
+</html>
