@@ -5,6 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Radical Concepts &mdash; Event Storming</title>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display&display=swap" rel="stylesheet">
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+        import elkLayouts from 'https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk/dist/mermaid-layout-elk.esm.min.mjs';
+        mermaid.registerLayoutLoaders(elkLayouts);
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: 'base',
+            layout: 'elk',
+            flowchart: {
+                useMaxWidth: false,
+                padding: 20
+            },
+            elk: {
+                nodePlacementStrategy: 'SIMPLE',
+                mergeEdges: true
+            },
+            themeVariables: {
+                primaryColor: '#2a1a0a',
+                primaryTextColor: '#F97316',
+                primaryBorderColor: '#F97316',
+                lineColor: 'rgba(255,255,255,0.2)',
+                secondaryColor: '#0d1525',
+                secondaryBorderColor: '#3B82F6',
+                secondaryTextColor: '#3B82F6',
+                tertiaryColor: '#1c1028',
+                tertiaryBorderColor: '#A855F7',
+                tertiaryTextColor: '#A855F7',
+                background: '#0f1219',
+                mainBkg: '#0f1219',
+                nodeBorder: 'rgba(255,255,255,0.15)',
+                clusterBkg: 'rgba(255,255,255,0.03)',
+                clusterBorder: 'rgba(255,255,255,0.08)',
+                fontFamily: 'DM Sans, sans-serif',
+                fontSize: '14px'
+            }
+        });
+        window.mermaid = mermaid;
+    </script>
     <style>
         :root {
             --text-xs: clamp(0.65rem, 0.55rem + 0.25vw, 0.78rem);
@@ -145,8 +183,9 @@
         .phase-dot--amber { background: var(--phase-amber); }
         .phase-dot--red { background: var(--phase-red); }
 
-        /* ── THE BOARD ── */
+        /* ── THE BOARD (legacy — hidden, replaced by Mermaid diagram) ── */
         .board {
+            display: none;
             position: relative; z-index: 1;
             overflow: auto;
             margin: 0 0.75rem 3rem;
@@ -486,31 +525,99 @@
             white-space: pre;
         }
 
-        /* ── Legend toggle button ── */
-        .legend-toggle {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-            padding: 0.35rem 0.75rem;
-            font-family: 'DM Sans', sans-serif;
-            font-size: var(--text-xs);
-            font-weight: 500;
-            color: rgba(255,255,255,0.38);
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
+        /* ── MERMAID DIAGRAM (primary view) ── */
+        .diagram-wrap {
+            position: relative;
+            z-index: 1;
+            margin: 0 0.75rem 3rem;
+            border: 1px solid rgba(255,255,255,0.035);
+            border-radius: 14px;
+            background: rgba(255,255,255,0.008);
+            overflow: hidden;
         }
-        .legend-toggle:hover { color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.07); }
-        .legend-toggle.active {
-            color: rgba(249,115,22,0.85);
-            background: rgba(249,115,22,0.1);
-            border-color: rgba(249,115,22,0.25);
+        .diagram-inner {
+            overflow: auto;
+            padding: 2rem 1rem;
+            min-height: 400px;
         }
-        .legend-toggle svg { width: 14px; height: 14px; }
+        .diagram-inner svg {
+            display: block;
+            margin: 0 auto;
+            min-width: 1200px;
+            height: auto;
+        }
+        .diagram-loading {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: rgba(255,255,255,0.25);
+            font-size: var(--text-sm);
+        }
+        .diagram-loading::after {
+            content: '';
+            display: block;
+            width: 32px; height: 32px;
+            margin: 1rem auto 0;
+            border: 2px solid rgba(255,255,255,0.08);
+            border-top-color: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ── Legend pinned state ── */
+        .zoom-controls {
+            position: absolute;
+            top: 10px; right: 10px;
+            display: flex; gap: 2px;
+            z-index: 10;
+            background: rgba(15,18,25,0.9);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 6px;
+            padding: 2px;
+        }
+        .zoom-controls button {
+            width: 30px; height: 30px;
+            border: none;
+            background: transparent;
+            color: rgba(255,255,255,0.4);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            cursor: pointer;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s, color 0.15s;
+        }
+        .zoom-controls button:hover {
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.8);
+        }
+        .diagram-wrap.is-zoomed .diagram-inner { cursor: grab; }
+        .diagram-wrap.is-panning .diagram-inner { cursor: grabbing; user-select: none; }
+
+        /* Override Mermaid node text for dark theme */
+        .diagram-inner .node .label,
+        .diagram-inner .nodeLabel {
+            font-family: 'DM Sans', sans-serif !important;
+        }
+        .diagram-inner .cluster-label .nodeLabel {
+            font-family: 'DM Serif Display', serif !important;
+            font-size: 16px !important;
+            fill: rgba(255,255,255,0.5) !important;
+        }
+        /* Prevent subgraph title clipping */
+        .diagram-inner .cluster-label {
+            overflow: visible !important;
+        }
+        .diagram-inner .cluster-label foreignObject {
+            overflow: visible !important;
+        }
+        .diagram-inner .edgeLabel {
+            font-family: 'DM Sans', sans-serif !important;
+            font-size: 11px !important;
+        }
+
+        /* ── Legend auto-sticky state ── */
         .legend-bar.legend-pinned,
         .phase-bar.legend-pinned {
             position: fixed;
@@ -524,6 +631,7 @@
             border-bottom: 1px solid rgba(255,255,255,0.06);
             max-width: 100%;
             justify-content: center;
+            animation: legendSlideIn 0.25s ease;
         }
         .legend-bar.legend-pinned {
             top: 56px;
@@ -533,26 +641,10 @@
             top: 104px;
             padding: 0.5rem 2.5rem;
         }
-
-        /* Close button on pinned legend */
-        .legend-close {
-            display: none;
-            align-items: center;
-            justify-content: center;
-            width: 22px; height: 22px;
-            margin-left: 1rem;
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 6px;
-            color: rgba(255,255,255,0.35);
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s;
-            flex-shrink: 0;
-            line-height: 1;
+        @keyframes legendSlideIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .legend-close:hover { color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.1); }
-        .legend-pinned .legend-close { display: inline-flex; }
 
         /* Spacer to prevent content jump when legend is pinned */
         .legend-spacer { display: none; }
@@ -567,8 +659,7 @@
 <div class="header-bar">
     <a href="radical-concepts-modular-platform.html">&larr; Back to Platform</a>
     <div class="header-brand">Radical Concepts</div>
-    <a href="#" id="mermaid-btn" onclick="document.getElementById('mermaid-modal').style.display='flex';return false;">Mermaid</a>
-    <button class="legend-toggle" id="legend-toggle" onclick="toggleLegend()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg> Legend</button>
+    <a href="#" id="mermaid-btn" onclick="var m=document.getElementById('mermaid-modal');m.setAttribute('data-user-opened','1');m.style.display='flex';return false;">Mermaid</a>
     <a href="deliverables/index.html">Dashboard &rarr;</a>
 </div>
 
@@ -587,7 +678,6 @@
     <div class="legend-item"><div class="legend-swatch legend-swatch--external"></div><span class="legend-label">External System</span></div>
     <div class="legend-item"><div class="legend-swatch legend-swatch--gate"></div><span class="legend-label">Human Gate</span></div>
     <div class="legend-item"><div class="legend-swatch legend-swatch--decision"></div><span class="legend-label">Decision</span></div>
-    <button class="legend-close" onclick="toggleLegend()" title="Unpin legend">&times;</button>
 </div>
 
 <div class="phase-bar">
@@ -604,7 +694,21 @@
 <div class="legend-spacer" id="legend-spacer"></div>
 
 <!-- ═══════════════════════════════════════════════ -->
-<!-- THE BOARD                                       -->
+<!-- MERMAID DIAGRAM (primary view with ELK layout)  -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="diagram-wrap" id="diagram-wrap">
+    <div class="zoom-controls">
+        <button onclick="zoomDiagram(this, 1.25)" title="Zoom in">+</button>
+        <button onclick="zoomDiagram(this, 0.8)" title="Zoom out">&minus;</button>
+        <button onclick="resetZoom(this)" title="Reset zoom">&#8634;</button>
+    </div>
+    <div class="diagram-inner" id="diagram-inner">
+        <div class="diagram-loading">Loading ELK layout&hellip;</div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- THE BOARD (legacy — hidden)                     -->
 <!-- ═══════════════════════════════════════════════ -->
 <div class="board">
     <div class="board-inner">
@@ -620,6 +724,8 @@
         <div class="lane-divider" style="top:2300px;"></div>
         <div class="lane-label" style="left:16px; top:2360px;">Distribution</div>
         <div class="lane-tag" style="left:100px; top:2320px;">Lane 3 &mdash; Publishing &amp; Intelligence</div>
+
+        <div class="lane-divider" style="top:3200px;"></div>
 
         <!-- SVG layer — arrows rendered by JS -->
         <svg class="connections" id="connSvg" viewBox="0 0 2800 3400" preserveAspectRatio="xMidYMid meet">
@@ -823,90 +929,87 @@
         <!-- LANE 3: DISTRIBUTION & INTELLIGENCE     -->
         <!-- ═══════════════════════════════════════ -->
 
-        <div class="sticky sticky--command" id="n-publish" style="left:220px; top:2420px; --i:27;">
+        <!-- Row 1: Main flow — Publish → RSS, Publish → Clips → Published → Analytics → Insights -->
+        <div class="sticky sticky--command" id="n-publish" style="left:120px; top:2420px; --i:27;">
             <div class="sticky-phase" style="background:var(--phase-amber);"></div>
             <div class="sticky-title">Publish to Platforms</div>
             <div class="sticky-detail">Format-adapt and auto-upload. RSS, YouTube, social clips. Zero manual work after approval.</div>
         </div>
 
-        <div class="sticky sticky--external" id="n-rss-out" style="left:580px; top:2400px; width:160px; --i:28;">
+        <div class="sticky sticky--external" id="n-rss-out" style="left:360px; top:2420px; width:160px; --i:28;">
             <div class="sticky-phase" style="background:var(--phase-amber);"></div>
             <div class="sticky-title">Podcast RSS</div>
             <div class="sticky-detail">Apple, Spotify, Google Podcasts distribution feed.</div>
         </div>
 
-        <div class="sticky sticky--external" id="n-youtube" style="left:120px; top:2720px; width:160px; --i:29;">
+        <div class="sticky sticky--command" id="n-clipgen" style="left:580px; top:2420px; --i:36;">
             <div class="sticky-phase" style="background:var(--phase-amber);"></div>
-            <div class="sticky-title">YouTube</div>
-            <div class="sticky-detail">Full episode + auto-cut clips. Duration TBD. Captions &amp; chapters auto-generated.</div>
+            <div class="sticky-title">Generate Clips</div>
+            <div class="sticky-detail">Cut full episode into platform-specific clips. Section markers define boundaries. 30s/60s shorts + quote cards.</div>
         </div>
 
-        <div class="sticky sticky--external" id="n-social" style="left:620px; top:2720px; width:170px; --i:30;">
-            <div class="sticky-phase" style="background:var(--phase-amber);"></div>
-            <div class="sticky-title">Social Platforms</div>
-            <div class="sticky-detail">Platform-specific formats. Quote cards, audiograms, video clips. X, LinkedIn, Instagram.</div>
-        </div>
-
-        <div class="sticky sticky--event" id="n-published" style="left:380px; top:2580px; width:170px; --i:31;">
+        <div class="sticky sticky--event" id="n-published" style="left:820px; top:2420px; width:170px; --i:31;">
             <div class="sticky-phase" style="background:var(--phase-amber);"></div>
             <div class="sticky-title">Content Published</div>
             <div class="sticky-detail">Live on all platforms. Triggers analytics tracking.</div>
         </div>
 
-        <div class="sticky sticky--policy" id="n-analytics" style="left:1100px; top:2420px; --i:32;">
+        <div class="sticky sticky--policy" id="n-analytics" style="left:1040px; top:2420px; --i:32;">
             <div class="sticky-phase" style="background:var(--phase-red);"></div>
             <div class="sticky-title">Track Analytics</div>
             <div class="sticky-detail">Automated: downloads, engagement, demographics, topic performance.</div>
         </div>
 
-        <div class="sticky sticky--event" id="n-insights" style="left:1540px; top:2420px; --i:33;">
+        <div class="sticky sticky--event" id="n-insights" style="left:1280px; top:2420px; --i:33;">
             <div class="sticky-phase" style="background:var(--phase-red);"></div>
             <div class="sticky-title">Insights Generated</div>
             <div class="sticky-detail">Performance data feeds back to Source Intelligence and Persona Engine.</div>
         </div>
 
-        <!-- C2 Future -->
-        <div class="sticky sticky--c2" id="n-c2-future" style="left:1100px; top:2960px; width:200px; --i:34;">
+        <!-- Row 2: External platforms + decisions -->
+        <div class="sticky sticky--decision" id="n-dec-schedule" style="left:120px; top:2700px; --i:39;">
+            <div class="sticky-phase" style="background:var(--phase-amber);"></div>
+            <div class="sticky-title">Schedule: fixed or quality-driven?</div>
+            <div class="sticky-detail">Publish on set days vs when material is ready. Consistency vs quality trade-off.</div>
+        </div>
+
+        <div class="sticky sticky--external" id="n-youtube" style="left:380px; top:2700px; width:170px; --i:29;">
+            <div class="sticky-phase" style="background:var(--phase-amber);"></div>
+            <div class="sticky-title">YouTube</div>
+            <div class="sticky-detail">Full episode + auto-cut clips. Duration TBD. Captions &amp; chapters auto-generated.</div>
+        </div>
+
+        <div class="sticky sticky--external" id="n-social" style="left:640px; top:2700px; width:170px; --i:30;">
+            <div class="sticky-phase" style="background:var(--phase-amber);"></div>
+            <div class="sticky-title">Social Platforms</div>
+            <div class="sticky-detail">Platform-specific formats. Quote cards, audiograms, video clips. X, LinkedIn, Instagram.</div>
+        </div>
+
+        <div class="sticky sticky--c2" id="n-c2-future" style="left:1040px; top:2700px; width:200px; --i:34;">
             <div class="sticky-phase" style="background:var(--phase-red);"></div>
             <div class="sticky-title">C2: Quiz Engagement</div>
             <div class="sticky-detail">Streaks, leaderboards, social sharing. Engagement data feeds back into content scoring.</div>
             <span class="exploring-tag" style="color:var(--c2);">Future</span>
         </div>
 
-        <!-- C3 Future -->
-        <div class="sticky sticky--c3" id="n-c3-future" style="left:380px; top:2960px; width:190px; --i:35;">
-            <div class="sticky-phase" style="background:var(--phase-red);"></div>
-            <div class="sticky-title">C3: Knowledge Cards</div>
-            <div class="sticky-detail">Spaced repetition library. Mon/Wed/Fri drip. Retention science format.</div>
-            <span class="exploring-tag" style="color:var(--c3);">Future</span>
-        </div>
-
-        <!-- Clip Generation — between Approved and external systems -->
-        <div class="sticky sticky--command" id="n-clipgen" style="left:900px; top:2420px; --i:36;">
-            <div class="sticky-phase" style="background:var(--phase-amber);"></div>
-            <div class="sticky-title">Generate Clips</div>
-            <div class="sticky-detail">Cut full episode into platform-specific clips. Section markers define boundaries. 30s/60s shorts + quote cards.</div>
-        </div>
-
-        <!-- DECISION: Video clip length -->
-        <div class="sticky sticky--decision" id="n-dec-cliplen" style="left:120px; top:2900px; --i:37;">
+        <!-- Row 3: Decisions + C3 Future -->
+        <div class="sticky sticky--decision" id="n-dec-cliplen" style="left:380px; top:2980px; --i:37;">
             <div class="sticky-phase" style="background:var(--phase-amber);"></div>
             <div class="sticky-title">Video: 30s or 60s clips?</div>
             <div class="sticky-detail">Short-form content length. Platform algorithms favour different durations.</div>
         </div>
 
-        <!-- DECISION: Caption style -->
-        <div class="sticky sticky--decision" id="n-dec-captions" style="left:620px; top:2900px; --i:38;">
+        <div class="sticky sticky--decision" id="n-dec-captions" style="left:640px; top:2980px; --i:38;">
             <div class="sticky-phase" style="background:var(--phase-amber);"></div>
             <div class="sticky-title">Captions: auto or styled?</div>
             <div class="sticky-detail">Auto-transcribed vs branded caption templates. Accessibility vs brand consistency.</div>
         </div>
 
-        <!-- DECISION: Publishing schedule -->
-        <div class="sticky sticky--decision" id="n-dec-schedule" style="left:180px; top:2650px; --i:39;">
-            <div class="sticky-phase" style="background:var(--phase-amber);"></div>
-            <div class="sticky-title">Schedule: fixed or quality-driven?</div>
-            <div class="sticky-detail">Publish on set days vs when material is ready. Consistency vs quality trade-off.</div>
+        <div class="sticky sticky--c3" id="n-c3-future" style="left:1040px; top:2980px; width:190px; --i:35;">
+            <div class="sticky-phase" style="background:var(--phase-red);"></div>
+            <div class="sticky-title">C3: Knowledge Cards</div>
+            <div class="sticky-detail">Spaced repetition library. Mon/Wed/Fri drip. Retention science format.</div>
+            <span class="exploring-tag" style="color:var(--c3);">Future</span>
         </div>
 
     </div>
@@ -1193,63 +1296,55 @@
         }
 
         // === LANE 3: Distribution ===
-        // Publish → RSS (direct, no clipping needed)
+        // Row 1: Publish → RSS Out, Clips → Published → Analytics → Insights
         horizBezier('n-publish', 'n-rss-out', 'conn--flow', 'ah-flow');
-
-        // Publish → Clip Generation
-        horizBezier('n-publish', 'n-clipgen', 'conn--amber', 'ah-amber');
-
-        // Publish → Content Published (the event that follows publishing)
-        vertBezier('n-publish', 'n-published', 'conn--amber', 'ah-amber');
-
-        // Content Published → Analytics
+        horizBezier('n-clipgen', 'n-published', 'conn--green', 'ah-green');
         horizBezier('n-published', 'n-analytics', 'conn--purple', 'ah-purple');
-
-        // Analytics → Insights
         horizBezier('n-analytics', 'n-insights', 'conn--red', 'ah-red');
 
-        // C2 quiz → C2 future (dashed, route down then right)
+        // Publish → Clips (route below RSS to avoid overlap)
+        var pPubL3 = pos('n-publish'), pClip = pos('n-clipgen');
+        if (pPubL3 && pClip) {
+            var belowY = pPubL3.b + 30;
+            addPath('M' + pPubL3.r + ',' + (pPubL3.b - 15) + ' L' + (pPubL3.r + 15) + ',' + belowY + ' L' + (pClip.x - 15) + ',' + belowY + ' L' + pClip.x + ',' + (pClip.b - 15), 'conn--amber', 'ah-amber');
+        }
+
+        // Clips → YouTube (down-left bezier)
+        var pYt = pos('n-youtube');
+        if (pClip && pYt) {
+            addPath('M' + pClip.cx + ',' + pClip.b + ' C' + pClip.cx + ',' + (pClip.b + 80) + ' ' + pYt.cx + ',' + (pYt.y - 80) + ' ' + pYt.cx + ',' + (pYt.y - 8), 'conn--flow', 'ah-flow');
+        }
+
+        // Clips → Social (down-right bezier)
+        var pSoc = pos('n-social');
+        if (pClip && pSoc) {
+            addPath('M' + (pClip.cx + 30) + ',' + pClip.b + ' C' + (pClip.cx + 30) + ',' + (pClip.b + 80) + ' ' + pSoc.cx + ',' + (pSoc.y - 80) + ' ' + pSoc.cx + ',' + (pSoc.y - 8), 'conn--flow', 'ah-flow');
+        }
+
+        // C2 quiz → C2 future (dashed vertical)
         var pC2q = pos('n-c2-quiz'), pC2f = pos('n-c2-future');
         if (pC2q && pC2f) {
             addPath('M' + pC2q.cx + ',' + pC2q.b + ' C' + pC2q.cx + ',' + (pC2q.b + 120) + ' ' + pC2f.cx + ',' + (pC2f.y - 120) + ' ' + pC2f.cx + ',' + (pC2f.y - 8), 'conn--c2', 'ah-c2');
         }
 
-        // C3 snippet → C3 future (dashed)
+        // C3 snippet → C3 future (dashed vertical)
         var pC3s = pos('n-c3-snippet'), pC3f = pos('n-c3-future');
         if (pC3s && pC3f) {
             addPath('M' + pC3s.cx + ',' + pC3s.b + ' C' + pC3s.cx + ',' + (pC3s.b + 120) + ' ' + pC3f.cx + ',' + (pC3f.y - 120) + ' ' + pC3f.cx + ',' + (pC3f.y - 8), 'conn--c3', 'ah-c3');
         }
 
-        // === Clip Generation connections ===
-        // Clip Generation → YouTube (down-left)
-        var pClip = pos('n-clipgen'), pYt = pos('n-youtube');
-        if (pClip && pYt) {
-            addPath('M' + pClip.x + ',' + pClip.b + ' C' + pClip.x + ',' + (pClip.b + 80) + ' ' + pYt.r + ',' + (pYt.y - 60) + ' ' + pYt.r + ',' + (pYt.y - 8), 'conn--flow', 'ah-flow');
-        }
-
-        // Clip Generation → Social (down)
-        var pSoc2 = pos('n-social');
-        if (pClip && pSoc2) {
-            addPath('M' + pClip.cx + ',' + pClip.b + ' C' + pClip.cx + ',' + (pClip.b + 80) + ' ' + pSoc2.cx + ',' + (pSoc2.y - 60) + ' ' + pSoc2.cx + ',' + (pSoc2.y - 8), 'conn--flow', 'ah-flow');
-        }
-
-        // === Decision hotspot connections (dashed) ===
-        // Decision: clip length → YouTube
+        // Decision hotspot connections (dashed)
         var pDecLen = pos('n-dec-cliplen'), pYtD = pos('n-youtube');
         if (pDecLen && pYtD) {
             addPath('M' + pDecLen.cx + ',' + pDecLen.y + ' L' + pYtD.cx + ',' + pYtD.b, 'conn--hotspot', null);
         }
-
-        // Decision: captions → Social
         var pDecCap = pos('n-dec-captions'), pSocD = pos('n-social');
         if (pDecCap && pSocD) {
             addPath('M' + pDecCap.cx + ',' + pDecCap.y + ' L' + pSocD.cx + ',' + pSocD.b, 'conn--hotspot', null);
         }
-
-        // Decision: schedule → Publish
         var pDecSch = pos('n-dec-schedule'), pPubD = pos('n-publish');
         if (pDecSch && pPubD) {
-            addPath('M' + pDecSch.cx + ',' + pDecSch.y + ' L' + pPubD.cx + ',' + pPubD.b, 'conn--hotspot', null);
+            addPath('M' + pDecSch.r + ',' + pDecSch.cy + ' L' + pPubD.x + ',' + pPubD.b, 'conn--hotspot', null);
         }
 
         // === FEEDBACK LOOPS ===
@@ -1281,19 +1376,486 @@
 </script>
 
 <script>
-function toggleLegend() {
+// Auto-sticky legend: pins when scrolled past, unpins when scrolled back
+(function() {
     var lb = document.querySelector('.legend-bar');
     var pb = document.querySelector('.phase-bar');
-    var btn = document.getElementById('legend-toggle');
     var spacer = document.getElementById('legend-spacer');
-    var pinned = lb.classList.toggle('legend-pinned');
-    pb.classList.toggle('legend-pinned');
-    btn.classList.toggle('active');
-    spacer.classList.toggle('active');
-    if (pinned) {
-        spacer.style.height = (lb.offsetHeight + pb.offsetHeight) + 'px';
-    }
+    var sentinel = document.createElement('div');
+    sentinel.style.height = '1px';
+    sentinel.style.width = '100%';
+    sentinel.style.position = 'relative';
+    lb.parentNode.insertBefore(sentinel, lb);
+
+    var observer = new IntersectionObserver(function(entries) {
+        var pinned = !entries[0].isIntersecting;
+        lb.classList.toggle('legend-pinned', pinned);
+        pb.classList.toggle('legend-pinned', pinned);
+        spacer.classList.toggle('active', pinned);
+        if (pinned) {
+            spacer.style.height = (lb.offsetHeight + pb.offsetHeight) + 'px';
+        }
+    }, { threshold: 0, rootMargin: '-57px 0px 0px 0px' });
+
+    observer.observe(sentinel);
+})();
+</script>
+
+<!-- Mermaid Modal -->
+<div class="mermaid-overlay" id="mermaid-modal">
+    <div class="mermaid-panel">
+        <div class="mermaid-panel-header">
+            <div class="mermaid-panel-title">Mermaid Diagram</div>
+            <div class="mermaid-panel-actions">
+                <button class="mermaid-copy-btn" id="mermaid-toggle-src" style="font-size:11px;">View Source</button>
+                <button class="mermaid-copy-btn" id="mermaid-copy">Copy</button>
+                <button class="mermaid-close-btn" id="mermaid-close">&times;</button>
+            </div>
+        </div>
+        <div id="mermaid-render" style="padding:1.5rem; overflow:auto; background:rgba(255,255,255,0.03); border-radius:8px; margin:0 1.5rem 1.5rem;"></div>
+        <pre class="mermaid-code" id="mermaid-code-block" style="display:none;"><code id="mermaid-source"></code></pre>
+    </div>
+</div>
+<script>
+(function() {
+    var mc = [
+        '%% ──────────────────────────────────────────────────',
+        '%% LEGEND',
+        '%% ──────────────────────────────────────────────────',
+        '%% Domain Event   (orange)  — Something that happened',
+        '%% Command        (blue)    — An action triggered',
+        '%% Read Model     (green)   — A queryable view of data',
+        '%% Policy         (purple)  — Automated rule / process',
+        '%% Aggregate      (yellow)  — Domain entity cluster',
+        '%% Hotspot        (red dash)— Open question / risk',
+        '%% External       (grey)    — External system',
+        "%% Human Gate     (steel)   — Brett's manual approval",
+        '%% C2 Branch      (coral)   — Curiosity Game path',
+        '%% C3 Branch      (gold)    — Weekly Deep Dive path',
+        '%% ──────────────────────────────────────────────────',
+        '',
+        'flowchart TD',
+        '',
+        '    %% ═══════════════════════════════════════════════',
+        '    %% LANE 1 — CONTENT PIPELINE (Curation)',
+        '    %% ═══════════════════════════════════════════════',
+        '    subgraph L1["Content Pipeline"]',
+        '        direction TB',
+        '',
+        '        RSS["🟢 RSS Feeds & APIs"]',
+        '        INGEST["🟢 Ingest Sources"]',
+        '        INGESTED["🟢 Sources Ingested"]',
+        '        VALIDATE(["🟢 Auto-Validate & Dedup"])',
+        '        VALIDATED["🟢 Content Validated"]',
+        '        SCORE["🟢 Score with Persona"]',
+        '        SCORED["🟢 Content Scored"]',
+        "        GATE1[\"🟢 Brett's Gate 1\\nTopic Selection & Curation\"]",
+        '        SELECTED["🟢 Topics Selected"]',
+        '        GENSUMMARY["🟢 Generate Summary"]',
+        '',
+        '        CORPUS["🟢 Validated Corpus"]',
+        '        RANKED["🟢 Ranked Feed"]',
+        '        PERSONA["🟢 Persona Profile"]',
+        '',
+        "        HS_TASTE[\"🟢 How do we encode\\nBrett's taste?\"]",
+        '        HS_DASH["🟢 Dashboard or<br/>WhatsApp?"]',
+        '',
+        '        RSS --> INGEST --> INGESTED --> VALIDATE --> VALIDATED --> SCORE',
+        '        SCORE --> SCORED --> GATE1 --> SELECTED --> GENSUMMARY',
+        '',
+        '        VALIDATED --> CORPUS',
+        '        SCORE --> PERSONA',
+        '        SCORED --> RANKED',
+        '',
+        '        HS_TASTE -.- SCORE',
+        '        HS_DASH -.- GATE1',
+        '    end',
+        '',
+        '    %% ═══════════════════════════════════════════════',
+        '    %% LANE 2 — PRODUCTION PIPELINE',
+        '    %% ═══════════════════════════════════════════════',
+        '    subgraph L2["  Production Pipeline  "]',
+        '        direction TB',
+        '',
+        '        SUMMARIZED["🟡 Summary Generated"]',
+        '        FORMATSCRIPT["🟡 Format Script"]',
+        '        SCRIPTREADY["🟡 Script Ready"]',
+        '        VOICE["🟡 Record / Clone Voice"]',
+        '        ASSEMBLE(["🟡 Auto-Assemble Episode"])',
+        '        ASSEMBLED["🟡 Episode Assembled"]',
+        "        GATE2[\"🟡 Brett's Gate 2\\nFinal Production Review\"]",
+        '        APPROVED["🟡 Episode Approved"]',
+        '',
+        '        C3_SNIPPET["🔴 C3: Generate Snippets"]',
+        '        C2_QUIZ["🔴 C2: Generate Quiz"]',
+        '',
+        '        PREVIEW["🟡 Episode Preview"]',
+        '',
+        '        HS_VOICE["🟡 Brett records or<br/>AI clone?"]',
+        '',
+        '        SUMMARIZED --> FORMATSCRIPT --> SCRIPTREADY --> VOICE --> ASSEMBLE --> ASSEMBLED --> GATE2 --> APPROVED',
+        '',
+        '        SUMMARIZED --> C3_SNIPPET',
+        '        SCRIPTREADY --> C2_QUIZ',
+        '',
+        '        ASSEMBLED --> PREVIEW',
+        '',
+        '        HS_VOICE -.- VOICE',
+        '    end',
+        '',
+        '    %% ═══════════════════════════════════════════════',
+        '    %% LANE 3 — DISTRIBUTION & INTELLIGENCE',
+        '    %% ═══════════════════════════════════════════════',
+        '    subgraph L3["  Distribution & Intelligence  "]',
+        '        direction TB',
+        '',
+        '        PUBLISH["🟡 Publish to Platforms"]',
+        '        RSS_OUT["🟡 Podcast RSS"]',
+        '        YOUTUBE["🟡 YouTube"]',
+        '        SOCIAL["🟡 Social Platforms"]',
+        '        PUBLISHED["🟡 Content Published"]',
+        '        ANALYTICS(["🔴 Track Analytics"])',
+        '        INSIGHTS["🔴 Insights Generated"]',
+        '',
+        '        C2_FUTURE["🔴 C2: Quiz Engagement"]',
+        '        C3_FUTURE["🔴 C3: Knowledge Cards"]',
+        '',
+        '        DEC_SCHED{"Schedule: fixed<br/>or quality-driven?"}',
+        '        DEC_CLIP{"Video: 30s<br/>or 60s clips?"}',
+        '        DEC_CAP{"Captions: auto<br/>or styled?"}',
+        '',
+        '        PUBLISH --> RSS_OUT',
+        '        PUBLISH --> YOUTUBE',
+        '        PUBLISH --> SOCIAL',
+        '        PUBLISH --> PUBLISHED --> ANALYTICS --> INSIGHTS',
+        '        DEC_SCHED -.- PUBLISH',
+        '        DEC_CLIP -.- YOUTUBE',
+        '        DEC_CAP -.- SOCIAL',
+        '    end',
+        '',
+        '    %% ═══════════════════════════════════════════════',
+        '    %% CROSS-LANE CONNECTIONS',
+        '    %% ═══════════════════════════════════════════════',
+        '    GENSUMMARY --> SUMMARIZED',
+        '    APPROVED --> PUBLISH',
+        '    C2_QUIZ -.-> C2_FUTURE',
+        '    C3_SNIPPET -.-> C3_FUTURE',
+        '',
+        '    %% ═══════════════════════════════════════════════',
+        '    %% STYLE DEFINITIONS',
+        '    %% ═══════════════════════════════════════════════',
+        '    classDef event fill:#FED7AA,stroke:#EA580C,color:#9A3412,stroke-width:2px',
+        '    classDef command fill:#BFDBFE,stroke:#2563EB,color:#1E3A8A,stroke-width:2px',
+        '    classDef readmodel fill:#BBF7D0,stroke:#16A34A,color:#14532D,stroke-width:2px',
+        '    classDef policy fill:#E9D5FF,stroke:#9333EA,color:#581C87,stroke-width:2px',
+        '    classDef aggregate fill:#FEF08A,stroke:#CA8A04,color:#713F12,stroke-width:2px',
+        '    classDef hotspot fill:#FECACA,stroke:#DC2626,stroke-dasharray:5 5,color:#991B1B,stroke-width:2px',
+        '    classDef external fill:#E5E7EB,stroke:#6B7280,color:#374151,stroke-width:2px',
+        '    classDef gate fill:#BFDBFE,stroke:#4682B4,stroke-width:4px,color:#1E3A5F',
+        '    classDef c2branch fill:#FECDD3,stroke:#E11D48,color:#881337,stroke-width:2px',
+        '    classDef c3branch fill:#FDE68A,stroke:#B45309,color:#78350F,stroke-width:2px',
+        '    classDef decision fill:#FEF3C7,stroke:#F59E0B,color:#92400E,stroke-width:2px',
+        '',
+        '    %% ═══════════════════════════════════════════════',
+        '    %% STYLE ASSIGNMENTS',
+        '    %% ═══════════════════════════════════════════════',
+        '',
+        '    %% Events (orange)',
+        '    class INGESTED,VALIDATED,SCORED,SELECTED,SUMMARIZED,SCRIPTREADY,ASSEMBLED,APPROVED,PUBLISHED,INSIGHTS event',
+        '',
+        '    %% Commands (blue)',
+        '    class INGEST,SCORE,GENSUMMARY,FORMATSCRIPT,VOICE,PUBLISH command',
+        '',
+        '    %% Read Models (green)',
+        '    class CORPUS,RANKED,PREVIEW readmodel',
+        '',
+        '    %% Policies (purple)',
+        '    class VALIDATE,ASSEMBLE,ANALYTICS policy',
+        '',
+        '    %% Aggregates (yellow)',
+        '    class PERSONA aggregate',
+        '',
+        '    %% Hotspots (red dashed)',
+        '    class HS_TASTE,HS_DASH,HS_VOICE hotspot',
+        '',
+        '    %% External Systems (grey)',
+        '    class RSS,RSS_OUT,YOUTUBE,SOCIAL external',
+        '',
+        '    %% Human Gates (steel blue, thick border)',
+        '    class GATE1,GATE2 gate',
+        '',
+        '    %% C2 Branches (coral)',
+        '    class C2_QUIZ,C2_FUTURE c2branch',
+        '',
+        '    %% C3 Branches (gold)',
+        '    class C3_SNIPPET,C3_FUTURE c3branch',
+        '',
+        '    %% Decisions (amber diamond)',
+        '    class DEC_SCHED,DEC_CLIP,DEC_CAP decision'
+    ];
+    var mermaidCode = mc.join('\n');
+
+    document.getElementById('mermaid-source').textContent = mermaidCode;
+
+    var modal = document.getElementById('mermaid-modal');
+    var panel = modal.querySelector('.mermaid-panel');
+    var renderDiv = document.getElementById('mermaid-render');
+    var codeBlock = document.getElementById('mermaid-code-block');
+    var toggleBtn = document.getElementById('mermaid-toggle-src');
+    var rendered = false;
+
+    function closeModal() { modal.style.display = 'none'; rendered = false; renderDiv.innerHTML = ''; }
+
+    document.getElementById('mermaid-close').addEventListener('click', closeModal);
+
+    modal.addEventListener('click', function(e) {
+        if (!panel.contains(e.target)) closeModal();
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal.style.display === 'flex') closeModal();
+    });
+
+    document.getElementById('mermaid-copy').addEventListener('click', function() {
+        navigator.clipboard.writeText(mermaidCode).then(function() {
+            var btn = document.getElementById('mermaid-copy');
+            btn.textContent = 'Copied!';
+            setTimeout(function() { btn.textContent = 'Copy'; }, 1800);
+        });
+    });
+
+    // Toggle between rendered diagram and source code
+    toggleBtn.addEventListener('click', function() {
+        if (codeBlock.style.display === 'none') {
+            codeBlock.style.display = '';
+            renderDiv.style.display = 'none';
+            toggleBtn.textContent = 'View Diagram';
+        } else {
+            codeBlock.style.display = 'none';
+            renderDiv.style.display = '';
+            toggleBtn.textContent = 'View Source';
+        }
+    });
+
+    // Render Mermaid diagram when modal opens
+    var origOpen = modal.style.__proto__;
+    var observer = new MutationObserver(function(mutations) {
+        if (modal.style.display === 'flex' && !rendered && modal.getAttribute('data-user-opened')) {
+            rendered = true;
+            if (window.mermaid) {
+                window.mermaid.render('mermaid-svg', mermaidCode).then(function(result) {
+                    renderDiv.innerHTML = result.svg;
+                    // Make SVG responsive
+                    var svg = renderDiv.querySelector('svg');
+                    if (svg) {
+                        svg.style.maxWidth = '100%';
+                        svg.style.height = 'auto';
+                    }
+                }).catch(function(err) {
+                    renderDiv.innerHTML = '<p style="color:rgba(239,68,68,0.8);">Mermaid render error: ' + err.message + '</p>';
+                });
+            }
+        }
+    });
+    observer.observe(modal, { attributes: true, attributeFilter: ['style'] });
+})();
+</script>
+
+<script>
+// Zoom controls for diagram
+function zoomDiagram(btn, factor) {
+    var wrap = btn.closest('.diagram-wrap') || document.getElementById('diagram-wrap');
+    var inner = wrap.querySelector('.diagram-inner');
+    var svg = inner.querySelector('svg');
+    if (!svg) return;
+    var current = parseFloat(svg.dataset.zoom || '1');
+    var next = Math.min(Math.max(current * factor, 0.3), 5);
+    svg.dataset.zoom = next;
+    svg.style.transform = 'scale(' + next + ')';
+    svg.style.transformOrigin = 'top center';
+    wrap.classList.toggle('is-zoomed', next > 1);
 }
+function resetZoom(btn) {
+    var wrap = btn.closest('.diagram-wrap') || document.getElementById('diagram-wrap');
+    var inner = wrap.querySelector('.diagram-inner');
+    var svg = inner.querySelector('svg');
+    if (!svg) return;
+    svg.dataset.zoom = '1';
+    svg.style.transform = 'scale(1)';
+    wrap.classList.remove('is-zoomed');
+}
+(function() {
+    var wrap = document.getElementById('diagram-wrap');
+    var inner = document.getElementById('diagram-inner');
+    // Ctrl/Cmd + scroll to zoom
+    inner.addEventListener('wheel', function(e) {
+        if (!e.ctrlKey && !e.metaKey) return;
+        e.preventDefault();
+        var svg = inner.querySelector('svg');
+        if (!svg) return;
+        var current = parseFloat(svg.dataset.zoom || '1');
+        var factor = e.deltaY < 0 ? 1.1 : 0.9;
+        var next = Math.min(Math.max(current * factor, 0.3), 5);
+        svg.dataset.zoom = next;
+        svg.style.transform = 'scale(' + next + ')';
+        svg.style.transformOrigin = 'top center';
+        wrap.classList.toggle('is-zoomed', next > 1);
+    }, { passive: false });
+    // Click-and-drag panning
+    var startX, startY, scrollL, scrollT;
+    inner.addEventListener('mousedown', function(e) {
+        if (e.target.closest('.zoom-controls')) return;
+        var svg = inner.querySelector('svg');
+        if (!svg || parseFloat(svg.dataset.zoom || '1') <= 1) return;
+        wrap.classList.add('is-panning');
+        startX = e.clientX; startY = e.clientY;
+        scrollL = inner.scrollLeft; scrollT = inner.scrollTop;
+    });
+    window.addEventListener('mousemove', function(e) {
+        if (!wrap.classList.contains('is-panning')) return;
+        inner.scrollLeft = scrollL - (e.clientX - startX);
+        inner.scrollTop = scrollT - (e.clientY - startY);
+    });
+    window.addEventListener('mouseup', function() { wrap.classList.remove('is-panning'); });
+})();
+</script>
+
+<script>
+// Render Mermaid diagram on page load (dark theme for on-page view)
+(function() {
+    var darkDiagram = [
+        '%%{init: {"flowchart": {"subGraphTitleMargin": {"top": 10, "bottom": 10}, "defaultRenderer": "elk", "nodeSpacing": 30, "rankSpacing": 50}} }%%',
+        'flowchart TD',
+        '',
+        '    subgraph L1["Content Pipeline"]',
+        '        direction TB',
+        '        RSS["🟢 RSS Feeds & APIs"]',
+        '        INGEST["🟢 Ingest Sources"]',
+        '        INGESTED["🟢 Sources Ingested"]',
+        '        VALIDATE(["🟢 Auto-Validate & Dedup"])',
+        '        VALIDATED["🟢 Content Validated"]',
+        '        SCORE["🟢 Score with Persona"]',
+        '        SCORED["🟢 Content Scored"]',
+        '        GATE1["🟢 Brett\'s Gate 1<br/>Topic Selection & Curation"]',
+        '        SELECTED["🟢 Topics Selected"]',
+        '        GENSUMMARY["🟢 Generate Summary"]',
+        '        CORPUS["🟢 Validated Corpus"]',
+        '        RANKED["🟢 Ranked Feed"]',
+        '        PERSONA["🟢 Persona Profile"]',
+        '        HS_TASTE["🟢 How do we encode<br/>Brett\'s taste?"]',
+        '        HS_DASH["🟢 Dashboard or<br/>WhatsApp?"]',
+        '',
+        '        RSS --> INGEST --> INGESTED --> VALIDATE --> VALIDATED --> SCORE',
+        '        SCORE --> SCORED --> GATE1 --> SELECTED --> GENSUMMARY',
+        '        VALIDATED --> CORPUS',
+        '        SCORE --> PERSONA',
+        '        SCORED --> RANKED',
+        '        HS_TASTE -.- SCORE',
+        '        HS_DASH -.- GATE1',
+        '    end',
+        '',
+        '    subgraph L2["  Production Pipeline  "]',
+        '        direction TB',
+        '        SUMMARIZED["🟡 Summary Generated"]',
+        '        FORMATSCRIPT["🟡 Format Script"]',
+        '        SCRIPTREADY["🟡 Script Ready"]',
+        '        VOICE["🟡 Record / Clone Voice"]',
+        '        ASSEMBLE(["🟡 Auto-Assemble Episode"])',
+        '        ASSEMBLED["🟡 Episode Assembled"]',
+        '        GATE2["🟡 Brett\'s Gate 2<br/>Final Production Review"]',
+        '        APPROVED["🟡 Episode Approved"]',
+        '        C3_SNIPPET["🔴 C3: Generate Snippets"]',
+        '        C2_QUIZ["🔴 C2: Generate Quiz"]',
+        '        PREVIEW["🟡 Episode Preview"]',
+        '        HS_VOICE["🟡 Brett records or<br/>AI clone?"]',
+        '',
+        '        SUMMARIZED --> FORMATSCRIPT --> SCRIPTREADY --> VOICE --> ASSEMBLE --> ASSEMBLED --> GATE2 --> APPROVED',
+        '        SUMMARIZED --> C3_SNIPPET',
+        '        SCRIPTREADY --> C2_QUIZ',
+        '        ASSEMBLED --> PREVIEW',
+        '        HS_VOICE -.- VOICE',
+        '    end',
+        '',
+        '    subgraph L3["  Distribution & Intelligence  "]',
+        '        direction TB',
+        '        PUBLISH["🟡 Publish to Platforms"]',
+        '        RSS_OUT["🟡 Podcast RSS"]',
+        '        YOUTUBE["🟡 YouTube"]',
+        '        SOCIAL["🟡 Social Platforms"]',
+        '        PUBLISHED["🟡 Content Published"]',
+        '        ANALYTICS(["🔴 Track Analytics"])',
+        '        INSIGHTS["🔴 Insights Generated"]',
+        '        C2_FUTURE["🔴 C2: Quiz Engagement"]',
+        '        C3_FUTURE["🔴 C3: Knowledge Cards"]',
+        '        DEC_SCHED{"🟡 Schedule: fixed<br/>or quality-driven?"}',
+        '        DEC_CLIP{"🟡 Video: 30s<br/>or 60s clips?"}',
+        '        DEC_CAP{"🟡 Captions: auto<br/>or styled?"}',
+        '',
+        '        PUBLISH --> RSS_OUT',
+        '        PUBLISH --> YOUTUBE',
+        '        PUBLISH --> SOCIAL',
+        '        PUBLISH --> PUBLISHED --> ANALYTICS --> INSIGHTS',
+        '        DEC_SCHED -.- PUBLISH',
+        '        DEC_CLIP -.- YOUTUBE',
+        '        DEC_CAP -.- SOCIAL',
+        '    end',
+        '',
+        '    GENSUMMARY --> SUMMARIZED',
+        '    APPROVED --> PUBLISH',
+        '    C2_QUIZ -.-> C2_FUTURE',
+        '    C3_SNIPPET -.-> C3_FUTURE',
+        '',
+        '    classDef event fill:#2a1a0a,stroke:#F97316,color:#F97316,stroke-width:2px',
+        '    classDef command fill:#0d1525,stroke:#3B82F6,color:#3B82F6,stroke-width:2px',
+        '    classDef readmodel fill:#0d1f12,stroke:#22C55E,color:#22C55E,stroke-width:2px',
+        '    classDef policy fill:#1c1028,stroke:#A855F7,color:#A855F7,stroke-width:2px',
+        '    classDef aggregate fill:#1f1a08,stroke:#EAB308,color:#EAB308,stroke-width:2px',
+        '    classDef hotspot fill:#1f0d0d,stroke:#EF4444,stroke-dasharray:5 5,color:#EF4444,stroke-width:2px',
+        '    classDef external fill:#1a1a1e,stroke:#6B7280,color:#9CA3AF,stroke-width:2px',
+        '    classDef gate fill:#0d1a25,stroke:#4682B4,stroke-width:4px,color:#4682B4',
+        '    classDef c2branch fill:#1f0d0d,stroke:#FF6B6B,color:#FF6B6B,stroke-width:2px',
+        '    classDef c3branch fill:#1f1a0d,stroke:#C9A96E,color:#C9A96E,stroke-width:2px',
+        '    classDef decision fill:#1f1508,stroke:#F59E0B,color:#F59E0B,stroke-width:2px',
+        '',
+        '    class INGESTED,VALIDATED,SCORED,SELECTED,SUMMARIZED,SCRIPTREADY,ASSEMBLED,APPROVED,PUBLISHED,INSIGHTS event',
+        '    class INGEST,SCORE,GENSUMMARY,FORMATSCRIPT,VOICE,PUBLISH command',
+        '    class CORPUS,RANKED,PREVIEW readmodel',
+        '    class VALIDATE,ASSEMBLE,ANALYTICS policy',
+        '    class PERSONA aggregate',
+        '    class HS_TASTE,HS_DASH,HS_VOICE hotspot',
+        '    class RSS,RSS_OUT,YOUTUBE,SOCIAL external',
+        '    class GATE1,GATE2 gate',
+        '    class C2_QUIZ,C2_FUTURE c2branch',
+        '    class C3_SNIPPET,C3_FUTURE c3branch',
+        '    class DEC_SCHED,DEC_CLIP,DEC_CAP decision'
+    ].join('\n');
+
+    function renderDiagram() {
+        if (!window.mermaid) {
+            setTimeout(renderDiagram, 200);
+            return;
+        }
+        var container = document.getElementById('diagram-inner');
+        window.mermaid.render('main-diagram-svg', darkDiagram).then(function(result) {
+            container.innerHTML = result.svg;
+            var svg = container.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.style.height = 'auto';
+                svg.dataset.zoom = '1';
+            }
+        }).catch(function(err) {
+            container.innerHTML = '<div class="diagram-loading" style="animation:none;">' +
+                'Diagram render error: ' + err.message + '</div>';
+        });
+    }
+    // Wait for module script to load mermaid
+    if (document.readyState === 'complete') {
+        setTimeout(renderDiagram, 500);
+    } else {
+        window.addEventListener('load', function() { setTimeout(renderDiagram, 300); });
+    }
+})();
 </script>
 
 </body>

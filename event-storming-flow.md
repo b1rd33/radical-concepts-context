@@ -104,10 +104,17 @@ flowchart TD
         C2_FUTURE["C2: Quiz Engagement"]
         C3_FUTURE["C3: Knowledge Cards"]
 
+        DEC_SCHED{"Schedule: fixed<br/>or quality-driven?"}
+        DEC_CLIP{"Video: 30s<br/>or 60s clips?"}
+        DEC_CAP{"Captions: auto<br/>or styled?"}
+
         PUBLISH --> RSS_OUT
         PUBLISH --> YOUTUBE
         PUBLISH --> SOCIAL
         PUBLISH --> PUBLISHED --> ANALYTICS --> INSIGHTS
+        DEC_SCHED -.- PUBLISH
+        DEC_CLIP -.- YOUTUBE
+        DEC_CAP -.- SOCIAL
     end
 
     %% ═══════════════════════════════════════════════
@@ -127,16 +134,17 @@ flowchart TD
     %% ═══════════════════════════════════════════════
     %% STYLE DEFINITIONS
     %% ═══════════════════════════════════════════════
-    classDef event fill:rgba(249,115,22,0.2),stroke:#F97316,color:#F97316
-    classDef command fill:rgba(59,130,246,0.15),stroke:#3B82F6,color:#3B82F6
-    classDef readmodel fill:rgba(34,197,94,0.15),stroke:#22C55E,color:#22C55E
-    classDef policy fill:rgba(168,85,247,0.15),stroke:#A855F7,color:#A855F7
-    classDef aggregate fill:rgba(234,179,8,0.15),stroke:#EAB308,color:#EAB308
-    classDef hotspot fill:rgba(239,68,68,0.1),stroke:#EF4444,stroke-dasharray:5 5,color:#EF4444
-    classDef external fill:rgba(107,114,128,0.15),stroke:#6B7280,color:#6B7280
-    classDef gate fill:rgba(70,130,180,0.12),stroke:#4682B4,stroke-width:3px,color:#4682B4
-    classDef c2branch fill:rgba(255,107,107,0.1),stroke:#FF6B6B,color:#FF6B6B
-    classDef c3branch fill:rgba(201,169,110,0.1),stroke:#C9A96E,color:#C9A96E
+    classDef event fill:#FED7AA,stroke:#EA580C,color:#9A3412,stroke-width:2px
+    classDef command fill:#BFDBFE,stroke:#2563EB,color:#1E3A8A,stroke-width:2px
+    classDef readmodel fill:#BBF7D0,stroke:#16A34A,color:#14532D,stroke-width:2px
+    classDef policy fill:#E9D5FF,stroke:#9333EA,color:#581C87,stroke-width:2px
+    classDef aggregate fill:#FEF08A,stroke:#CA8A04,color:#713F12,stroke-width:2px
+    classDef hotspot fill:#FECACA,stroke:#DC2626,stroke-dasharray:5 5,color:#991B1B,stroke-width:2px
+    classDef external fill:#E5E7EB,stroke:#6B7280,color:#374151,stroke-width:2px
+    classDef gate fill:#BFDBFE,stroke:#4682B4,stroke-width:4px,color:#1E3A5F
+    classDef c2branch fill:#FECDD3,stroke:#E11D48,color:#881337,stroke-width:2px
+    classDef c3branch fill:#FDE68A,stroke:#B45309,color:#78350F,stroke-width:2px
+    classDef decision fill:#FEF3C7,stroke:#F59E0B,color:#92400E,stroke-width:2px
 
     %% ═══════════════════════════════════════════════
     %% STYLE ASSIGNMENTS
@@ -171,6 +179,9 @@ flowchart TD
 
     %% C3 Branches (gold)
     class C3_SNIPPET,C3_FUTURE c3branch
+
+    %% Decisions (amber diamond)
+    class DEC_SCHED,DEC_CLIP,DEC_CAP decision
 ```
 
 ## Node Type Legend
@@ -185,5 +196,6 @@ flowchart TD
 | **Hotspot** | Red (dashed) | Open question, risk, or unresolved decision |
 | **External System** | Grey | System outside the domain boundary |
 | **Human Gate** | Steel Blue (thick) | Brett's manual approval checkpoint |
+| **Decision** | Amber (diamond) | Open architectural or product decision |
 | **C2 Branch** | Coral | Curiosity Game expansion path (future) |
 | **C3 Branch** | Gold | Weekly Deep Dive expansion path (future) |
