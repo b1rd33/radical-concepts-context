@@ -110,18 +110,32 @@
             backdrop-filter: blur(14px);
             border-bottom: 1px solid rgba(255,255,255,0.06);
         }
-        .header-bar a {
-            font-size: var(--text-sm);
-            color: rgba(255,255,255,0.38);
-            transition: color 0.2s;
+        .header-bar a.nav-link {
+            font-size: var(--text-xs);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #fff;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 999px;
+            padding: 0.4rem 1rem;
+            transition: background 0.2s, transform 0.2s;
         }
-        .header-bar a:hover { color: rgba(255,255,255,0.8); }
-        .header-brand {
-            font-family: 'DM Serif Display', serif;
-            font-size: var(--text-lg);
-            color: rgba(255,255,255,0.6);
-            letter-spacing: 0.02em;
+        .header-bar a.nav-link:hover { background: rgba(255,255,255,0.2); transform: translateY(-1px); }
+        .client-logo {
+            display: flex; align-items: center; gap: 0.5rem;
+            font-weight: 600; font-size: var(--text-sm);
+            color: rgba(255,255,255,0.85);
         }
+        .logo-mark {
+            width: 34px; height: 34px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.72rem; font-weight: 700;
+        }
+        .nav-links { display: flex; gap: 0.75rem; align-items: center; }
 
         /* ── HERO ── */
         .hero {
@@ -440,6 +454,11 @@
             border-top: 1px solid rgba(255,255,255,0.03);
         }
 
+        @media (max-width: 900px) {
+            .header-bar { flex-wrap: wrap; gap: 0.75rem; padding: 0.75rem 1rem; }
+            .nav-links { gap: 0.5rem; }
+        }
+
         @page { margin: 0.5cm; size: A2 landscape; }
         @media print {
             -webkit-print-color-adjust: exact; print-color-adjust: exact;
@@ -657,14 +676,12 @@
 <div class="canvas-bg"></div>
 
 <div class="header-bar">
-    <a href="deliverables/index.html">&larr; Dashboard</a>
-    <div style="display:flex;gap:1.5rem;align-items:center;">
-        <a href="radical-concepts-all-pitches.html">Pitches</a>
-        <a href="radical-concepts-modular-platform.html">Platform</a>
-    </div>
-    <div class="header-brand">Radical Concepts</div>
-    <div style="display:flex;gap:1.5rem;align-items:center;">
-        <a href="#" id="mermaid-btn" onclick="var m=document.getElementById('mermaid-modal');m.setAttribute('data-user-opened','1');m.style.display='flex';return false;">Mermaid</a>
+    <a href="deliverables/index.html" class="nav-link">&larr; Dashboard</a>
+    <div class="client-logo"><div class="logo-mark">RC</div> Radical Concepts</div>
+    <div class="nav-links">
+        <a href="radical-concepts-all-pitches.html" class="nav-link">Pitches</a>
+        <a href="radical-concepts-modular-platform.html" class="nav-link">Platform</a>
+        <a href="#" class="nav-link" id="mermaid-btn" onclick="var m=document.getElementById('mermaid-modal');m.setAttribute('data-user-opened','1');m.style.display='flex';return false;">Mermaid</a>
     </div>
 </div>
 
