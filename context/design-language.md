@@ -36,7 +36,7 @@ All use `clamp()` for fluid responsive sizing — no fixed px, no breakpoints fo
 |---------|---------|-------------|
 | C1 — Daily Podcast | `#4682B4` (Steel Blue) | `#2D6A9F` |
 | C2 — Curiosity Game | `#FF6B6B` (Coral) | `#E85555` |
-| C3 — Weekly Deep Dive | `#C9A96E` (Gold) | `#C9A96E` |
+| C3 — Dinner Table Drop | `#C9A96E` (Gold) | `#C9A96E` |
 
 ## Glassmorphism Cards (on dark backgrounds)
 ```css

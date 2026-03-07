@@ -27,7 +27,7 @@ SHARED FOUNDATION (all paths):
 
 PATH A — Daily Podcast (C1, Sprint 2-3): Script → Record → Distribute ← GREEN
 PATH B — Curiosity Game (C2, Phase 2): Quiz → Streaks → Share ← ORANGE
-PATH C — Weekly Deep Dive (C3, Phase 2): Mon/Wed/Fri → Spaced Repetition ← ORANGE
+PATH C — Dinner Table Drop (C3, Phase 2): Mon/Wed/Fri → Spaced Repetition ← ORANGE
 ```
 
 ## Key Decisions (Active)
