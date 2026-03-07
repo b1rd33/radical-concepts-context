@@ -15,7 +15,7 @@ Full architecture flow from source to audience. Domain-Driven Design notation wi
 %% External       (grey)    — External system
 %% Human Gate     (steel)   — Brett's manual approval
 %% C2 Branch      (coral)   — Curiosity Game path
-%% C3 Branch      (gold)    — Weekly Deep Dive path
+%% C3 Branch      (gold)    — Dinner Table Drop path
 %% ──────────────────────────────────────────────────
 
 flowchart TD
@@ -69,6 +69,7 @@ flowchart TD
         ASSEMBLED["Episode Assembled"]
         GATE2["Brett's Gate 2\nFinal Production Review"]
         APPROVED["Episode Approved"]
+        GENCLIPS["Generate Clips"]
 
         C3_SNIPPET["C3: Generate Snippets"]
         C2_QUIZ["C2: Generate Quiz"]
@@ -121,7 +122,8 @@ flowchart TD
     %% CROSS-LANE CONNECTIONS
     %% ═══════════════════════════════════════════════
     GENSUMMARY --> SUMMARIZED
-    APPROVED --> PUBLISH
+    APPROVED --> GENCLIPS
+    GENCLIPS --> PUBLISH
     C2_QUIZ -.-> C2_FUTURE
     C3_SNIPPET -.-> C3_FUTURE
 
@@ -154,7 +156,7 @@ flowchart TD
     class INGESTED,VALIDATED,SCORED,SELECTED,SUMMARIZED,SCRIPTREADY,ASSEMBLED,APPROVED,PUBLISHED,INSIGHTS event
 
     %% Commands (blue)
-    class INGEST,SCORE,GENSUMMARY,FORMATSCRIPT,VOICE,PUBLISH command
+    class INGEST,SCORE,GENSUMMARY,FORMATSCRIPT,VOICE,GENCLIPS,PUBLISH command
 
     %% Read Models (green)
     class CORPUS,RANKED,PREVIEW readmodel
@@ -198,4 +200,4 @@ flowchart TD
 | **Human Gate** | Steel Blue (thick) | Brett's manual approval checkpoint |
 | **Decision** | Amber (diamond) | Open architectural or product decision |
 | **C2 Branch** | Coral | Curiosity Game expansion path (future) |
-| **C3 Branch** | Gold | Weekly Deep Dive expansion path (future) |
+| **C3 Branch** | Gold | Dinner Table Drop expansion path (future) |
