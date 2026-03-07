@@ -127,6 +127,7 @@
         .legend-swatch--hotspot { background: rgba(239,68,68,0.1); border: 1.5px dashed rgba(239,68,68,0.5); }
         .legend-swatch--external { background: rgba(107,114,128,0.16); border: 1.5px solid rgba(107,114,128,0.42); }
         .legend-swatch--gate { background: rgba(70,130,180,0.1); border: 2px solid rgba(70,130,180,0.5); border-radius: 6px; }
+        .legend-swatch--decision { background: rgba(245,158,11,0.1); border: 2px solid rgba(245,158,11,0.5); border-radius: 3px 10px 3px 10px; }
         .legend-label { font-size: var(--text-xs); color: rgba(255,255,255,0.45); font-weight: 500; }
 
         /* Phase legend */
@@ -156,7 +157,7 @@
         .board-inner {
             position: relative;
             width: 2800px;
-            height: 3200px;
+            height: 3400px;
         }
 
         /* ── LANE LABELS ── */
@@ -290,6 +291,21 @@
             width: 210px;
         }
 
+        /* Decision: amber/orange hexagonal feel */
+        .sticky--decision {
+            background: rgba(245,158,11,0.08);
+            border: 2px solid rgba(245,158,11,0.5);
+            color: rgba(245,158,11,0.95);
+            border-radius: 4px 14px 4px 14px;
+            min-height: 80px;
+            width: 175px;
+            box-shadow: inset 0 0 12px rgba(245,158,11,0.06);
+        }
+        .sticky--decision .sticky-title::before {
+            content: '\25C6  ';
+            font-size: 10px;
+        }
+
         /* Concept branches */
         .sticky--c2 {
             border-color: rgba(255,107,107,0.4);
@@ -391,6 +407,157 @@
             .canvas-bg { display: none; }
             .header-bar { position: static; }
         }
+        /* ── Mermaid Modal ── */
+        .mermaid-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(6px);
+        }
+        .mermaid-panel {
+            position: relative;
+            max-width: 900px;
+            width: 92%;
+            max-height: 80vh;
+            overflow-y: auto;
+            background: rgba(15,18,25,0.98);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            padding: 2rem;
+        }
+        .mermaid-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.2rem;
+        }
+        .mermaid-panel-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: var(--text-xl);
+            color: rgba(255,255,255,0.85);
+        }
+        .mermaid-panel-actions {
+            display: flex;
+            gap: 0.6rem;
+            align-items: center;
+        }
+        .mermaid-copy-btn {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: rgba(255,255,255,0.55);
+            font-family: 'DM Sans', sans-serif;
+            font-size: var(--text-sm);
+            padding: 0.35rem 0.9rem;
+            border-radius: 7px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .mermaid-copy-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.8);
+        }
+        .mermaid-close-btn {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.35);
+            font-size: 1.4rem;
+            cursor: pointer;
+            padding: 0.2rem 0.5rem;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+        .mermaid-close-btn:hover { color: rgba(255,255,255,0.8); }
+        .mermaid-code {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 8px;
+            padding: 1.2rem;
+            overflow-x: auto;
+        }
+        .mermaid-code code {
+            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 12px;
+            color: rgba(255,255,255,0.7);
+            line-height: 1.6;
+            white-space: pre;
+        }
+
+        /* ── Legend toggle button ── */
+        .legend-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.35rem 0.75rem;
+            font-family: 'DM Sans', sans-serif;
+            font-size: var(--text-xs);
+            font-weight: 500;
+            color: rgba(255,255,255,0.38);
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .legend-toggle:hover { color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.07); }
+        .legend-toggle.active {
+            color: rgba(249,115,22,0.85);
+            background: rgba(249,115,22,0.1);
+            border-color: rgba(249,115,22,0.25);
+        }
+        .legend-toggle svg { width: 14px; height: 14px; }
+
+        /* ── Legend pinned state ── */
+        .legend-bar.legend-pinned,
+        .phase-bar.legend-pinned {
+            position: fixed;
+            left: 0; right: 0;
+            z-index: 99;
+            margin: 0;
+            border-radius: 0;
+            background: rgba(15,18,25,0.92);
+            backdrop-filter: blur(16px);
+            border: none;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            max-width: 100%;
+            justify-content: center;
+        }
+        .legend-bar.legend-pinned {
+            top: 56px;
+            padding: 0.9rem 2.5rem;
+        }
+        .phase-bar.legend-pinned {
+            top: 104px;
+            padding: 0.5rem 2.5rem;
+        }
+
+        /* Close button on pinned legend */
+        .legend-close {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 22px; height: 22px;
+            margin-left: 1rem;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 6px;
+            color: rgba(255,255,255,0.35);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+        .legend-close:hover { color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.1); }
+        .legend-pinned .legend-close { display: inline-flex; }
+
+        /* Spacer to prevent content jump when legend is pinned */
+        .legend-spacer { display: none; }
+        .legend-spacer.active { display: block; }
+
     </style>
 </head>
 <body>
@@ -400,6 +567,8 @@
 <div class="header-bar">
     <a href="radical-concepts-modular-platform.html">&larr; Back to Platform</a>
     <div class="header-brand">Radical Concepts</div>
+    <a href="#" id="mermaid-btn" onclick="document.getElementById('mermaid-modal').style.display='flex';return false;">Mermaid</a>
+    <button class="legend-toggle" id="legend-toggle" onclick="toggleLegend()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg> Legend</button>
     <a href="deliverables/index.html">Dashboard &rarr;</a>
 </div>
 
@@ -417,6 +586,8 @@
     <div class="legend-item"><div class="legend-swatch legend-swatch--hotspot"></div><span class="legend-label">Hotspot</span></div>
     <div class="legend-item"><div class="legend-swatch legend-swatch--external"></div><span class="legend-label">External System</span></div>
     <div class="legend-item"><div class="legend-swatch legend-swatch--gate"></div><span class="legend-label">Human Gate</span></div>
+    <div class="legend-item"><div class="legend-swatch legend-swatch--decision"></div><span class="legend-label">Decision</span></div>
+    <button class="legend-close" onclick="toggleLegend()" title="Unpin legend">&times;</button>
 </div>
 
 <div class="phase-bar">
@@ -429,6 +600,8 @@
         <span style="color:var(--c3); margin-left:0.4rem;">&bull;</span> C3
     </div>
 </div>
+
+<div class="legend-spacer" id="legend-spacer"></div>
 
 <!-- ═══════════════════════════════════════════════ -->
 <!-- THE BOARD                                       -->
@@ -449,7 +622,7 @@
         <div class="lane-tag" style="left:100px; top:2320px;">Lane 3 &mdash; Publishing &amp; Intelligence</div>
 
         <!-- SVG layer — arrows rendered by JS -->
-        <svg class="connections" id="connSvg" viewBox="0 0 2800 3200" preserveAspectRatio="xMidYMid meet">
+        <svg class="connections" id="connSvg" viewBox="0 0 2800 3400" preserveAspectRatio="xMidYMid meet">
             <defs>
                 <marker id="ah-flow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><path d="M0,0.5 L9,3.5 L0,6.5" class="arrow-head" fill="rgba(255,255,255,0.25)"/></marker>
                 <marker id="ah-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><path d="M0,0.5 L9,3.5 L0,6.5" class="arrow-head" fill="rgba(34,197,94,0.55)"/></marker>
@@ -665,13 +838,13 @@
         <div class="sticky sticky--external" id="n-youtube" style="left:120px; top:2720px; width:160px; --i:29;">
             <div class="sticky-phase" style="background:var(--phase-amber);"></div>
             <div class="sticky-title">YouTube</div>
-            <div class="sticky-detail">Full episodes + auto-generated short clips with captions.</div>
+            <div class="sticky-detail">Full episode + auto-cut clips. Duration TBD. Captions &amp; chapters auto-generated.</div>
         </div>
 
         <div class="sticky sticky--external" id="n-social" style="left:620px; top:2720px; width:170px; --i:30;">
             <div class="sticky-phase" style="background:var(--phase-amber);"></div>
             <div class="sticky-title">Social Platforms</div>
-            <div class="sticky-detail">Clips, quote cards, audiograms for X, LinkedIn, Instagram.</div>
+            <div class="sticky-detail">Platform-specific formats. Quote cards, audiograms, video clips. X, LinkedIn, Instagram.</div>
         </div>
 
         <div class="sticky sticky--event" id="n-published" style="left:380px; top:2580px; width:170px; --i:31;">
@@ -706,6 +879,34 @@
             <div class="sticky-title">C3: Knowledge Cards</div>
             <div class="sticky-detail">Spaced repetition library. Mon/Wed/Fri drip. Retention science format.</div>
             <span class="exploring-tag" style="color:var(--c3);">Future</span>
+        </div>
+
+        <!-- Clip Generation — between Approved and external systems -->
+        <div class="sticky sticky--command" id="n-clipgen" style="left:900px; top:2420px; --i:36;">
+            <div class="sticky-phase" style="background:var(--phase-amber);"></div>
+            <div class="sticky-title">Generate Clips</div>
+            <div class="sticky-detail">Cut full episode into platform-specific clips. Section markers define boundaries. 30s/60s shorts + quote cards.</div>
+        </div>
+
+        <!-- DECISION: Video clip length -->
+        <div class="sticky sticky--decision" id="n-dec-cliplen" style="left:120px; top:2900px; --i:37;">
+            <div class="sticky-phase" style="background:var(--phase-amber);"></div>
+            <div class="sticky-title">Video: 30s or 60s clips?</div>
+            <div class="sticky-detail">Short-form content length. Platform algorithms favour different durations.</div>
+        </div>
+
+        <!-- DECISION: Caption style -->
+        <div class="sticky sticky--decision" id="n-dec-captions" style="left:620px; top:2900px; --i:38;">
+            <div class="sticky-phase" style="background:var(--phase-amber);"></div>
+            <div class="sticky-title">Captions: auto or styled?</div>
+            <div class="sticky-detail">Auto-transcribed vs branded caption templates. Accessibility vs brand consistency.</div>
+        </div>
+
+        <!-- DECISION: Publishing schedule -->
+        <div class="sticky sticky--decision" id="n-dec-schedule" style="left:180px; top:2650px; --i:39;">
+            <div class="sticky-phase" style="background:var(--phase-amber);"></div>
+            <div class="sticky-title">Schedule: fixed or quality-driven?</div>
+            <div class="sticky-detail">Publish on set days vs when material is ready. Consistency vs quality trade-off.</div>
         </div>
 
     </div>
@@ -765,6 +966,7 @@
             <p>Multi-platform distribution. Zero manual work after approval.</p>
             <div class="card-events">
                 <span class="event-tag event-tag--command">Publish</span>
+                <span class="event-tag event-tag--command">Generate Clips</span>
                 <span class="event-tag event-tag--event">Content Published</span>
             </div>
         </div>
@@ -991,14 +1193,11 @@
         }
 
         // === LANE 3: Distribution ===
-        // Publish → external systems
+        // Publish → RSS (direct, no clipping needed)
         horizBezier('n-publish', 'n-rss-out', 'conn--flow', 'ah-flow');
-        vertBezier('n-publish', 'n-youtube', 'conn--flow', 'ah-flow');
 
-        var pPub2 = pos('n-publish'), pSoc = pos('n-social');
-        if (pPub2 && pSoc) {
-            addPath('M' + pPub2.r + ',' + (pPub2.b - 10) + ' C' + (pPub2.r + 80) + ',' + pPub2.b + ' ' + pSoc.x + ',' + (pSoc.y - 40) + ' ' + pSoc.x + ',' + (pSoc.y - 8), 'conn--flow', 'ah-flow');
-        }
+        // Publish → Clip Generation
+        horizBezier('n-publish', 'n-clipgen', 'conn--amber', 'ah-amber');
 
         // Publish → Content Published (the event that follows publishing)
         vertBezier('n-publish', 'n-published', 'conn--amber', 'ah-amber');
@@ -1019,6 +1218,38 @@
         var pC3s = pos('n-c3-snippet'), pC3f = pos('n-c3-future');
         if (pC3s && pC3f) {
             addPath('M' + pC3s.cx + ',' + pC3s.b + ' C' + pC3s.cx + ',' + (pC3s.b + 120) + ' ' + pC3f.cx + ',' + (pC3f.y - 120) + ' ' + pC3f.cx + ',' + (pC3f.y - 8), 'conn--c3', 'ah-c3');
+        }
+
+        // === Clip Generation connections ===
+        // Clip Generation → YouTube (down-left)
+        var pClip = pos('n-clipgen'), pYt = pos('n-youtube');
+        if (pClip && pYt) {
+            addPath('M' + pClip.x + ',' + pClip.b + ' C' + pClip.x + ',' + (pClip.b + 80) + ' ' + pYt.r + ',' + (pYt.y - 60) + ' ' + pYt.r + ',' + (pYt.y - 8), 'conn--flow', 'ah-flow');
+        }
+
+        // Clip Generation → Social (down)
+        var pSoc2 = pos('n-social');
+        if (pClip && pSoc2) {
+            addPath('M' + pClip.cx + ',' + pClip.b + ' C' + pClip.cx + ',' + (pClip.b + 80) + ' ' + pSoc2.cx + ',' + (pSoc2.y - 60) + ' ' + pSoc2.cx + ',' + (pSoc2.y - 8), 'conn--flow', 'ah-flow');
+        }
+
+        // === Decision hotspot connections (dashed) ===
+        // Decision: clip length → YouTube
+        var pDecLen = pos('n-dec-cliplen'), pYtD = pos('n-youtube');
+        if (pDecLen && pYtD) {
+            addPath('M' + pDecLen.cx + ',' + pDecLen.y + ' L' + pYtD.cx + ',' + pYtD.b, 'conn--hotspot', null);
+        }
+
+        // Decision: captions → Social
+        var pDecCap = pos('n-dec-captions'), pSocD = pos('n-social');
+        if (pDecCap && pSocD) {
+            addPath('M' + pDecCap.cx + ',' + pDecCap.y + ' L' + pSocD.cx + ',' + pSocD.b, 'conn--hotspot', null);
+        }
+
+        // Decision: schedule → Publish
+        var pDecSch = pos('n-dec-schedule'), pPubD = pos('n-publish');
+        if (pDecSch && pPubD) {
+            addPath('M' + pDecSch.cx + ',' + pDecSch.y + ' L' + pPubD.cx + ',' + pPubD.b, 'conn--hotspot', null);
         }
 
         // === FEEDBACK LOOPS ===
@@ -1047,6 +1278,22 @@
     requestAnimationFrame(function() { requestAnimationFrame(draw); });
     window.addEventListener('resize', draw);
 })();
+</script>
+
+<script>
+function toggleLegend() {
+    var lb = document.querySelector('.legend-bar');
+    var pb = document.querySelector('.phase-bar');
+    var btn = document.getElementById('legend-toggle');
+    var spacer = document.getElementById('legend-spacer');
+    var pinned = lb.classList.toggle('legend-pinned');
+    pb.classList.toggle('legend-pinned');
+    btn.classList.toggle('active');
+    spacer.classList.toggle('active');
+    if (pinned) {
+        spacer.style.height = (lb.offsetHeight + pb.offsetHeight) + 'px';
+    }
+}
 </script>
 
 </body>
