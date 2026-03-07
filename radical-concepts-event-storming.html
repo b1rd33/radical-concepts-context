@@ -32,8 +32,8 @@
                 tertiaryColor: '#1c1028',
                 tertiaryBorderColor: '#A855F7',
                 tertiaryTextColor: '#A855F7',
-                background: '#0f1219',
-                mainBkg: '#0f1219',
+                background: '#111827',
+                mainBkg: '#111827',
                 nodeBorder: 'rgba(255,255,255,0.15)',
                 clusterBkg: 'rgba(255,255,255,0.03)',
                 clusterBorder: 'rgba(255,255,255,0.08)',
@@ -78,7 +78,7 @@
 
         body {
             font-family: 'DM Sans', sans-serif;
-            background: #0f1219;
+            background: #111827;
             color: rgba(255,255,255,0.85);
             -webkit-font-smoothing: antialiased;
             min-height: 100vh;
@@ -106,7 +106,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 1rem 2rem;
-            background: rgba(15,18,25,0.94);
+            background: rgba(17,24,39,0.94);
             backdrop-filter: blur(14px);
             border-bottom: 1px solid rgba(255,255,255,0.06);
         }
@@ -657,10 +657,15 @@
 <div class="canvas-bg"></div>
 
 <div class="header-bar">
-    <a href="radical-concepts-modular-platform.html">&larr; Back to Platform</a>
+    <a href="deliverables/index.html">&larr; Dashboard</a>
+    <div style="display:flex;gap:1.5rem;align-items:center;">
+        <a href="radical-concepts-all-pitches.html">Pitches</a>
+        <a href="radical-concepts-modular-platform.html">Platform</a>
+    </div>
     <div class="header-brand">Radical Concepts</div>
-    <a href="#" id="mermaid-btn" onclick="var m=document.getElementById('mermaid-modal');m.setAttribute('data-user-opened','1');m.style.display='flex';return false;">Mermaid</a>
-    <a href="deliverables/index.html">Dashboard &rarr;</a>
+    <div style="display:flex;gap:1.5rem;align-items:center;">
+        <a href="#" id="mermaid-btn" onclick="var m=document.getElementById('mermaid-modal');m.setAttribute('data-user-opened','1');m.style.display='flex';return false;">Mermaid</a>
+    </div>
 </div>
 
 <div class="hero">
