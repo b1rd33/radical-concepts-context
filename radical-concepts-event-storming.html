@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radical Concepts &mdash; Event Storming</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --text-xs: clamp(0.65rem, 0.55rem + 0.25vw, 0.78rem);
+            --text-sm: clamp(0.78rem, 0.65rem + 0.35vw, 0.92rem);
+            --text-base: clamp(0.9rem, 0.75rem + 0.4vw, 1.1rem);
+            --text-lg: clamp(1rem, 0.8rem + 0.55vw, 1.3rem);
+            --text-xl: clamp(1.1rem, 0.85rem + 0.7vw, 1.5rem);
+            --text-2xl: clamp(1.6rem, 1.2rem + 1.2vw, 2.5rem);
+            --text-3xl: clamp(2rem, 1.4rem + 1.8vw, 3.2rem);
+            --space-slide: clamp(2.5rem, 2rem + 3vw, 6rem);
+
+            /* DDD Event Storming palette */
+            --es-event: #F97316;
+            --es-command: #3B82F6;
+            --es-readmodel: #22C55E;
+            --es-policy: #A855F7;
+            --es-hotspot: #EF4444;
+            --es-external: #6B7280;
+            --es-aggregate: #EAB308;
+
+            /* Phase colors */
+            --phase-green: #22c55e;
+            --phase-amber: #eab308;
+            --phase-red: #ef4444;
+
+            /* Concept colors */
+            --c1: #4682B4;
+            --c2: #FF6B6B;
+            --c3: #C9A96E;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #0f1219;
+            color: rgba(255,255,255,0.85);
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+            overflow-wrap: break-word;
+        }
+
+        a { color: inherit; text-decoration: none; }
+
+        /* ── Dot grid background ── */
+        .canvas-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background-image: radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 28px 28px;
+            pointer-events: none;
+        }
+
+        /* ── HEADER ── */
+        .header-bar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: rgba(15,18,25,0.94);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .header-bar a {
+            font-size: var(--text-sm);
+            color: rgba(255,255,255,0.38);
+            transition: color 0.2s;
+        }
+        .header-bar a:hover { color: rgba(255,255,255,0.8); }
+        .header-brand {
+            font-family: 'DM Serif Display', serif;
+            font-size: var(--text-lg);
+            color: rgba(255,255,255,0.6);
+            letter-spacing: 0.02em;
+        }
+
+        /* ── HERO ── */
+        .hero {
+            position: relative; z-index: 1;
+            padding: clamp(2.5rem, 2rem + 2vw, 4.5rem) 2rem clamp(1.5rem, 1rem + 1vw, 2.5rem);
+            text-align: center;
+        }
+        .hero h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: var(--text-3xl);
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 0.6rem;
+        }
+        .hero p {
+            font-size: var(--text-base);
+            color: rgba(255,255,255,0.38);
+            max-width: 680px;
+            margin: 0 auto;
+            line-height: 1.65;
+        }
+
+        /* ── LEGEND ── */
+        .legend-bar {
+            position: relative; z-index: 1;
+            display: flex; flex-wrap: wrap;
+            gap: 1rem 2rem;
+            justify-content: center;
+            padding: 1.1rem 2rem;
+            margin: 0 2rem 0.75rem;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 14px;
+        }
+        .legend-item { display: flex; align-items: center; gap: 0.45rem; }
+        .legend-swatch { width: 24px; height: 17px; border-radius: 4px; flex-shrink: 0; }
+        .legend-swatch--event { background: rgba(249,115,22,0.2); border: 1.5px solid rgba(249,115,22,0.5); }
+        .legend-swatch--command { background: rgba(59,130,246,0.16); border: 1.5px solid rgba(59,130,246,0.42); }
+        .legend-swatch--readmodel { background: rgba(34,197,94,0.16); border: 1.5px solid rgba(34,197,94,0.42); }
+        .legend-swatch--policy { background: rgba(168,85,247,0.16); border: 1.5px solid rgba(168,85,247,0.42); }
+        .legend-swatch--aggregate { background: rgba(234,179,8,0.16); border: 1.5px solid rgba(234,179,8,0.42); }
+        .legend-swatch--hotspot { background: rgba(239,68,68,0.1); border: 1.5px dashed rgba(239,68,68,0.5); }
+        .legend-swatch--external { background: rgba(107,114,128,0.16); border: 1.5px solid rgba(107,114,128,0.42); }
+        .legend-swatch--gate { background: rgba(70,130,180,0.1); border: 2px solid rgba(70,130,180,0.5); border-radius: 6px; }
+        .legend-label { font-size: var(--text-xs); color: rgba(255,255,255,0.45); font-weight: 500; }
+
+        /* Phase legend */
+        .phase-bar {
+            position: relative; z-index: 1;
+            display: flex; flex-wrap: wrap;
+            gap: 0.6rem 1.5rem;
+            justify-content: center;
+            padding: 0.6rem 2rem;
+            margin: 0 2rem 1.5rem;
+        }
+        .phase-item { display: flex; align-items: center; gap: 0.35rem; font-size: var(--text-xs); color: rgba(255,255,255,0.32); }
+        .phase-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .phase-dot--green { background: var(--phase-green); }
+        .phase-dot--amber { background: var(--phase-amber); }
+        .phase-dot--red { background: var(--phase-red); }
+
+        /* ── THE BOARD ── */
+        .board {
+            position: relative; z-index: 1;
+            overflow: auto;
+            margin: 0 0.75rem 3rem;
+            border: 1px solid rgba(255,255,255,0.035);
+            border-radius: 14px;
+            background: rgba(255,255,255,0.008);
+        }
+        .board-inner {
+            position: relative;
+            width: 2800px;
+            height: 3200px;
+        }
+
+        /* ── LANE LABELS ── */
+        .lane-label {
+            position: absolute;
+            font-family: 'DM Serif Display', serif;
+            font-size: 14px;
+            color: rgba(255,255,255,0.18);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+        }
+        .lane-divider {
+            position: absolute;
+            left: 60px; right: 40px;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.03) 100%);
+        }
+        .lane-tag {
+            position: absolute;
+            font-size: 11px; font-weight: 600;
+            letter-spacing: 0.12em; text-transform: uppercase;
+            color: rgba(255,255,255,0.12);
+            padding: 5px 16px;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 6px;
+            background: rgba(255,255,255,0.02);
+        }
+
+        /* ── STICKY NOTES ── */
+        .sticky {
+            position: absolute;
+            width: 190px;
+            min-height: 90px;
+            padding: 14px 16px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            line-height: 1.45;
+            cursor: default;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            z-index: 2;
+            animation: fadeUp 0.5s ease-out both;
+            animation-delay: calc(var(--i, 0) * 0.04s);
+        }
+        .sticky:hover {
+            transform: scale(1.05) rotate(-0.7deg);
+            z-index: 20;
+            box-shadow: 0 14px 44px rgba(0,0,0,0.45);
+        }
+        .sticky-title { font-weight: 600; margin-bottom: 6px; font-size: 13px; line-height: 1.3; }
+        .sticky-detail { opacity: 0.65; font-size: 10.5px; line-height: 1.42; }
+        .sticky-phase {
+            position: absolute; top: 8px; right: 10px;
+            width: 8px; height: 8px; border-radius: 50%;
+        }
+        .exploring-tag {
+            position: absolute; bottom: 6px; right: 10px;
+            font-size: 9px; font-style: italic; opacity: 0.45;
+        }
+
+        /* ── Sticky types — each visually distinct ── */
+
+        /* Domain Event: wide orange, slightly rotated feel */
+        .sticky--event {
+            background: rgba(249,115,22,0.12);
+            border: 1.5px solid rgba(249,115,22,0.4);
+            color: rgba(249,115,22,0.95);
+            border-radius: 6px;
+        }
+
+        /* Command: blue, left accent bar */
+        .sticky--command {
+            background: rgba(59,130,246,0.1);
+            border: 1.5px solid rgba(59,130,246,0.3);
+            border-left: 4px solid rgba(59,130,246,0.6);
+            color: rgba(59,130,246,0.95);
+            border-radius: 4px 8px 8px 4px;
+        }
+
+        /* Read Model: green, bottom accent */
+        .sticky--readmodel {
+            background: rgba(34,197,94,0.1);
+            border: 1.5px solid rgba(34,197,94,0.3);
+            border-bottom: 3px solid rgba(34,197,94,0.5);
+            color: rgba(34,197,94,0.95);
+            border-radius: 8px 8px 4px 4px;
+        }
+
+        /* Policy: purple, rounded — automated process */
+        .sticky--policy {
+            background: rgba(168,85,247,0.1);
+            border: 1.5px solid rgba(168,85,247,0.35);
+            color: rgba(168,85,247,0.95);
+            border-radius: 20px;
+        }
+
+        /* Hotspot: red dashed, diamond-like corners */
+        .sticky--hotspot {
+            background: rgba(239,68,68,0.08);
+            border: 2px dashed rgba(239,68,68,0.45);
+            color: rgba(239,68,68,0.88);
+            border-radius: 4px;
+        }
+
+        /* External System: dark grey, octagonal feel */
+        .sticky--external {
+            background: rgba(107,114,128,0.1);
+            border: 1.5px solid rgba(107,114,128,0.4);
+            color: rgba(255,255,255,0.55);
+            border-radius: 12px;
+        }
+
+        /* Aggregate: yellow, top accent */
+        .sticky--aggregate {
+            background: rgba(234,179,8,0.1);
+            border: 1.5px solid rgba(234,179,8,0.3);
+            border-top: 3px solid rgba(234,179,8,0.55);
+            color: rgba(234,179,8,0.95);
+            border-radius: 4px 4px 8px 8px;
+        }
+
+        /* Human Gate: blue, double-border, larger */
+        .sticky--gate {
+            background: rgba(70,130,180,0.08);
+            border: 2px solid rgba(70,130,180,0.45);
+            box-shadow: inset 0 0 0 2px rgba(70,130,180,0.12);
+            color: rgba(70,130,180,0.95);
+            min-height: 110px;
+            border-radius: 14px;
+            width: 210px;
+        }
+
+        /* Concept branches */
+        .sticky--c2 {
+            border-color: rgba(255,107,107,0.4);
+            border-left: 4px solid rgba(255,107,107,0.6);
+            color: rgba(255,107,107,0.9);
+            background: rgba(255,107,107,0.06);
+            border-radius: 4px 8px 8px 4px;
+        }
+        .sticky--c3 {
+            border-color: rgba(201,169,110,0.4);
+            border-left: 4px solid rgba(201,169,110,0.6);
+            color: rgba(201,169,110,0.9);
+            background: rgba(201,169,110,0.06);
+            border-radius: 4px 8px 8px 4px;
+        }
+
+        /* ── SVG CONNECTIONS ── */
+        .connections {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none; z-index: 1;
+            overflow: visible;
+        }
+        .conn { fill: none; stroke-width: 2.5; stroke-linecap: round; }
+        .conn--flow { stroke: rgba(255,255,255,0.2); }
+        .conn--green { stroke: rgba(34,197,94,0.45); }
+        .conn--amber { stroke: rgba(234,179,8,0.45); }
+        .conn--blue { stroke: rgba(70,130,180,0.5); }
+        .conn--red { stroke: rgba(239,68,68,0.4); }
+        .conn--purple { stroke: rgba(168,85,247,0.4); }
+        .conn--c2 { stroke: rgba(255,107,107,0.55); stroke-dasharray: 8 5; stroke-width: 2.5; }
+        .conn--c3 { stroke: rgba(201,169,110,0.55); stroke-dasharray: 8 5; stroke-width: 2.5; }
+        .conn--feedback { stroke: rgba(201,169,110,0.35); stroke-dasharray: 12 6; stroke-width: 2.5; }
+        .conn--hotspot { stroke: rgba(239,68,68,0.3); stroke-dasharray: 4 5; stroke-width: 1.8; }
+        .conn--wrap { stroke-dasharray: none; }
+
+        .arrow-head { stroke: none; }
+
+        /* ── Animations ── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes drawIn {
+            from { stroke-dashoffset: var(--len); }
+            to { stroke-dashoffset: 0; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .sticky { animation: none; opacity: 1; }
+        }
+
+        /* ── MODULE MAPPING ── */
+        .mapping-section {
+            position: relative; z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem clamp(3rem, 2rem + 2vw, 5rem);
+        }
+        .mapping-section h2 {
+            font-family: 'DM Serif Display', serif;
+            font-size: var(--text-xl);
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .mapping-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+        .mapping-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 1.25rem;
+            min-width: 0;
+        }
+        .mapping-card h3 { font-size: var(--text-sm); font-weight: 600; margin-bottom: 0.4rem; }
+        .mapping-card p { font-size: var(--text-xs); color: rgba(255,255,255,0.38); line-height: 1.5; }
+        .card-events { margin-top: 0.7rem; display: flex; flex-wrap: wrap; gap: 0.3rem; }
+        .event-tag { font-size: 9px; padding: 3px 7px; border-radius: 4px; font-weight: 500; }
+        .event-tag--event { background: rgba(249,115,22,0.1); color: rgba(249,115,22,0.7); }
+        .event-tag--command { background: rgba(59,130,246,0.08); color: rgba(59,130,246,0.7); }
+        .event-tag--policy { background: rgba(168,85,247,0.08); color: rgba(168,85,247,0.7); }
+
+        /* ── FOOTER ── */
+        .footer {
+            position: relative; z-index: 1;
+            text-align: center; padding: 2rem 0;
+            color: rgba(255,255,255,0.14);
+            font-size: var(--text-xs);
+            border-top: 1px solid rgba(255,255,255,0.03);
+        }
+
+        @page { margin: 0.5cm; size: A2 landscape; }
+        @media print {
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+            .canvas-bg { display: none; }
+            .header-bar { position: static; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="canvas-bg"></div>
+
+<div class="header-bar">
+    <a href="radical-concepts-modular-platform.html">&larr; Back to Platform</a>
+    <div class="header-brand">Radical Concepts</div>
+    <a href="deliverables/index.html">Dashboard &rarr;</a>
+</div>
+
+<div class="hero">
+    <h1>Event Storming</h1>
+    <p>Full architecture flow &mdash; source to audience. Domain-Driven Design notation with every event, command, policy, and decision point across three pipeline lanes.</p>
+</div>
+
+<div class="legend-bar">
+    <div class="legend-item"><div class="legend-swatch legend-swatch--event"></div><span class="legend-label">Domain Event</span></div>
+    <div class="legend-item"><div class="legend-swatch legend-swatch--command"></div><span class="legend-label">Command</span></div>
+    <div class="legend-item"><div class="legend-swatch legend-swatch--readmodel"></div><span class="legend-label">Read Model</span></div>
+    <div class="legend-item"><div class="legend-swatch legend-swatch--policy"></div><span class="legend-label">Policy</span></div>
+    <div class="legend-item"><div class="legend-swatch legend-swatch--aggregate"></div><span class="legend-label">Aggregate</span></div>
+    <div class="legend-item"><div class="legend-swatch legend-swatch--hotspot"></div><span class="legend-label">Hotspot</span></div>
+    <div class="legend-item"><div class="legend-swatch legend-swatch--external"></div><span class="legend-label">External System</span></div>
+    <div class="legend-item"><div class="legend-swatch legend-swatch--gate"></div><span class="legend-label">Human Gate</span></div>
+</div>
+
+<div class="phase-bar">
+    <div class="phase-item"><div class="phase-dot phase-dot--green"></div> Build now</div>
+    <div class="phase-item"><div class="phase-dot phase-dot--amber"></div> Sprint 2&ndash;3</div>
+    <div class="phase-item"><div class="phase-dot phase-dot--red"></div> Future</div>
+    <div class="phase-item" style="margin-left:0.8rem; gap:0.2rem;">
+        <span style="color:var(--c1);">&bull;</span> C1
+        <span style="color:var(--c2); margin-left:0.4rem;">&bull;</span> C2
+        <span style="color:var(--c3); margin-left:0.4rem;">&bull;</span> C3
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- THE BOARD                                       -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="board">
+    <div class="board-inner">
+
+        <!-- Lane structure -->
+        <div class="lane-label" style="left:16px; top:100px;">Content Pipeline</div>
+        <div class="lane-tag" style="left:100px; top:40px;">Lane 1 &mdash; Curation</div>
+
+        <div class="lane-divider" style="top:1160px;"></div>
+        <div class="lane-label" style="left:16px; top:1220px;">Production Pipeline</div>
+        <div class="lane-tag" style="left:100px; top:1180px;">Lane 2 &mdash; Production</div>
+
+        <div class="lane-divider" style="top:2300px;"></div>
+        <div class="lane-label" style="left:16px; top:2360px;">Distribution</div>
+        <div class="lane-tag" style="left:100px; top:2320px;">Lane 3 &mdash; Publishing &amp; Intelligence</div>
+
+        <!-- SVG layer — arrows rendered by JS -->
+        <svg class="connections" id="connSvg" viewBox="0 0 2800 3200" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <marker id="ah-flow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><path d="M0,0.5 L9,3.5 L0,6.5" class="arrow-head" fill="rgba(255,255,255,0.25)"/></marker>
+                <marker id="ah-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><path d="M0,0.5 L9,3.5 L0,6.5" class="arrow-head" fill="rgba(34,197,94,0.55)"/></marker>
+                <marker id="ah-amber" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><path d="M0,0.5 L9,3.5 L0,6.5" class="arrow-head" fill="rgba(234,179,8,0.55)"/></marker>
+                <marker id="ah-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><path d="M0,0.5 L9,3.5 L0,6.5" class="arrow-head" fill="rgba(70,130,180,0.6)"/></marker>
+                <marker id="ah-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><path d="M0,0.5 L9,3.5 L0,6.5" class="arrow-head" fill="rgba(239,68,68,0.5)"/></marker>
+                <marker id="ah-purple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><path d="M0,0.5 L9,3.5 L0,6.5" class="arrow-head" fill="rgba(168,85,247,0.55)"/></marker>
+                <marker id="ah-c2" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><path d="M0,0.5 L9,3.5 L0,6.5" class="arrow-head" fill="rgba(255,107,107,0.7)"/></marker>
+                <marker id="ah-c3" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><path d="M0,0.5 L9,3.5 L0,6.5" class="arrow-head" fill="rgba(201,169,110,0.7)"/></marker>
+                <marker id="ah-fb" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><path d="M0,0.5 L9,3.5 L0,6.5" class="arrow-head" fill="rgba(201,169,110,0.45)"/></marker>
+            </defs>
+        </svg>
+
+        <!-- ═══════════════════════════════════════ -->
+        <!-- LANE 1: CONTENT PIPELINE                -->
+        <!-- ═══════════════════════════════════════ -->
+
+        <!-- Row 1 -->
+        <div class="sticky sticky--external" id="n-rss" style="left:120px; top:100px; --i:0;">
+            <div class="sticky-phase" style="background:var(--phase-green);"></div>
+            <div class="sticky-title">RSS Feeds &amp; APIs</div>
+            <div class="sticky-detail">928 curated feeds, news APIs, Brett's manual URLs. The raw input layer.</div>
+        </div>
+
+        <div class="sticky sticky--command" id="n-ingest" style="left:440px; top:100px; --i:1;">
+            <div class="sticky-phase" style="background:var(--phase-green);"></div>
+            <div class="sticky-title">Ingest Sources</div>
+            <div class="sticky-detail">Extract full text from articles as clean content. Orchestrator handles the daily schedule.</div>
+        </div>
+
+        <div class="sticky sticky--event" id="n-ingested" style="left:800px; top:100px; --i:2;">
+            <div class="sticky-phase" style="background:var(--phase-green);"></div>
+            <div class="sticky-title">Sources Ingested</div>
+            <div class="sticky-detail">Raw articles available in the system. Triggers the validation pipeline.</div>
+        </div>
+
+        <div class="sticky sticky--policy" id="n-validate" style="left:1160px; top:100px; --i:3;">
+            <div class="sticky-phase" style="background:var(--phase-green);"></div>
+            <div class="sticky-title">Auto-Validate &amp; Dedup</div>
+            <div class="sticky-detail">Cluster similar stories, remove duplicates, check source reliability scores.</div>
+        </div>
+
+        <div class="sticky sticky--event" id="n-validated" style="left:1540px; top:100px; --i:4;">
+            <div class="sticky-phase" style="background:var(--phase-green);"></div>
+            <div class="sticky-title">Content Validated</div>
+            <div class="sticky-detail">Clean, deduplicated corpus ready for persona scoring.</div>
+        </div>
+
+        <div class="sticky sticky--command" id="n-score" style="left:1920px; top:100px; --i:5;">
+            <div class="sticky-phase" style="background:var(--phase-green);"></div>
+            <div class="sticky-title">Score with Persona</div>
+            <div class="sticky-detail">AI rates each article for relevance, novelty, Brett-fit. Persona Engine shapes scoring criteria.</div>
+        </div>
+
+        <!-- Read Models & Aggregates (below row 1) -->
+        <div class="sticky sticky--readmodel" id="n-corpus" style="left:1540px; top:360px; --i:6;">
+            <div class="sticky-phase" style="background:var(--phase-green);"></div>
+            <div class="sticky-title">Validated Corpus</div>
+            <div class="sticky-detail">Searchable, clustered article store with metadata and reliability scores.</div>
+        </div>
+
+        <div class="sticky sticky--aggregate" id="n-persona" style="left:1920px; top:360px; --i:7;">
+            <div class="sticky-phase" style="background:var(--phase-green);"></div>
+            <div class="sticky-title">Persona Profile</div>
+            <div class="sticky-detail">Brett's taste model: vocabulary, hot takes, topic weights, style rules. Cross-cutting concern.</div>
+        </div>
+
+        <!-- HOTSPOT: Encoding taste -->
+        <div class="sticky sticky--hotspot" id="n-hs-taste" style="left:280px; top:310px; width:200px; --i:8;">
+            <div class="sticky-phase" style="background:var(--phase-green);"></div>
+            <div class="sticky-title">How do we encode Brett's taste?</div>
+            <div class="sticky-detail">Prompt engineering vs fine-tuning vs feedback loop? Starting with 7 pages of his legal guidelines + editorial examples.</div>
+        </div>
+
+        <!-- Row 2 of Lane 1 -->
+        <div class="sticky sticky--event" id="n-scored" style="left:220px; top:570px; --i:9;">
+            <div class="sticky-phase" style="background:var(--phase-green);"></div>
+            <div class="sticky-title">Content Scored</div>
+            <div class="sticky-detail">Each article has relevance score, topic cluster, novelty rating, show-type assignment.</div>
+        </div>
+
+        <div class="sticky sticky--readmodel" id="n-ranked" style="left:220px; top:800px; --i:10;">
+            <div class="sticky-phase" style="background:var(--phase-green);"></div>
+            <div class="sticky-title">Ranked Feed</div>
+            <div class="sticky-detail">Ordered by Brett-worthiness. Grouped by show type: politics, science, quirky.</div>
+        </div>
+
+        <!-- GATE 1 -->
+        <div class="sticky sticky--gate" id="n-gate1" style="left:620px; top:550px; --i:11;">
+            <div class="sticky-phase" style="background:var(--phase-green);"></div>
+            <div class="sticky-title" style="font-family:'DM Serif Display',serif; font-size:15px;">Brett's Gate 1</div>
+            <div class="sticky-detail" style="font-size:11px;">Topic Selection &amp; Curation<br/><br/>Pick stories, reorder priority, reject, add context notes. Nothing enters production without this.</div>
+        </div>
+
+        <!-- HOTSPOT: Dashboard vs WhatsApp -->
+        <div class="sticky sticky--hotspot" id="n-hs-dash" style="left:640px; top:840px; width:200px; --i:12;">
+            <div class="sticky-phase" style="background:var(--phase-green);"></div>
+            <div class="sticky-title">Dashboard or WhatsApp?</div>
+            <div class="sticky-detail">How Brett interacts with Gate 1. Full dashboard UI vs conversational approval. Very different dev complexity.</div>
+        </div>
+
+        <div class="sticky sticky--event" id="n-selected" style="left:1100px; top:570px; --i:13;">
+            <div class="sticky-phase" style="background:var(--phase-amber);"></div>
+            <div class="sticky-title">Topics Selected</div>
+            <div class="sticky-detail">Brett's approved topic list with show assignment and priority order. Editorial intent locked.</div>
+        </div>
+
+        <div class="sticky sticky--command" id="n-gensummary" style="left:1540px; top:570px; --i:14;">
+            <div class="sticky-phase" style="background:var(--phase-amber);"></div>
+            <div class="sticky-title">Generate Summary</div>
+            <div class="sticky-detail">AI creates structured summaries per approved topic. Multi-angle analysis, fact-checked.</div>
+        </div>
+
+        <!-- ═══════════════════════════════════════ -->
+        <!-- LANE 2: PRODUCTION PIPELINE             -->
+        <!-- ═══════════════════════════════════════ -->
+
+        <div class="sticky sticky--event" id="n-summarized" style="left:220px; top:1260px; --i:15;">
+            <div class="sticky-phase" style="background:var(--phase-amber);"></div>
+            <div class="sticky-title">Summary Generated</div>
+            <div class="sticky-detail">Structured summaries ready. Fan-out point: script, snippets, quiz source all branch from here.</div>
+        </div>
+
+        <!-- C3 Branch -->
+        <div class="sticky sticky--c3" id="n-c3-snippet" style="left:220px; top:1560px; width:210px; --i:16;">
+            <div class="sticky-phase" style="background:var(--phase-red);"></div>
+            <div class="sticky-title">C3: Generate Snippets</div>
+            <div class="sticky-detail">Bite-sized knowledge cards from summaries. Spaced repetition scheduling. Weekly Deep Dive format.</div>
+            <span class="exploring-tag" style="color:var(--c3);">Exploring</span>
+        </div>
+
+        <div class="sticky sticky--command" id="n-formatscript" style="left:640px; top:1260px; --i:17;">
+            <div class="sticky-phase" style="background:var(--phase-amber);"></div>
+            <div class="sticky-title">Format Script</div>
+            <div class="sticky-detail">Transform summary into show-specific script. Politics, science, quirky each have different tones.</div>
+        </div>
+
+        <div class="sticky sticky--event" id="n-scriptready" style="left:1080px; top:1260px; --i:18;">
+            <div class="sticky-phase" style="background:var(--phase-amber);"></div>
+            <div class="sticky-title">Script Ready</div>
+            <div class="sticky-detail">Formatted script with chapter markers, section breaks, clip boundaries.</div>
+        </div>
+
+        <!-- C2 Branch -->
+        <div class="sticky sticky--c2" id="n-c2-quiz" style="left:1080px; top:1560px; width:210px; --i:19;">
+            <div class="sticky-phase" style="background:var(--phase-red);"></div>
+            <div class="sticky-title">C2: Generate Quiz</div>
+            <div class="sticky-detail">Transform script topics into quiz questions. Duolingo-style gamification, streaks, difficulty tiers.</div>
+            <span class="exploring-tag" style="color:var(--c2);">Exploring</span>
+        </div>
+
+        <div class="sticky sticky--command" id="n-voice" style="left:1540px; top:1260px; --i:20;">
+            <div class="sticky-phase" style="background:var(--phase-amber);"></div>
+            <div class="sticky-title">Record / Clone Voice</div>
+            <div class="sticky-detail">Politics: Brett records himself. Science/quirky: AI voice clone. TTS provider under evaluation.</div>
+        </div>
+
+        <!-- HOTSPOT: Record vs Clone -->
+        <div class="sticky sticky--hotspot" id="n-hs-voice" style="left:1540px; top:1560px; width:200px; --i:21;">
+            <div class="sticky-phase" style="background:var(--phase-amber);"></div>
+            <div class="sticky-title">Brett records or AI clone?</div>
+            <div class="sticky-detail">Per-show decision. Authenticity vs scalability trade-off. Side-by-side voice quality tests ongoing.</div>
+        </div>
+
+        <!-- Row 2 of Lane 2 -->
+        <div class="sticky sticky--policy" id="n-assemble" style="left:220px; top:1840px; --i:22;">
+            <div class="sticky-phase" style="background:var(--phase-amber);"></div>
+            <div class="sticky-title">Auto-Assemble Episode</div>
+            <div class="sticky-detail">Combine voice + music + transitions. Chapter markers from script. 5&ndash;7 min target.</div>
+        </div>
+
+        <div class="sticky sticky--event" id="n-assembled" style="left:640px; top:1840px; --i:23;">
+            <div class="sticky-phase" style="background:var(--phase-amber);"></div>
+            <div class="sticky-title">Episode Assembled</div>
+            <div class="sticky-detail">Complete audio/video ready for review. Each section doubles as standalone clip.</div>
+        </div>
+
+        <div class="sticky sticky--readmodel" id="n-preview" style="left:640px; top:2080px; --i:24;">
+            <div class="sticky-phase" style="background:var(--phase-amber);"></div>
+            <div class="sticky-title">Episode Preview</div>
+            <div class="sticky-detail">Playable preview with waveform, chapter markers, clip boundaries.</div>
+        </div>
+
+        <!-- GATE 2 -->
+        <div class="sticky sticky--gate" id="n-gate2" style="left:1100px; top:1820px; --i:25;">
+            <div class="sticky-phase" style="background:var(--phase-amber);"></div>
+            <div class="sticky-title" style="font-family:'DM Serif Display',serif; font-size:15px;">Brett's Gate 2</div>
+            <div class="sticky-detail" style="font-size:11px;">Final Production Review<br/><br/>Listen, approve, request re-record or edit. Legal compliance check. Nothing publishes without this.</div>
+        </div>
+
+        <div class="sticky sticky--event" id="n-approved" style="left:1560px; top:1840px; --i:26;">
+            <div class="sticky-phase" style="background:var(--phase-amber);"></div>
+            <div class="sticky-title">Episode Approved</div>
+            <div class="sticky-detail">Green light from Brett. Triggers automated multi-platform distribution.</div>
+        </div>
+
+        <!-- ═══════════════════════════════════════ -->
+        <!-- LANE 3: DISTRIBUTION & INTELLIGENCE     -->
+        <!-- ═══════════════════════════════════════ -->
+
+        <div class="sticky sticky--command" id="n-publish" style="left:220px; top:2420px; --i:27;">
+            <div class="sticky-phase" style="background:var(--phase-amber);"></div>
+            <div class="sticky-title">Publish to Platforms</div>
+            <div class="sticky-detail">Format-adapt and auto-upload. RSS, YouTube, social clips. Zero manual work after approval.</div>
+        </div>
+
+        <div class="sticky sticky--external" id="n-rss-out" style="left:580px; top:2400px; width:160px; --i:28;">
+            <div class="sticky-phase" style="background:var(--phase-amber);"></div>
+            <div class="sticky-title">Podcast RSS</div>
+            <div class="sticky-detail">Apple, Spotify, Google Podcasts distribution feed.</div>
+        </div>
+
+        <div class="sticky sticky--external" id="n-youtube" style="left:120px; top:2720px; width:160px; --i:29;">
+            <div class="sticky-phase" style="background:var(--phase-amber);"></div>
+            <div class="sticky-title">YouTube</div>
+            <div class="sticky-detail">Full episodes + auto-generated short clips with captions.</div>
+        </div>
+
+        <div class="sticky sticky--external" id="n-social" style="left:620px; top:2720px; width:170px; --i:30;">
+            <div class="sticky-phase" style="background:var(--phase-amber);"></div>
+            <div class="sticky-title">Social Platforms</div>
+            <div class="sticky-detail">Clips, quote cards, audiograms for X, LinkedIn, Instagram.</div>
+        </div>
+
+        <div class="sticky sticky--event" id="n-published" style="left:380px; top:2580px; width:170px; --i:31;">
+            <div class="sticky-phase" style="background:var(--phase-amber);"></div>
+            <div class="sticky-title">Content Published</div>
+            <div class="sticky-detail">Live on all platforms. Triggers analytics tracking.</div>
+        </div>
+
+        <div class="sticky sticky--policy" id="n-analytics" style="left:1100px; top:2420px; --i:32;">
+            <div class="sticky-phase" style="background:var(--phase-red);"></div>
+            <div class="sticky-title">Track Analytics</div>
+            <div class="sticky-detail">Automated: downloads, engagement, demographics, topic performance.</div>
+        </div>
+
+        <div class="sticky sticky--event" id="n-insights" style="left:1540px; top:2420px; --i:33;">
+            <div class="sticky-phase" style="background:var(--phase-red);"></div>
+            <div class="sticky-title">Insights Generated</div>
+            <div class="sticky-detail">Performance data feeds back to Source Intelligence and Persona Engine.</div>
+        </div>
+
+        <!-- C2 Future -->
+        <div class="sticky sticky--c2" id="n-c2-future" style="left:1100px; top:2960px; width:200px; --i:34;">
+            <div class="sticky-phase" style="background:var(--phase-red);"></div>
+            <div class="sticky-title">C2: Quiz Engagement</div>
+            <div class="sticky-detail">Streaks, leaderboards, social sharing. Engagement data feeds back into content scoring.</div>
+            <span class="exploring-tag" style="color:var(--c2);">Future</span>
+        </div>
+
+        <!-- C3 Future -->
+        <div class="sticky sticky--c3" id="n-c3-future" style="left:380px; top:2960px; width:190px; --i:35;">
+            <div class="sticky-phase" style="background:var(--phase-red);"></div>
+            <div class="sticky-title">C3: Knowledge Cards</div>
+            <div class="sticky-detail">Spaced repetition library. Mon/Wed/Fri drip. Retention science format.</div>
+            <span class="exploring-tag" style="color:var(--c3);">Future</span>
+        </div>
+
+    </div>
+</div>
+
+<!-- ═══ MODULE MAPPING ═══ -->
+<div class="mapping-section">
+    <h2>Events &rarr; Modules</h2>
+    <div class="mapping-grid">
+        <div class="mapping-card" style="border-top: 2px solid rgba(34,197,94,0.35);">
+            <h3 style="color:rgba(34,197,94,0.9);">01 &middot; Source Intelligence</h3>
+            <p>Ingest, validate, deduplicate, trend-detect. The entry point.</p>
+            <div class="card-events">
+                <span class="event-tag event-tag--command">Ingest Sources</span>
+                <span class="event-tag event-tag--event">Sources Ingested</span>
+                <span class="event-tag event-tag--policy">Auto-Validate</span>
+                <span class="event-tag event-tag--event">Content Validated</span>
+            </div>
+        </div>
+        <div class="mapping-card" style="border-top: 2px solid rgba(34,197,94,0.35);">
+            <h3 style="color:rgba(34,197,94,0.9);">02 &middot; Persona Engine</h3>
+            <p>Brett's taste as a queryable service. Cross-cutting concern.</p>
+            <div class="card-events">
+                <span class="event-tag event-tag--command">Score with Persona</span>
+                <span class="event-tag event-tag--event">Content Scored</span>
+            </div>
+        </div>
+        <div class="mapping-card" style="border-top: 2px solid rgba(70,130,180,0.45);">
+            <h3 style="color:rgba(70,130,180,0.95);">03 &middot; Editorial Control</h3>
+            <p>Brett's two human gates. Nothing passes without approval.</p>
+            <div class="card-events">
+                <span class="event-tag event-tag--event">Topics Selected</span>
+                <span class="event-tag event-tag--event">Episode Approved</span>
+            </div>
+        </div>
+        <div class="mapping-card" style="border-top: 2px solid rgba(234,179,8,0.35);">
+            <h3 style="color:rgba(234,179,8,0.9);">04 &middot; Script &amp; Text Engine</h3>
+            <p>Summaries, scripts, format adaptation per show type.</p>
+            <div class="card-events">
+                <span class="event-tag event-tag--command">Generate Summary</span>
+                <span class="event-tag event-tag--event">Summary Generated</span>
+                <span class="event-tag event-tag--command">Format Script</span>
+                <span class="event-tag event-tag--event">Script Ready</span>
+            </div>
+        </div>
+        <div class="mapping-card" style="border-top: 2px solid rgba(234,179,8,0.35);">
+            <h3 style="color:rgba(234,179,8,0.9);">05 &middot; Media Production</h3>
+            <p>Voice recording/cloning, assembly, chapter marks.</p>
+            <div class="card-events">
+                <span class="event-tag event-tag--command">Record / Clone</span>
+                <span class="event-tag event-tag--policy">Auto-Assemble</span>
+                <span class="event-tag event-tag--event">Episode Assembled</span>
+            </div>
+        </div>
+        <div class="mapping-card" style="border-top: 2px solid rgba(234,179,8,0.35);">
+            <h3 style="color:rgba(234,179,8,0.9);">06 &middot; Publishing Network</h3>
+            <p>Multi-platform distribution. Zero manual work after approval.</p>
+            <div class="card-events">
+                <span class="event-tag event-tag--command">Publish</span>
+                <span class="event-tag event-tag--event">Content Published</span>
+            </div>
+        </div>
+        <div class="mapping-card" style="border-top: 2px solid rgba(255,107,107,0.35);">
+            <h3 style="color:rgba(255,107,107,0.9);">07 &middot; Learning &amp; Social</h3>
+            <p>C2 quiz gamification + C3 spaced repetition. Future phase.</p>
+            <div class="card-events">
+                <span class="event-tag event-tag--command">Generate Quiz</span>
+                <span class="event-tag event-tag--command">Generate Snippets</span>
+                <span class="event-tag event-tag--event">Quiz Engagement</span>
+            </div>
+        </div>
+        <div class="mapping-card" style="border-top: 2px solid rgba(239,68,68,0.35);">
+            <h3 style="color:rgba(239,68,68,0.85);">08 &middot; Intelligence &amp; Growth</h3>
+            <p>Analytics, audience signals. Feeds back to Source + Persona.</p>
+            <div class="card-events">
+                <span class="event-tag event-tag--policy">Track Analytics</span>
+                <span class="event-tag event-tag--event">Insights Generated</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="footer">Team Radical &mdash; ESADE I2P 2026</div>
+
+<script>
+// Dynamic SVG connector engine — reads sticky positions and draws bezier curves
+(function() {
+    var svg = document.getElementById('connSvg');
+    var board = document.querySelector('.board-inner');
+
+    function pos(id) {
+        var el = document.getElementById(id);
+        if (!el) return null;
+        var r = el.getBoundingClientRect();
+        var br = board.getBoundingClientRect();
+        return {
+            x: r.left - br.left, y: r.top - br.top,
+            w: r.width, h: r.height,
+            cx: r.left - br.left + r.width / 2,
+            cy: r.top - br.top + r.height / 2,
+            r: r.left - br.left + r.width,
+            b: r.top - br.top + r.height
+        };
+    }
+
+    function horizBezier(from, to, cls, marker) {
+        var p = pos(from), q = pos(to);
+        if (!p || !q) return;
+        var x1 = p.r + 8, y1 = p.cy;
+        var x2 = q.x - 8, y2 = q.cy;
+        var cpx = (x1 + x2) / 2;
+        var d = 'M' + x1 + ',' + y1 + ' C' + cpx + ',' + y1 + ' ' + cpx + ',' + y2 + ' ' + x2 + ',' + y2;
+        addPath(d, cls, marker);
+    }
+
+    function vertBezier(from, to, cls, marker, fromBot) {
+        var p = pos(from), q = pos(to);
+        if (!p || !q) return;
+        var x1 = p.cx, y1 = fromBot !== false ? p.b + 8 : p.cy;
+        var x2 = q.cx, y2 = q.y - 8;
+        var cpy = (y1 + y2) / 2;
+        var d = 'M' + x1 + ',' + y1 + ' C' + x1 + ',' + cpy + ' ' + x2 + ',' + cpy + ' ' + x2 + ',' + y2;
+        addPath(d, cls, marker);
+    }
+
+    function wrapPath(from, to, cls, marker, side, yOffset) {
+        var p = pos(from), q = pos(to);
+        if (!p || !q) return;
+        var x1, y1, x2, y2, mx;
+        if (side === 'right') {
+            x1 = p.r + 8; y1 = p.cy;
+            x2 = q.r + 8; y2 = q.cy;
+            mx = Math.max(x1, x2) + (yOffset || 120);
+            var d = 'M' + x1 + ',' + y1 + ' L' + mx + ',' + y1 + ' L' + mx + ',' + y2 + ' L' + x2 + ',' + y2;
+            addPath(d, cls, marker);
+        } else if (side === 'left-wrap') {
+            // wrap from right of source, go right and down, then left across, then down to target
+            x1 = p.r + 8; y1 = p.cy;
+            x2 = q.x - 8; y2 = q.y - 8;
+            var midY = yOffset || (y1 + 60);
+            var d = 'M' + x1 + ',' + y1 + ' L' + (x1 + 60) + ',' + y1 + ' L' + (x1 + 60) + ',' + midY + ' L' + x2 + ',' + midY + ' L' + x2 + ',' + y2;
+            addPath(d, cls, marker);
+        } else {
+            x1 = p.x - 8; y1 = p.cy;
+            x2 = q.x - 8; y2 = q.cy;
+            mx = Math.min(x1, x2) - (yOffset || 60);
+            var d = 'M' + x1 + ',' + y1 + ' L' + mx + ',' + y1 + ' L' + mx + ',' + y2 + ' L' + x2 + ',' + y2;
+            addPath(d, cls, marker);
+        }
+    }
+
+    function addPath(d, cls, marker) {
+        var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', d);
+        path.setAttribute('class', 'conn ' + (cls || 'conn--flow'));
+        if (marker) path.setAttribute('marker-end', 'url(#' + marker + ')');
+        svg.appendChild(path);
+    }
+
+    function addLabel(x, y, text, color, rotate) {
+        var t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        t.setAttribute('x', x);
+        t.setAttribute('y', y);
+        t.setAttribute('text-anchor', 'middle');
+        t.setAttribute('fill', color || 'rgba(201,169,110,0.2)');
+        t.setAttribute('font-family', "'DM Sans',sans-serif");
+        t.setAttribute('font-size', '10');
+        if (rotate) t.setAttribute('transform', 'rotate(' + rotate + ',' + x + ',' + y + ')');
+        t.textContent = text;
+        svg.appendChild(t);
+    }
+
+    function draw() {
+        // Clear old paths
+        while (svg.lastChild && svg.lastChild.tagName !== 'defs') svg.removeChild(svg.lastChild);
+
+        // === LANE 1: Content Pipeline ===
+        horizBezier('n-rss', 'n-ingest', 'conn--flow', 'ah-flow');
+        horizBezier('n-ingest', 'n-ingested', 'conn--green', 'ah-green');
+        horizBezier('n-ingested', 'n-validate', 'conn--purple', 'ah-purple');
+        horizBezier('n-validate', 'n-validated', 'conn--green', 'ah-green');
+        horizBezier('n-validated', 'n-score', 'conn--flow', 'ah-flow');
+
+        // Validated → Corpus (down)
+        vertBezier('n-validated', 'n-corpus', 'conn--green', 'ah-green');
+        // Score → Persona (down)
+        vertBezier('n-score', 'n-persona', 'conn--amber', 'ah-amber');
+
+        // Score → wraps to Content Scored (L-shaped: right, down, all the way left, down)
+        var pScore = pos('n-score'), pScored = pos('n-scored');
+        if (pScore && pScored) {
+            var x1 = pScore.r + 10, y1 = pScore.cy;
+            var midX = x1 + 80;
+            var midY = pScore.b + 80;
+            var x2 = pScored.cx, y2 = pScored.y - 10;
+            addPath('M' + x1 + ',' + y1 + ' L' + midX + ',' + y1 + ' L' + midX + ',' + midY + ' L' + x2 + ',' + midY + ' L' + x2 + ',' + y2, 'conn--green', 'ah-green');
+        }
+
+        // Scored → Ranked Feed (down)
+        vertBezier('n-scored', 'n-ranked', 'conn--green', 'ah-green');
+
+        // Scored → Gate 1
+        horizBezier('n-scored', 'n-gate1', 'conn--blue', 'ah-blue');
+
+        // Gate 1 → Topics Selected
+        horizBezier('n-gate1', 'n-selected', 'conn--green', 'ah-green');
+
+        // Topics Selected → Generate Summary
+        horizBezier('n-selected', 'n-gensummary', 'conn--amber', 'ah-amber');
+
+        // Generate Summary → wraps to Summary Generated (Lane 2)
+        var pGen = pos('n-gensummary'), pSum = pos('n-summarized');
+        if (pGen && pSum) {
+            var x1 = pGen.r + 10, y1 = pGen.cy;
+            var midX = x1 + 80;
+            var midY = pGen.b + 100;
+            var x2 = pSum.cx, y2 = pSum.y - 10;
+            addPath('M' + x1 + ',' + y1 + ' L' + midX + ',' + y1 + ' L' + midX + ',' + midY + ' L' + x2 + ',' + midY + ' L' + x2 + ',' + y2, 'conn--amber', 'ah-amber');
+        }
+
+        // Hotspot connections (dashed, subtle)
+        var pHs1 = pos('n-hs-taste'), pScoreN = pos('n-score');
+        if (pHs1 && pScoreN) {
+            addPath('M' + pHs1.r + ',' + pHs1.cy + ' L' + pScoreN.x + ',' + (pScoreN.b + 10), 'conn--hotspot', null);
+        }
+        var pHs2 = pos('n-hs-dash'), pG1 = pos('n-gate1');
+        if (pHs2 && pG1) {
+            addPath('M' + pHs2.cx + ',' + pHs2.y + ' L' + pG1.cx + ',' + pG1.b, 'conn--hotspot', null);
+        }
+
+        // === LANE 2: Production Pipeline ===
+        // Summary → C3 branch (down)
+        vertBezier('n-summarized', 'n-c3-snippet', 'conn--c3', 'ah-c3');
+
+        // Summary → Format Script
+        horizBezier('n-summarized', 'n-formatscript', 'conn--amber', 'ah-amber');
+
+        // Format Script → Script Ready
+        horizBezier('n-formatscript', 'n-scriptready', 'conn--amber', 'ah-amber');
+
+        // Script Ready → C2 branch (down)
+        vertBezier('n-scriptready', 'n-c2-quiz', 'conn--c2', 'ah-c2');
+
+        // Script Ready → Voice
+        horizBezier('n-scriptready', 'n-voice', 'conn--amber', 'ah-amber');
+
+        // Hotspot voice
+        var pHs3 = pos('n-hs-voice'), pVoice = pos('n-voice');
+        if (pHs3 && pVoice) {
+            addPath('M' + pHs3.cx + ',' + pHs3.y + ' L' + pVoice.cx + ',' + pVoice.b, 'conn--hotspot', null);
+        }
+
+        // Voice → wraps to Auto-Assemble
+        var pVo = pos('n-voice'), pAs = pos('n-assemble');
+        if (pVo && pAs) {
+            var x1 = pVo.r + 10, y1 = pVo.cy;
+            var midX = x1 + 80;
+            var midY = pVo.b + 80;
+            var x2 = pAs.cx, y2 = pAs.y - 10;
+            addPath('M' + x1 + ',' + y1 + ' L' + midX + ',' + y1 + ' L' + midX + ',' + midY + ' L' + x2 + ',' + midY + ' L' + x2 + ',' + y2, 'conn--purple', 'ah-purple');
+        }
+
+        // Assemble → Assembled
+        horizBezier('n-assemble', 'n-assembled', 'conn--amber', 'ah-amber');
+
+        // Assembled → Preview (down)
+        vertBezier('n-assembled', 'n-preview', 'conn--green', 'ah-green');
+
+        // Assembled → Gate 2
+        horizBezier('n-assembled', 'n-gate2', 'conn--blue', 'ah-blue');
+
+        // Gate 2 → Approved
+        horizBezier('n-gate2', 'n-approved', 'conn--amber', 'ah-amber');
+
+        // Approved → wraps to Publish (Lane 3)
+        var pAp = pos('n-approved'), pPub = pos('n-publish');
+        if (pAp && pPub) {
+            var x1 = pAp.r + 10, y1 = pAp.cy;
+            var midX = x1 + 80;
+            var midY = pAp.b + 100;
+            var x2 = pPub.cx, y2 = pPub.y - 10;
+            addPath('M' + x1 + ',' + y1 + ' L' + midX + ',' + y1 + ' L' + midX + ',' + midY + ' L' + x2 + ',' + midY + ' L' + x2 + ',' + y2, 'conn--amber', 'ah-amber');
+        }
+
+        // === LANE 3: Distribution ===
+        // Publish → external systems
+        horizBezier('n-publish', 'n-rss-out', 'conn--flow', 'ah-flow');
+        vertBezier('n-publish', 'n-youtube', 'conn--flow', 'ah-flow');
+
+        var pPub2 = pos('n-publish'), pSoc = pos('n-social');
+        if (pPub2 && pSoc) {
+            addPath('M' + pPub2.r + ',' + (pPub2.b - 10) + ' C' + (pPub2.r + 80) + ',' + pPub2.b + ' ' + pSoc.x + ',' + (pSoc.y - 40) + ' ' + pSoc.x + ',' + (pSoc.y - 8), 'conn--flow', 'ah-flow');
+        }
+
+        // Publish → Content Published (the event that follows publishing)
+        vertBezier('n-publish', 'n-published', 'conn--amber', 'ah-amber');
+
+        // Content Published → Analytics
+        horizBezier('n-published', 'n-analytics', 'conn--purple', 'ah-purple');
+
+        // Analytics → Insights
+        horizBezier('n-analytics', 'n-insights', 'conn--red', 'ah-red');
+
+        // C2 quiz → C2 future (dashed, route down then right)
+        var pC2q = pos('n-c2-quiz'), pC2f = pos('n-c2-future');
+        if (pC2q && pC2f) {
+            addPath('M' + pC2q.cx + ',' + pC2q.b + ' C' + pC2q.cx + ',' + (pC2q.b + 120) + ' ' + pC2f.cx + ',' + (pC2f.y - 120) + ' ' + pC2f.cx + ',' + (pC2f.y - 8), 'conn--c2', 'ah-c2');
+        }
+
+        // C3 snippet → C3 future (dashed)
+        var pC3s = pos('n-c3-snippet'), pC3f = pos('n-c3-future');
+        if (pC3s && pC3f) {
+            addPath('M' + pC3s.cx + ',' + pC3s.b + ' C' + pC3s.cx + ',' + (pC3s.b + 120) + ' ' + pC3f.cx + ',' + (pC3f.y - 120) + ' ' + pC3f.cx + ',' + (pC3f.y - 8), 'conn--c3', 'ah-c3');
+        }
+
+        // === FEEDBACK LOOPS ===
+        var pIns = pos('n-insights'), pRss = pos('n-rss'), pPer = pos('n-persona');
+
+        // Insights → Sources (left side big loop)
+        if (pIns && pRss) {
+            var x1 = pIns.x - 8, y1 = pIns.cy;
+            var loopX = 60;
+            var x2 = pRss.x - 8, y2 = pRss.cy;
+            addPath('M' + x1 + ',' + y1 + ' L' + loopX + ',' + y1 + ' L' + loopX + ',' + y2 + ' L' + x2 + ',' + y2, 'conn--feedback', 'ah-fb');
+            addLabel(48, 1400, 'Feedback: refine sources', 'rgba(201,169,110,0.18)', -90);
+        }
+
+        // Insights → Persona (right side big loop)
+        if (pIns && pPer) {
+            var x1 = pIns.r + 8, y1 = pIns.cy;
+            var loopX = 2600;
+            var x2 = pPer.r + 8, y2 = pPer.cy;
+            addPath('M' + x1 + ',' + y1 + ' L' + loopX + ',' + y1 + ' L' + loopX + ',' + y2 + ' L' + x2 + ',' + y2, 'conn--feedback', 'ah-fb');
+            addLabel(2612, 1400, 'Feedback: refine persona', 'rgba(201,169,110,0.15)', 90);
+        }
+    }
+
+    // Draw after layout settles
+    requestAnimationFrame(function() { requestAnimationFrame(draw); });
+    window.addEventListener('resize', draw);
+})();
+</script>
+
+</body>
+</html>

@@ -6,31 +6,42 @@
 <title>I2P Radical Concepts — Design Thinking Ideation Board</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display&display=swap" rel="stylesheet">
 <style>
 /* ============ RESET & BASE ============ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --font-hand: 'Caveat', cursive;
-  --font-body: 'DM Sans', system-ui, sans-serif;
-  --font-mono: 'DM Mono', monospace;
-  --bg: #f5f0e8;
-  --bg-cork: #e8dfd3;
-  --surface: #faf8f4;
-  --text: #2c2416;
-  --text-dim: #8a7e6a;
-  --text-light: #b5a88f;
-  --border: rgba(0,0,0,0.08);
-  /* Sticky note colors */
-  --pink-1: #ffb3ba; --pink-2: #ffc2c7; --pink-3: #ffccd2; --pink-4: #ffd5d9;
-  --white-1: #fefefe; --white-2: #f9f9f7; --white-3: #f4f3ef; --white-4: #efeee9;
-  --yellow-1: #fff9c4; --yellow-2: #fff59d; --yellow-3: #ffee58;
-  --blue-1: #bbdefb; --blue-2: #c8e6f8; --blue-3: #d4ecfa; --blue-4: #b3d4fc;
-  --green-1: #c8e6c9; --green-2: #d4edda; --green-3: #b9dfbb; --green-4: #a8d5aa;
-  --red-alert: #e74c3c;
+  --font-headline: 'DM Serif Display', serif;
+  --font-body: 'DM Sans', sans-serif;
+  --bg: #111827;
+  --surface: rgba(255,255,255,0.06);
+  --surface-border: rgba(255,255,255,0.1);
+  --text: #fff;
+  --text-dim: rgba(255,255,255,0.55);
+  --text-light: rgba(255,255,255,0.35);
+  --border: rgba(255,255,255,0.1);
+  /* Concept accent colors */
+  --c1: #4682B4;
+  --c2: #FF6B6B;
+  --c3: #C9A96E;
+  /* Sticky note colors — tinted glassmorphism, visually distinct */
+  --pink-1: rgba(255,107,107,0.22); --pink-2: rgba(255,107,107,0.18); --pink-3: rgba(255,107,107,0.15); --pink-4: rgba(255,107,107,0.12);
+  --white-1: rgba(130,160,200,0.18); --white-2: rgba(130,160,200,0.15); --white-3: rgba(130,160,200,0.12); --white-4: rgba(130,160,200,0.10);
+  --yellow-1: rgba(201,169,110,0.25); --yellow-2: rgba(201,169,110,0.30); --yellow-3: rgba(201,169,110,0.35);
+  --blue-1: rgba(70,160,220,0.22); --blue-2: rgba(70,160,220,0.18); --blue-3: rgba(70,160,220,0.15); --blue-4: rgba(70,160,220,0.25);
+  --green-1: rgba(100,200,130,0.22); --green-2: rgba(100,200,130,0.18); --green-3: rgba(100,200,130,0.15); --green-4: rgba(100,200,130,0.12);
+  --red-alert: #FF6B6B;
   /* Flow arrow */
-  --arrow: #9e8e78;
+  --arrow: rgba(255,255,255,0.4);
+  /* Typography scale */
+  --text-xs: clamp(0.65rem, 0.55rem + 0.25vw, 0.78rem);
+  --text-sm: clamp(0.78rem, 0.65rem + 0.35vw, 0.92rem);
+  --text-base: clamp(0.9rem, 0.75rem + 0.4vw, 1.1rem);
+  --text-lg: clamp(1rem, 0.8rem + 0.55vw, 1.3rem);
+  --text-xl: clamp(1.1rem, 0.85rem + 0.7vw, 1.5rem);
+  --text-2xl: clamp(1.6rem, 1.2rem + 1.2vw, 2.5rem);
+  --text-3xl: clamp(2rem, 1.4rem + 1.8vw, 3.2rem);
 }
 
 body {
@@ -38,9 +49,9 @@ body {
   color: var(--text);
   background: var(--bg);
   background-image:
-    radial-gradient(circle at 20% 10%, rgba(255,179,186,0.15) 0%, transparent 40%),
-    radial-gradient(circle at 80% 10%, rgba(200,230,201,0.15) 0%, transparent 40%),
-    radial-gradient(circle at 50% 90%, rgba(255,249,196,0.2) 0%, transparent 40%);
+    radial-gradient(circle at 20% 10%, rgba(70,130,180,0.08) 0%, transparent 40%),
+    radial-gradient(circle at 80% 10%, rgba(201,169,110,0.06) 0%, transparent 40%),
+    radial-gradient(circle at 50% 90%, rgba(255,107,107,0.05) 0%, transparent 40%);
   min-height: 100vh;
   line-height: 1.4;
 }
@@ -52,28 +63,28 @@ body {
   position: relative;
 }
 .board-header h1 {
-  font-family: var(--font-hand);
-  font-size: clamp(2.4rem, 5vw, 3.8rem);
-  font-weight: 700;
+  font-family: var(--font-headline);
+  font-size: var(--text-3xl);
+  font-weight: 400;
   color: var(--text);
   letter-spacing: -0.5px;
   line-height: 1.1;
 }
 .board-header .subtitle {
   font-family: var(--font-body);
-  font-size: 0.95rem;
+  font-size: var(--text-sm);
   color: var(--text-dim);
   margin-top: 8px;
   font-weight: 500;
 }
 .board-header .process-label {
   display: inline-block;
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
   text-transform: uppercase;
   letter-spacing: 2px;
   color: var(--text-light);
-  background: rgba(0,0,0,0.04);
+  background: rgba(255,255,255,0.06);
   padding: 4px 14px;
   border-radius: 20px;
   margin-top: 12px;
@@ -100,8 +111,9 @@ body {
 .legend-swatch {
   width: 20px; height: 20px;
   border-radius: 3px;
-  box-shadow: 1px 1px 3px rgba(0,0,0,0.15);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
   transform: rotate(-2deg);
+  border: 1px solid rgba(255,255,255,0.1);
 }
 
 /* ============ SECTIONS CONTAINER ============ */
@@ -131,13 +143,13 @@ body {
   .section { animation: none; }
 }
 
-/* ============ SECTION HEADER (TAPE LABEL) ============ */
+/* ============ SECTION HEADER ============ */
 .section-label {
   display: inline-block;
-  font-family: var(--font-hand);
-  font-size: 1.6rem;
-  font-weight: 700;
-  padding: 6px 28px;
+  font-family: var(--font-headline);
+  font-size: var(--text-xl);
+  font-weight: 400;
+  padding: 6px 0;
   margin-bottom: 16px;
   position: relative;
   color: var(--text);
@@ -145,22 +157,26 @@ body {
 .section-label::before {
   content: '';
   position: absolute;
-  inset: 0;
-  background: rgba(255,255,200,0.7);
-  border-radius: 2px;
-  transform: rotate(-0.5deg);
-  z-index: -1;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 1px;
 }
-.section-label.pink::before { background: rgba(255,179,186,0.5); }
-.section-label.white::before { background: rgba(220,218,210,0.6); }
-.section-label.yellow::before { background: rgba(255,249,196,0.7); }
-.section-label.blue::before { background: rgba(187,222,251,0.6); }
-.section-label.green-label::before { background: rgba(200,230,201,0.6); }
+.section-label.pink { color: var(--c2); }
+.section-label.pink::before { background: rgba(255,107,107,0.3); }
+.section-label.white::before { background: rgba(255,255,255,0.2); }
+.section-label.yellow { color: var(--c3); }
+.section-label.yellow::before { background: rgba(201,169,110,0.3); }
+.section-label.blue { color: var(--c1); }
+.section-label.blue::before { background: rgba(70,130,180,0.3); }
+.section-label.green-label { color: var(--c3); }
+.section-label.green-label::before { background: rgba(201,169,110,0.3); }
 
 .section-count {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
   color: var(--text-dim);
   margin-left: 8px;
   vertical-align: middle;
@@ -174,8 +190,8 @@ body {
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  border: 1.5px solid rgba(0,0,0,0.12);
-  background: rgba(255,255,255,0.7);
+  border: 1.5px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.06);
   backdrop-filter: blur(4px);
   cursor: pointer;
   margin-left: 10px;
@@ -187,29 +203,29 @@ body {
   top: -1px;
 }
 .info-btn:hover {
-  background: var(--text);
-  color: white;
-  border-color: var(--text);
+  background: rgba(255,255,255,0.15);
+  color: var(--text);
+  border-color: rgba(255,255,255,0.3);
   transform: scale(1.1);
 }
 .info-btn:active { transform: scale(0.95); }
 
 /* ============ SESSION DEBRIEF ============ */
-.debrief { margin-top:32px; padding:24px; background:rgba(33,150,243,0.04); border:2px solid rgba(33,150,243,0.12); border-radius:14px; }
-.debrief.c3-debrief { background:rgba(76,175,80,0.04); border-color:rgba(76,175,80,0.12); }
-.debrief-title { font-family:var(--font-serif); font-size:1.1rem; font-weight:700; margin-bottom:16px; }
-.spark-card { background:white; border-radius:10px; padding:14px 16px; margin-bottom:10px; border-left:4px solid #ffc107; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
-.spark-card .spark-label { font-family:var(--font-mono); font-size:0.62rem; text-transform:uppercase; letter-spacing:1.5px; color:#ff8f00; margin-bottom:4px; }
-.spark-card h4 { font-family:var(--font-serif); font-size:0.92rem; margin:0 0 4px; }
-.spark-card p { font-size:0.8rem; color:var(--text-dim); margin:0; line-height:1.45; }
-.constraint-card { background:rgba(0,0,0,0.03); border-radius:10px; padding:12px 16px; margin-bottom:8px; border-left:4px solid #f44336; }
-.constraint-card strong { font-size:0.82rem; }
-.constraint-card p { font-size:0.78rem; color:var(--text-dim); margin:4px 0 0; line-height:1.4; }
-.vote-tag { display:inline-block; padding:2px 8px; border-radius:10px; font-size:0.68rem; font-family:var(--font-mono); margin-right:4px; }
-.vote-tag.yes { background:rgba(76,175,80,0.15); color:#2e7d32; }
-.vote-tag.maybe { background:rgba(255,193,7,0.2); color:#f57f17; }
-.vote-tag.no { background:rgba(244,67,54,0.1); color:#c62828; }
-.vote-tag.split { background:rgba(33,150,243,0.12); color:#1565c0; }
+.debrief { margin-top:32px; padding:24px; background:rgba(70,130,180,0.08); border:1px solid rgba(70,130,180,0.2); border-radius:12px; }
+.debrief.c3-debrief { background:rgba(201,169,110,0.08); border-color:rgba(201,169,110,0.2); }
+.debrief-title { font-family:var(--font-headline); font-size:var(--text-lg); font-weight:400; margin-bottom:16px; }
+.spark-card { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:14px 16px; margin-bottom:10px; border-left:4px solid var(--c3); }
+.spark-card .spark-label { font-family:var(--font-body); font-size:0.62rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--c3); margin-bottom:4px; }
+.spark-card h4 { font-family:var(--font-headline); font-size:var(--text-sm); font-weight:400; margin:0 0 4px; }
+.spark-card p { font-size:var(--text-xs); color:var(--text-dim); margin:0; line-height:1.45; }
+.constraint-card { background:rgba(255,107,107,0.06); border:1px solid rgba(255,107,107,0.12); border-radius:10px; padding:12px 16px; margin-bottom:8px; border-left:4px solid var(--c2); }
+.constraint-card strong { font-size:var(--text-xs); }
+.constraint-card p { font-size:var(--text-xs); color:var(--text-dim); margin:4px 0 0; line-height:1.4; }
+.vote-tag { display:inline-block; padding:2px 8px; border-radius:10px; font-size:0.68rem; font-family:var(--font-body); margin-right:4px; }
+.vote-tag.yes { background:rgba(100,200,130,0.2); color:#6ddb8a; }
+.vote-tag.maybe { background:rgba(201,169,110,0.2); color:var(--c3); }
+.vote-tag.no { background:rgba(255,107,107,0.15); color:var(--c2); }
+.vote-tag.split { background:rgba(70,130,180,0.15); color:var(--c1); }
 
 /* ============ CLUSTER ============ */
 .cluster {
@@ -238,10 +254,9 @@ body {
   width: 170px;
   min-height: 120px;
   padding: 14px 12px 10px;
-  border-radius: 2px;
-  box-shadow:
-    2px 3px 6px rgba(0,0,0,0.12),
-    0 0 0 0.5px rgba(0,0,0,0.04);
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   position: relative;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   cursor: default;
@@ -251,20 +266,21 @@ body {
 }
 .sticky:hover {
   transform: scale(1.04) rotate(0deg) !important;
-  box-shadow: 4px 6px 16px rgba(0,0,0,0.18);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  border-color: rgba(255,255,255,0.15);
   z-index: 10;
 }
 .sticky .note-text {
-  font-family: var(--font-hand);
-  font-size: 1.05rem;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
   font-weight: 500;
-  line-height: 1.25;
-  color: rgba(0,0,0,0.8);
+  line-height: 1.35;
+  color: rgba(255,255,255,0.9);
 }
 .sticky .note-num {
-  font-family: var(--font-mono);
+  font-family: var(--font-body);
   font-size: 0.6rem;
-  color: rgba(0,0,0,0.3);
+  color: rgba(255,255,255,0.25);
   position: absolute;
   top: 4px;
   right: 6px;
@@ -299,30 +315,30 @@ body {
   min-height: 160px;
   padding: 18px 16px;
 }
-.sticky.yellow .note-text { font-size: 1.1rem; }
+.sticky.yellow .note-text { font-size: var(--text-base); }
 .sticky.yellow.starred {
   background: var(--yellow-2);
-  border: 2px solid rgba(255,152,0,0.4);
+  border: 2px solid rgba(201,169,110,0.5);
 }
 .sticky .star-badge {
   position: absolute;
   top: -8px;
   left: -8px;
-  background: #ff9800;
-  color: white;
+  background: var(--c3);
+  color: #111827;
   font-size: 0.6rem;
-  font-family: var(--font-mono);
+  font-family: var(--font-body);
   font-weight: 600;
   padding: 2px 8px;
   border-radius: 10px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  box-shadow: 0 2px 4px rgba(255,152,0,0.3);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 .sticky .connects {
-  font-family: var(--font-mono);
+  font-family: var(--font-body);
   font-size: 0.62rem;
-  color: rgba(0,0,0,0.4);
+  color: rgba(255,255,255,0.35);
   margin-top: auto;
   padding-top: 8px;
   line-height: 1.3;
@@ -345,18 +361,18 @@ body {
   padding-bottom: 32px;
 }
 .sticky.idea .idea-title {
-  font-family: var(--font-hand);
-  font-size: 1.05rem;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
   font-weight: 700;
-  color: rgba(0,0,0,0.85);
+  color: rgba(255,255,255,0.9);
   margin-bottom: 4px;
-  line-height: 1.15;
+  line-height: 1.2;
 }
 .sticky.idea .idea-desc {
-  font-family: var(--font-hand);
-  font-size: 0.88rem;
-  color: rgba(0,0,0,0.55);
-  line-height: 1.2;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  color: rgba(255,255,255,0.5);
+  line-height: 1.3;
 }
 .vote-row {
   position: absolute;
@@ -365,9 +381,9 @@ body {
   right: 10px;
   display: flex;
   gap: 12px;
-  font-family: var(--font-mono);
+  font-family: var(--font-body);
   font-size: 0.65rem;
-  color: rgba(0,0,0,0.4);
+  color: rgba(255,255,255,0.3);
 }
 .vote-row span {
   display: flex;
@@ -378,9 +394,9 @@ body {
   display: inline-block;
   width: 16px;
   height: 16px;
-  border: 1.5px solid rgba(0,0,0,0.25);
+  border: 1.5px solid rgba(255,255,255,0.2);
   border-radius: 50%;
-  background: rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.06);
 }
 
 /* ============ FLOW ARROW ============ */
@@ -397,22 +413,22 @@ body {
   opacity: 0.5;
 }
 .flow-arrow .arrow-label {
-  font-family: var(--font-hand);
-  font-size: 1rem;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
   color: var(--text-dim);
   margin-left: 8px;
 }
 
 /* ============ HMW BANNER ============ */
 .hmw-banner {
-  background: rgba(255,249,196,0.5);
-  border-left: 4px solid #ffc107;
+  background: rgba(201,169,110,0.1);
+  border-left: 4px solid var(--c3);
   padding: 12px 20px;
   margin-bottom: 16px;
-  border-radius: 0 6px 6px 0;
-  font-family: var(--font-hand);
-  font-size: 1.15rem;
-  font-weight: 600;
+  border-radius: 0 8px 8px 0;
+  font-family: var(--font-headline);
+  font-size: var(--text-lg);
+  font-weight: 400;
   color: var(--text);
 }
 
@@ -426,41 +442,42 @@ body {
 .concept-card {
   width: 320px;
   min-height: 180px;
-  border: 3px dashed rgba(0,0,0,0.15);
+  border: 1px solid rgba(255,255,255,0.1);
   border-radius: 12px;
   padding: 24px;
-  background: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.04);
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, transform 0.2s;
+  border-top: 3px solid;
 }
-.concept-card:hover { border-color: rgba(0,0,0,0.3); }
+.concept-card:hover { border-color: rgba(255,255,255,0.2); transform: translateY(-2px); }
 .concept-card .cc-num {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
   text-transform: uppercase;
   letter-spacing: 2px;
   color: var(--text-dim);
   margin-bottom: 8px;
 }
 .concept-card .cc-title {
-  font-family: var(--font-hand);
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-family: var(--font-headline);
+  font-size: var(--text-xl);
+  font-weight: 400;
   color: var(--text);
   margin-bottom: 4px;
 }
 .concept-card .cc-status {
   font-family: var(--font-body);
-  font-size: 0.8rem;
+  font-size: var(--text-xs);
   color: var(--text-light);
 }
-.concept-card.c1 { border-color: rgba(158,142,120,0.4); background: rgba(158,142,120,0.06); }
-.concept-card.c2 { border-color: rgba(100,160,230,0.4); background: rgba(187,222,251,0.15); }
-.concept-card.c3 { border-color: rgba(100,180,100,0.4); background: rgba(200,230,201,0.15); }
+.concept-card.c1 { border-top-color: var(--c1); background: rgba(70,130,180,0.08); }
+.concept-card.c2 { border-top-color: var(--c2); background: rgba(255,107,107,0.08); }
+.concept-card.c3 { border-top-color: var(--c3); background: rgba(201,169,110,0.08); }
 
 /* ============ RISK CALLOUT ============ */
 .risk-callout {
@@ -499,10 +516,10 @@ body {
   .idea-split { grid-template-columns: 1fr; }
 }
 .idea-column {
-  background: rgba(0,0,0,0.02);
+  background: rgba(255,255,255,0.03);
   border-radius: 12px;
   padding: 20px;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255,255,255,0.06);
 }
 
 /* ============ RESPONSIVE ============ */
@@ -529,11 +546,11 @@ body {
 .add-ideas-area {
   margin-top: 16px;
   padding-top: 14px;
-  border-top: 2px dashed rgba(0,0,0,0.1);
+  border-top: 2px dashed rgba(255,255,255,0.08);
 }
 .add-ideas-label {
-  font-family: var(--font-hand);
-  font-size: 1.1rem;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
   font-weight: 600;
   color: var(--text-dim);
   margin-bottom: 10px;
@@ -542,24 +559,24 @@ body {
   gap: 6px;
 }
 .sticky.editable {
-  border: 2px dashed rgba(0,0,0,0.15);
-  background: rgba(255,255,255,0.6) !important;
+  border: 2px dashed rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.04) !important;
   cursor: text;
   min-height: 100px;
   width: 200px;
 }
 .sticky.editable:focus-within {
-  border-color: rgba(0,0,0,0.3);
-  box-shadow: 4px 6px 16px rgba(0,0,0,0.15);
+  border-color: rgba(255,255,255,0.3);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
 }
 .sticky.editable .note-text {
   outline: none;
   min-height: 60px;
-  color: rgba(0,0,0,0.6);
+  color: rgba(255,255,255,0.5);
 }
 .sticky.editable .note-text:empty::before {
   content: attr(data-placeholder);
-  color: rgba(0,0,0,0.25);
+  color: rgba(255,255,255,0.2);
   font-style: italic;
 }
 
@@ -571,8 +588,8 @@ body {
   transform: translateY(-50%);
   width: 36px;
   height: 140px;
-  background: rgba(44,36,22,0.85);
-  color: #faf8f4;
+  background: rgba(255,255,255,0.08);
+  color: var(--text);
   border-radius: 8px 0 0 8px;
   display: flex;
   align-items: center;
@@ -586,11 +603,13 @@ body {
   letter-spacing: 1.5px;
   text-transform: uppercase;
   transition: width 0.2s, background 0.2s;
-  box-shadow: -2px 0 8px rgba(0,0,0,0.15);
+  box-shadow: -2px 0 8px rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-right: none;
 }
 .guide-trigger:hover {
   width: 42px;
-  background: rgba(44,36,22,0.95);
+  background: rgba(255,255,255,0.12);
 }
 
 .guide-panel {
@@ -599,12 +618,12 @@ body {
   top: 0;
   width: 400px;
   height: 100vh;
-  background: #faf8f4;
-  box-shadow: -4px 0 24px rgba(0,0,0,0.15);
+  background: #151d2e;
+  box-shadow: -4px 0 24px rgba(0,0,0,0.4);
   z-index: 1000;
   transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   overflow-y: auto;
-  border-left: 1px solid rgba(0,0,0,0.08);
+  border-left: 1px solid rgba(255,255,255,0.08);
 }
 .guide-panel.open {
   right: 0;
@@ -612,25 +631,25 @@ body {
 .guide-panel-header {
   position: sticky;
   top: 0;
-  background: #faf8f4;
+  background: #151d2e;
   padding: 20px 24px 14px;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
   display: flex;
   justify-content: space-between;
   align-items: center;
   z-index: 2;
 }
 .guide-panel-header h2 {
-  font-family: var(--font-hand);
-  font-size: 1.6rem;
-  font-weight: 700;
+  font-family: var(--font-headline);
+  font-size: var(--text-xl);
+  font-weight: 400;
   color: var(--text);
 }
 .guide-close {
   width: 32px;
   height: 32px;
   border: none;
-  background: rgba(0,0,0,0.06);
+  background: rgba(255,255,255,0.06);
   border-radius: 50%;
   font-size: 1.1rem;
   cursor: pointer;
@@ -641,19 +660,19 @@ body {
   transition: background 0.15s;
 }
 .guide-close:hover {
-  background: rgba(0,0,0,0.12);
+  background: rgba(255,255,255,0.12);
 }
 
 .guide-section {
   padding: 18px 24px;
-  border-bottom: 1px solid rgba(0,0,0,0.05);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
   border-left: 3px solid transparent;
   transition: background 0.35s ease, border-left-color 0.35s ease;
 }
 .guide-section:last-child { border-bottom: none; }
 .guide-section.active {
-  background: rgba(255,249,196,0.22);
-  border-left-color: #ffc107;
+  background: rgba(201,169,110,0.08);
+  border-left-color: var(--c3);
 }
 
 .guide-section .gs-icon {
@@ -677,7 +696,7 @@ body {
   margin-bottom: 8px;
 }
 .guide-section .gs-detail {
-  background: rgba(0,0,0,0.03);
+  background: rgba(255,255,255,0.04);
   border-radius: 6px;
   padding: 10px 12px;
   font-family: var(--font-body);
@@ -715,38 +734,38 @@ body {
 .guide-nav-dot {
   flex-shrink: 0;
   padding: 3px 10px;
-  font-family: var(--font-mono);
+  font-family: var(--font-body);
   font-size: 0.58rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--text-light);
-  background: rgba(0,0,0,0.04);
+  background: rgba(255,255,255,0.04);
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s;
   border: none;
   white-space: nowrap;
 }
-.guide-nav-dot:hover { background: rgba(0,0,0,0.08); color: var(--text-dim); }
-.guide-nav-dot.active { background: rgba(44,36,22,0.15); color: var(--text); font-weight: 600; }
+.guide-nav-dot:hover { background: rgba(255,255,255,0.08); color: var(--text-dim); }
+.guide-nav-dot.active { background: rgba(255,255,255,0.1); color: var(--text); font-weight: 600; }
 
 /* ============ PROCESS TIMELINE ============ */
 .process-timeline {
   display: flex; align-items: flex-start; justify-content: center; gap: 0;
   margin: 0 auto 24px; max-width: 680px;
-  padding: 16px 20px; background: rgba(0,0,0,0.025); border-radius: 12px;
+  padding: 16px 20px; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.06);
 }
 .pt-step { text-align: center; flex: 1; }
 .pt-num {
   width: 30px; height: 30px; border-radius: 50%;
-  background: rgba(0,0,0,0.08); color: var(--text-dim);
-  font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700;
+  background: rgba(255,255,255,0.08); color: var(--text-dim);
+  font-family: var(--font-body); font-size: 0.72rem; font-weight: 700;
   display: flex; align-items: center; justify-content: center; margin: 0 auto 5px;
 }
-.pt-step.done .pt-num { background: #4caf50; color: white; }
-.pt-step.current .pt-num { background: #ffc107; color: var(--text); box-shadow: 0 0 0 3px rgba(255,193,7,0.25); }
+.pt-step.done .pt-num { background: rgba(100,200,130,0.3); color: #6ddb8a; }
+.pt-step.current .pt-num { background: rgba(201,169,110,0.25); color: var(--c3); box-shadow: 0 0 0 3px rgba(201,169,110,0.15); }
 .pt-label { font-family: var(--font-body); font-size: 0.76rem; font-weight: 700; color: var(--text); }
-.pt-detail { font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-dim); margin-top: 2px; }
+.pt-detail { font-family: var(--font-body); font-size: 0.6rem; color: var(--text-dim); margin-top: 2px; }
 .pt-connector { color: var(--text-light); font-size: 1.1rem; padding-top: 3px; flex-shrink: 0; width: 36px; text-align: center; }
 
 /* ============ ROUND BLOCKS ============ */
@@ -755,63 +774,63 @@ body {
   display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; flex-wrap: wrap;
 }
 .round-num {
-  font-family: var(--font-mono); font-size: 0.62rem; text-transform: uppercase;
-  letter-spacing: 1.5px; color: white; background: var(--text);
+  font-family: var(--font-body); font-size: 0.62rem; text-transform: uppercase;
+  letter-spacing: 1.5px; color: #111827; background: rgba(255,255,255,0.7);
   padding: 3px 10px; border-radius: 10px; white-space: nowrap;
 }
-.round-title { font-family: var(--font-hand); font-size: 1.35rem; font-weight: 700; color: var(--text); }
-.round-meta { font-family: var(--font-mono); font-size: 0.62rem; color: var(--text-light); }
+.round-title { font-family: var(--font-headline); font-size: var(--text-lg); font-weight: 400; color: var(--text); }
+.round-meta { font-family: var(--font-body); font-size: 0.62rem; color: var(--text-light); }
 
 /* ============ AUTHOR BADGES ============ */
 .author-badge {
   position: absolute; top: -6px; left: -6px;
   width: 22px; height: 22px; border-radius: 50%;
-  font-family: var(--font-mono); font-size: 0.6rem; font-weight: 700;
+  font-family: var(--font-body); font-size: 0.6rem; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2); z-index: 2;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4); z-index: 2;
 }
-.author-badge.chris { background: #2196f3; color: white; }
+.author-badge.chris { background: var(--c1); color: white; }
 .author-badge.kalina { background: #9c27b0; color: white; }
 
 /* Kalina's sticky colors */
-.sticky.lavender { background: #e8d5f5; }
-.sticky.lavender-2 { background: #eddcf7; }
-.sticky.lavender-3 { background: #f2e6fa; }
+.sticky.lavender { background: rgba(160,100,220,0.22); }
+.sticky.lavender-2 { background: rgba(160,100,220,0.18); }
+.sticky.lavender-3 { background: rgba(160,100,220,0.15); }
 
 /* ============ CONCEPT BLOCKS ============ */
 .concept-block {
   margin-bottom: 32px; padding: 24px;
-  background: rgba(0,0,0,0.015); border-radius: 16px; border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03); border-radius: 16px; border: 1px solid rgba(255,255,255,0.06);
 }
-.concept-block.c2 { border-left: 4px solid rgba(100,160,230,0.5); }
-.concept-block.c3 { border-left: 4px solid rgba(100,180,100,0.5); }
+.concept-block.c2 { border-left: 4px solid rgba(255,107,107,0.4); }
+.concept-block.c3 { border-left: 4px solid rgba(201,169,110,0.4); }
 
 /* ============ STIMULUS COLLAPSIBLE ============ */
 .stimulus-block {
-  margin-top: 20px; border: 2px dashed rgba(0,0,0,0.08);
+  margin-top: 20px; border: 1px dashed rgba(255,255,255,0.1);
   border-radius: 12px; overflow: hidden;
 }
 .stimulus-block summary {
   display: flex; align-items: baseline; gap: 10px;
   padding: 14px 20px; cursor: pointer;
-  background: rgba(0,0,0,0.02); list-style: none; flex-wrap: wrap;
+  background: rgba(255,255,255,0.02); list-style: none; flex-wrap: wrap;
 }
 .stimulus-block summary::-webkit-details-marker { display: none; }
 .stimulus-block summary::before {
-  content: '▶'; font-size: 0.65rem; color: var(--text-light);
+  content: '\25B6'; font-size: 0.65rem; color: var(--text-light);
   transition: transform 0.25s; flex-shrink: 0; margin-top: 3px;
 }
 .stimulus-block[open] summary::before { transform: rotate(90deg); }
-.stimulus-block[open] summary { border-bottom: 1px solid rgba(0,0,0,0.06); }
+.stimulus-block[open] summary { border-bottom: 1px solid rgba(255,255,255,0.06); }
 .stimulus-block .stimulus-body { padding: 16px 20px; }
-.stimulus-block .round-num { background: var(--text-dim); }
+.stimulus-block .round-num { background: rgba(255,255,255,0.15); color: var(--text); }
 
 /* Pending brainstorm placeholder */
 .pending-brainstorm {
   text-align: center; padding: 28px 20px;
-  color: var(--text-dim); font-family: var(--font-body); font-size: 0.88rem;
-  border: 2px dashed rgba(0,0,0,0.1); border-radius: 12px;
-  background: rgba(0,0,0,0.015); margin-bottom: 16px;
+  color: var(--text-dim); font-family: var(--font-body); font-size: var(--text-sm);
+  border: 2px dashed rgba(255,255,255,0.08); border-radius: 12px;
+  background: rgba(255,255,255,0.02); margin-bottom: 16px;
 }
 .pending-brainstorm .pending-icon { font-size: 1.8rem; margin-bottom: 8px; }
 
@@ -829,7 +848,7 @@ body {
   padding: 8px 14px;
   border-radius: 28px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.06);
-  font-family: var(--font-mono);
+  font-family: var(--font-body);
   user-select: none;
   transition: opacity 0.3s, transform 0.3s;
 }
@@ -849,7 +868,7 @@ body {
   justify-content: center;
   transition: background 0.15s;
   flex-shrink: 0;
-  font-family: var(--font-mono);
+  font-family: var(--font-body);
 }
 .zoom-bar button:hover { background: rgba(255,255,255,0.22); }
 .zoom-bar button:active { background: rgba(255,255,255,0.3); transform: scale(0.92); }
@@ -924,10 +943,12 @@ body {
 
 /* ============ PRINT ============ */
 @media print {
-  body { background: white; }
+  @page { margin: 1.5cm; size: A4; }
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  body { background: #111827; }
   .board-scaler { zoom: 1 !important; }
   .section { break-inside: avoid; animation: none; }
-  .sticky:hover { transform: none; box-shadow: 2px 3px 6px rgba(0,0,0,0.12); }
+  .sticky:hover { transform: none; box-shadow: none; }
   .guide-trigger, .guide-panel, .add-ideas-area, .zoom-bar { display: none; }
 }
 </style>
@@ -935,43 +956,43 @@ body {
 <body>
 
 <!-- ======== CONTEXT GUIDE SIDEBAR ======== -->
-<div class="guide-trigger" onclick="document.querySelector('.guide-panel').classList.toggle('open'); this.style.display='none'">📖 GUIDE</div>
+<div class="guide-trigger" onclick="document.querySelector('.guide-panel').classList.toggle('open'); this.style.display='none'">GUIDE</div>
 <div class="guide-panel" id="guidePanel">
   <div class="guide-panel-header">
-    <h2>📖 Board Guide</h2>
-    <button class="guide-close" onclick="this.closest('.guide-panel').classList.remove('open'); document.querySelector('.guide-trigger').style.display='flex'">✕</button>
+    <h2>Board Guide</h2>
+    <button class="guide-close" onclick="this.closest('.guide-panel').classList.remove('open'); document.querySelector('.guide-trigger').style.display='flex'">&times;</button>
   </div>
 
   <div class="guide-nav">
     <button class="guide-nav-dot active" data-target="guide-overview">Overview</button>
-    <button class="guide-nav-dot" data-target="guide-brett">🩷 Brett</button>
-    <button class="guide-nav-dot" data-target="guide-audience">🤍 Audience</button>
-    <button class="guide-nav-dot" data-target="guide-intersections">🟡 Intersections</button>
+    <button class="guide-nav-dot" data-target="guide-brett">Brett</button>
+    <button class="guide-nav-dot" data-target="guide-audience">Audience</button>
+    <button class="guide-nav-dot" data-target="guide-intersections">Intersections</button>
     <button class="guide-nav-dot" data-target="guide-why-two">Why 3?</button>
-    <button class="guide-nav-dot" data-target="guide-ideation">💡 Ideation</button>
-    <button class="guide-nav-dot" data-target="guide-mediums">📡 Mediums</button>
-    <button class="guide-nav-dot" data-target="guide-path2">🔄 Path 2</button>
-    <button class="guide-nav-dot" data-target="guide-convergence">⭐ Converge</button>
-    <button class="guide-nav-dot" data-target="guide-colors">🎨 Colors</button>
-    <button class="guide-nav-dot" data-target="guide-risk">⚠️ Risk</button>
+    <button class="guide-nav-dot" data-target="guide-ideation">Ideation</button>
+    <button class="guide-nav-dot" data-target="guide-mediums">Mediums</button>
+    <button class="guide-nav-dot" data-target="guide-path2">Path 2</button>
+    <button class="guide-nav-dot" data-target="guide-convergence">Converge</button>
+    <button class="guide-nav-dot" data-target="guide-colors">Colors</button>
+    <button class="guide-nav-dot" data-target="guide-risk">Risk</button>
   </div>
 
-  <!-- ─── OVERVIEW ─── -->
+  <!--  OVERVIEW  -->
   <div class="guide-section active" id="guide-overview" data-section="section-brett">
-    <h3><span class="gs-icon">🎯</span> What Is This Board?</h3>
+    <h3><span class="gs-icon">&bull;</span> What Is This Board?</h3>
     <p>A digital artefact of our design thinking process — from sticky notes on a wall to three locked product concepts. This board documents every decision, iteration, and pivot along the way.</p>
     <div class="gs-detail">
       <strong>Design Thinking Process:</strong> Empathize → Define → Ideate → Prototype → Test.<br>
       This board covers <strong>Empathize</strong> (48 pain points from interviews), <strong>Define</strong> (6 intersections → HMW questions), <strong>Ideate</strong> (78 ideas across 3 rounds), and an <strong>iteration loop</strong> back to Define (Path 2) when we discovered our concepts were overlapping. The result: 3 genuinely distinct product concepts ready for pitch pages.
     </div>
     <div class="gs-detail" style="margin-top:8px;">
-      <strong>How to read:</strong> Scroll top → bottom = chronological process. Each section builds on the previous one. The <strong>ℹ️ buttons</strong> next to headers explain <em>why</em> that section exists. The <strong>🔄 Path 2</strong> section shows where the team iterated — this is design thinking working as intended, not a mistake.
+      <strong>How to read:</strong> Scroll top → bottom = chronological process. Each section builds on the previous one. The <strong>i buttons</strong> next to headers explain <em>why</em> that section exists. The <strong>Path 2</strong> section shows where the team iterated — this is design thinking working as intended, not a mistake.
     </div>
   </div>
 
-  <!-- ─── BRETT ─── -->
+  <!--  BRETT  -->
   <div class="guide-section" id="guide-brett" data-section="section-brett">
-    <h3><span class="gs-icon">🩷</span> Brett's Pain Points</h3>
+    <h3><span class="gs-icon">&bull;</span> Brett's Pain Points</h3>
     <div class="gs-detail" style="margin-bottom:8px;">
       <strong>Phase:</strong> Empathize · <strong>When:</strong> After Meeting #1 · <strong>Method:</strong> Client interview + team synthesis
     </div>
@@ -982,35 +1003,35 @@ body {
     </div>
   </div>
 
-  <!-- ─── AUDIENCE ─── -->
+  <!--  AUDIENCE  -->
   <div class="guide-section" id="guide-audience" data-section="section-audience">
-    <h3><span class="gs-icon">🤍</span> Audience Pain Points</h3>
+    <h3><span class="gs-icon">&bull;</span> Audience Pain Points</h3>
     <div class="gs-detail" style="margin-bottom:8px;">
       <strong>Phase:</strong> Empathize · <strong>When:</strong> After Meeting #1 · <strong>Method:</strong> Desk research + team analysis
     </div>
     <p><strong>Why:</strong> A product only works if it solves a real problem for real people. We can't just design for what Brett wants — we must understand what his potential audience actually struggles with when consuming news and analysis.</p>
     <p>28 pain points clustered into 6 themes. White post-its = audience side (consumer).</p>
-    <div class="gs-color-note"><span class="mini-swatch" style="background:#fefefe; border:1px solid #ddd"></span> Pure white = primary pain (directly stated)</div>
-    <div class="gs-color-note"><span class="mini-swatch" style="background:#f4f3ef"></span> Warm/beige = secondary pain (related, less sharp)</div>
-    <div class="gs-color-note"><span class="mini-swatch" style="background:#efeee9"></span> Darker beige = implied pain (inferred, not stated)</div>
+    <div class="gs-color-note"><span class="mini-swatch" style="background:var(--white-1)"></span> Bright = primary pain (directly stated)</div>
+    <div class="gs-color-note"><span class="mini-swatch" style="background:var(--white-2)"></span> Medium = secondary pain (related, less sharp)</div>
+    <div class="gs-color-note"><span class="mini-swatch" style="background:var(--white-3)"></span> Dimmer = implied pain (inferred, not stated)</div>
   </div>
 
-  <!-- ─── INTERSECTIONS ─── -->
+  <!--  INTERSECTIONS  -->
   <div class="guide-section" id="guide-intersections" data-section="section-intersections">
-    <h3><span class="gs-icon">🟡</span> Intersections</h3>
+    <h3><span class="gs-icon">&bull;</span> Intersections</h3>
     <div class="gs-detail" style="margin-bottom:8px;">
       <strong>Phase:</strong> Define · <strong>When:</strong> Week 5 · <strong>Method:</strong> Affinity mapping + cross-referencing
     </div>
     <p><strong>Why:</strong> The magic happens where Brett's pain meets audience pain. If we only solve Brett's problems, we build something nobody wants to use. If we only solve audience problems, Brett won't invest. Intersections are the only viable product territory — where both sides win.</p>
     <p>We found 6 intersections. Orange-badged ones were selected for concept development. Each intersection became the seed for a "How Might We" question that frames the ideation.</p>
     <div class="gs-detail" style="margin-top:8px;">
-      <strong>Path 1 selection:</strong> Intersections 2+3 → C2, Intersections 5+6 → C3. In Path 2 these pairings evolved — the team split content territories to create genuinely different products. See 🔄 Path 2 for the full story.
+      <strong>Path 1 selection:</strong> Intersections 2+3 → C2, Intersections 5+6 → C3. In Path 2 these pairings evolved — the team split content territories to create genuinely different products. See Path 2 for the full story.
     </div>
   </div>
 
-  <!-- ─── WHY THREE ─── -->
+  <!--  WHY THREE  -->
   <div class="guide-section" id="guide-why-two" data-section="section-intersections">
-    <h3><span class="gs-icon">❓</span> Why Three Concepts?</h3>
+    <h3><span class="gs-icon">?</span> Why Three Concepts?</h3>
     <p>We have 6 intersections but only need 3 concepts (minimum per I2P brief). C1 was always Brett's original ask. For C2 and C3, we paired intersections and then — crucially — split <strong>content territories</strong> to prevent overlap.</p>
     <div class="gs-detail">
       <strong>Farid's concept strategy:</strong><br>
@@ -1023,9 +1044,9 @@ body {
     </div>
   </div>
 
-  <!-- ─── IDEATION ─── -->
+  <!--  IDEATION  -->
   <div class="guide-section" id="guide-ideation" data-section="section-ideation">
-    <h3><span class="gs-icon">💡</span> Ideation</h3>
+    <h3><span class="gs-icon">&bull;</span> Ideation</h3>
     <div class="gs-detail" style="margin-bottom:8px;">
       <strong>Phase:</strong> Ideate · <strong>When:</strong> Week 6 · <strong>Method:</strong> Multi-round divergent brainstorming
     </div>
@@ -1034,17 +1055,17 @@ body {
       <strong>Our process:</strong><br>
       <strong>Round 1 — Own Thinking:</strong> Chris and Kalina brainstormed independently, no AI. Pure instinct. 38 ideas total.<br>
       <strong>Round 2 — Independent AI Ideation:</strong> Claude generated 20 fresh ideas per concept using creative lenses (analogy, reversal, "What Would X Do?") — fully independent from Round 1 to avoid bias.<br>
-      <strong>Session Review:</strong> Rapid-fire votes on all ideas (👍 👎 ⭐ 💡). Votes + sparks identified the strongest signals and surprising connections.<br>
+      <strong>Session Review:</strong> Rapid-fire votes on all ideas (yes, no, star, spark). Votes + sparks identified the strongest signals and surprising connections.<br>
       <strong>Path 2 Re-Define:</strong> Concepts were overlapping → team went back to Define, split content territories, and converged on 3 distinct products.
     </div>
     <div class="gs-detail" style="margin-top:8px;">
-      <strong>Author badges:</strong> <span style="background:#2196f3; color:white; padding:1px 6px; border-radius:8px; font-size:0.7rem;">C</span> = Chris · <span style="background:#9c27b0; color:white; padding:1px 6px; border-radius:8px; font-size:0.7rem;">K</span> = Kalina · <span style="background:rgba(0,0,0,0.55); color:white; padding:1px 6px; border-radius:8px; font-size:0.7rem;">AI</span> = Claude. Ideas clustered by theme, not author.
+      <strong>Author badges:</strong> <span style="background:var(--c1); color:white; padding:1px 6px; border-radius:8px; font-size:0.7rem;">C</span> = Chris · <span style="background:#9c27b0; color:white; padding:1px 6px; border-radius:8px; font-size:0.7rem;">K</span> = Kalina · <span style="background:rgba(255,255,255,0.2); color:white; padding:1px 6px; border-radius:8px; font-size:0.7rem;">AI</span> = Claude. Ideas clustered by theme, not author.
     </div>
   </div>
 
-  <!-- ─── MEDIUM LANDSCAPE ─── -->
+  <!--  MEDIUM LANDSCAPE  -->
   <div class="guide-section" id="guide-mediums" data-section="section-ideation">
-    <h3><span class="gs-icon">📡</span> Information Medium Landscape</h3>
+    <h3><span class="gs-icon">&bull;</span> Information Medium Landscape</h3>
     <div class="gs-detail" style="margin-bottom:8px;">
       <strong>Phase:</strong> Ideate (research input) · <strong>When:</strong> Parallel to brainstorming · <strong>Method:</strong> Desk research
     </div>
@@ -1057,9 +1078,9 @@ body {
     </div>
   </div>
 
-  <!-- ─── PATH 2 RE-DEFINE ─── -->
+  <!--  PATH 2 RE-DEFINE  -->
   <div class="guide-section" id="guide-path2" data-section="section-path2">
-    <h3><span class="gs-icon">🔄</span> Path 2 — Back to Define</h3>
+    <h3><span class="gs-icon">&bull;</span> Path 2 — Back to Define</h3>
     <div class="gs-detail" style="margin-bottom:8px;">
       <strong>Phase:</strong> Ideate → Define (iteration loop) · <strong>When:</strong> After session review · <strong>Method:</strong> HMW re-framing, content territory splitting
     </div>
@@ -1078,9 +1099,9 @@ body {
     </div>
   </div>
 
-  <!-- ─── CONVERGENCE ─── -->
+  <!--  CONVERGENCE  -->
   <div class="guide-section" id="guide-convergence" data-section="section-convergence">
-    <h3><span class="gs-icon">⭐</span> Convergence Zone — 3 Final Concepts</h3>
+    <h3><span class="gs-icon">&bull;</span> Convergence Zone — 3 Final Concepts</h3>
     <div class="gs-detail" style="margin-bottom:8px;">
       <strong>Phase:</strong> Converge · <strong>When:</strong> Week 7 · <strong>Method:</strong> Selection, synthesis, differentiation test
     </div>
@@ -1099,22 +1120,22 @@ body {
     </div>
   </div>
 
-  <!-- ─── COLORS ─── -->
+  <!--  COLORS  -->
   <div class="guide-section" id="guide-colors" data-section="section-ideation">
-    <h3><span class="gs-icon">🎨</span> Color Coding Summary</h3>
-    <div class="gs-color-note"><span class="mini-swatch" style="background:#ffb3ba"></span> <strong>Pink</strong> = Brett's pain points (creator side)</div>
-    <div class="gs-color-note"><span class="mini-swatch" style="background:#fefefe; border:1px solid #ddd"></span> <strong>White</strong> = Audience pain points (consumer side)</div>
-    <div class="gs-color-note"><span class="mini-swatch" style="background:#fff9c4"></span> <strong>Yellow</strong> = Intersections (where both pains overlap)</div>
-    <div class="gs-color-note"><span class="mini-swatch" style="background:#bbdefb"></span> <strong>Blue stickies</strong> = Concept 2 ideas · The Curiosity Game</div>
-    <div class="gs-color-note"><span class="mini-swatch" style="background:#c8e6c9"></span> <strong>Green stickies</strong> = Concept 3 ideas · The Dinner Table Drop</div>
-    <div class="gs-color-note"><span class="mini-swatch" style="background:#e8d5f5"></span> <strong>Lavender</strong> = Kalina's ideas (within C2 and C3)</div>
-    <div class="gs-color-note"><span class="mini-swatch" style="background:rgba(255,152,0,0.3); border:2px solid #ff9800"></span> <strong>Orange border</strong> = Selected for concept development</div>
+    <h3><span class="gs-icon">&bull;</span> Color Coding Summary</h3>
+    <div class="gs-color-note"><span class="mini-swatch" style="background:var(--pink-1)"></span> <strong>Pink</strong> = Brett's pain points (creator side)</div>
+    <div class="gs-color-note"><span class="mini-swatch" style="background:var(--white-1)"></span> <strong>White/Blue</strong> = Audience pain points (consumer side)</div>
+    <div class="gs-color-note"><span class="mini-swatch" style="background:var(--yellow-1)"></span> <strong>Yellow</strong> = Intersections (where both pains overlap)</div>
+    <div class="gs-color-note"><span class="mini-swatch" style="background:var(--blue-1)"></span> <strong>Blue stickies</strong> = Concept 2 ideas &middot; The Curiosity Game</div>
+    <div class="gs-color-note"><span class="mini-swatch" style="background:var(--green-1)"></span> <strong>Green stickies</strong> = Concept 3 ideas &middot; The Dinner Table Drop</div>
+    <div class="gs-color-note"><span class="mini-swatch" style="background:rgba(160,100,220,0.22)"></span> <strong>Lavender</strong> = Kalina's ideas (within C2 and C3)</div>
+    <div class="gs-color-note"><span class="mini-swatch" style="background:rgba(201,169,110,0.3); border:2px solid var(--c3)"></span> <strong>Gold border</strong> = Selected for concept development</div>
     <div class="gs-color-note" style="margin-top:6px; font-size:0.72rem; color:var(--text-dim); font-style:italic;">Note: In the Ideation section, blue/green refer to original concept groupings (Path 1). After Path 2, the content was redistributed — the sticky colors reflect where ideas originated, not where they ended up.</div>
   </div>
 
-  <!-- ─── RISK ─── -->
+  <!--  RISK  -->
   <div class="guide-section" id="guide-risk" data-section="section-intersections">
-    <h3><span class="gs-icon">⚠️</span> Riskiest Assumptions</h3>
+    <h3><span class="gs-icon">&bull;</span> Riskiest Assumptions</h3>
     <p><strong>#1 — Willingness to pay:</strong> Brett wants to monetize, but we have zero evidence his audience would pay. No intersection exists for monetization — it's purely Brett's wish, not a shared pain.</p>
     <div class="gs-detail" style="margin-top:8px;">
       <strong>#2 — AI trust:</strong> C3 depends on AI-generated content that "never sounds like AI." This is a technical bet. If the output feels robotic, the core proposition collapses.
@@ -1150,20 +1171,20 @@ body {
 <!-- ======== LEGEND ======== -->
 <div class="legend">
   <div class="legend-item"><div class="legend-swatch" style="background:var(--pink-1)"></div> Brett's Pain Points</div>
-  <div class="legend-item"><div class="legend-swatch" style="background:var(--white-1); border:1px solid #ddd"></div> Audience Pain Points</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:var(--white-1)"></div> Audience Pain Points</div>
   <div class="legend-item"><div class="legend-swatch" style="background:var(--yellow-1)"></div> Intersections</div>
   <div class="legend-item"><div class="legend-swatch" style="background:var(--blue-1)"></div> Concept 2 Ideas</div>
   <div class="legend-item"><div class="legend-swatch" style="background:var(--green-1)"></div> Concept 3 Ideas</div>
-  <div class="legend-item"><div class="legend-swatch" style="background:rgba(255,152,0,0.3); border:2px solid #ff9800"></div> Selected for Concepts</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:rgba(201,169,110,0.3); border:2px solid var(--c3)"></div> Selected for Concepts</div>
 </div>
 
 <div class="board">
 
-<!-- ════════════════════════════════════════════ -->
+<!--  -->
 <!-- SECTION 1: BRETT'S PAIN POINTS              -->
-<!-- ════════════════════════════════════════════ -->
+<!--  -->
 <section class="section" id="section-brett">
-  <div class="section-label pink">🩷 Brett's Pain Points <span class="section-count">20 pain points</span><button class="info-btn" onclick="openGuide('guide-brett')" title="Why this section?">ℹ</button></div>
+  <div class="section-label pink">Brett's Pain Points <span class="section-count">20 pain points</span><button class="info-btn" onclick="openGuide('guide-brett')" title="Why this section?">i</button></div>
 
   <div class="cluster">
     <div class="cluster-name">AI &amp; Content Quality</div>
@@ -1228,11 +1249,11 @@ body {
   <span class="arrow-label">mapped against</span>
 </div>
 
-<!-- ════════════════════════════════════════════ -->
+<!--  -->
 <!-- SECTION 2: AUDIENCE PAIN POINTS             -->
-<!-- ════════════════════════════════════════════ -->
+<!--  -->
 <section class="section" id="section-audience">
-  <div class="section-label white">🤍 Audience Pain Points <span class="section-count">28 pain points</span><button class="info-btn" onclick="openGuide('guide-audience')" title="Why this section?">ℹ</button></div>
+  <div class="section-label white">Audience Pain Points <span class="section-count">28 pain points</span><button class="info-btn" onclick="openGuide('guide-audience')" title="Why this section?">i</button></div>
 
   <div class="cluster">
     <div class="cluster-name">Trust &amp; Authenticity Crisis</div>
@@ -1305,11 +1326,11 @@ body {
   <span class="arrow-label">reveals 6 intersections</span>
 </div>
 
-<!-- ════════════════════════════════════════════ -->
+<!--  -->
 <!-- SECTION 3: INTERSECTIONS                    -->
-<!-- ════════════════════════════════════════════ -->
+<!--  -->
 <section class="section" id="section-intersections">
-  <div class="section-label yellow">🟡 Intersections — Where Pain Meets Pain <span class="section-count">6 intersections</span><button class="info-btn" onclick="openGuide('guide-intersections')" title="Why this section?">ℹ</button></div>
+  <div class="section-label yellow">Intersections — Where Pain Meets Pain <span class="section-count">6 intersections</span><button class="info-btn" onclick="openGuide('guide-intersections')" title="Why this section?">i</button></div>
 
   <div class="stickies" style="gap:16px;">
     <div class="sticky yellow r2">
@@ -1356,7 +1377,7 @@ body {
 
 <!-- RISK CALLOUT -->
 <div class="risk-callout">
-  <span class="risk-icon">⚠️</span>
+  <span class="risk-icon">&bull;</span>
   <div class="risk-text"><strong>RISKIEST ASSUMPTION:</strong> Brett wants monetization (Pain Point #15), but we have ZERO evidence the audience would pay. No intersection exists for this. This is the most dangerous assumption in the entire project.</div>
 </div>
 
@@ -1366,11 +1387,11 @@ body {
   <span class="arrow-label">generates solution ideas</span>
 </div>
 
-<!-- ════════════════════════════════════════════ -->
+<!--  -->
 <!-- SECTION 4: IDEATION                         -->
-<!-- ════════════════════════════════════════════ -->
+<!--  -->
 <section class="section" id="section-ideation">
-  <div class="section-label blue">💡 Ideation — Solution Ideas <span class="section-count">38 own + 40 AI · 65 mediums</span><button class="info-btn" onclick="openGuide('guide-ideation')" title="Why this section?">ℹ</button></div>
+  <div class="section-label blue">Ideation — Solution Ideas <span class="section-count">38 own + 40 AI · 65 mediums</span><button class="info-btn" onclick="openGuide('guide-ideation')" title="Why this section?">i</button></div>
 
   <!-- PROCESS TIMELINE -->
   <div class="process-timeline">
@@ -1402,9 +1423,9 @@ body {
   <div class="concept-block c2">
 
   <div class="hmw-banner" style="opacity:0.6; text-decoration:line-through; font-size:0.85rem;">HMW make consuming deep analysis feel as effortless as scrolling — but leave knowledge that compounds over weeks?</div>
-  <div class="hmw-banner" style="border-left-color:#4caf50; background:rgba(76,175,80,0.06);">🔄 <strong>Path 2 HMW:</strong> How might we turn Brett's curation into something people remember, use, and talk about?</div>
+  <div class="hmw-banner" style="border-left-color:var(--c3); background:rgba(201,169,110,0.08);"><strong>Path 2 HMW:</strong> How might we turn Brett's curation into something people remember, use, and talk about?</div>
 
-  <!-- ═══════ ROUND 1: OUR OWN THINKING ═══════ -->
+  <!--  ROUND 1: OUR OWN THINKING  -->
   <div class="round-block">
     <div class="round-header-bar">
       <span class="round-num">Round 1</span>
@@ -1414,7 +1435,7 @@ body {
 
     <!-- CLUSTER: Retention & Gamification -->
     <div class="cluster">
-      <div class="cluster-name">🧠 Retention &amp; Gamification</div>
+      <div class="cluster-name">Retention &amp; Gamification</div>
       <div class="stickies">
         <div class="sticky blue idea r2"><span class="author-badge chris">C</span><span class="note-num">C1</span><span class="note-text">Competition like Quistwell (German quiz app)</span></div>
         <div class="sticky blue-2 idea r5"><span class="author-badge chris">C</span><span class="note-num">C7</span><span class="note-text">Interactive workflows, gamification for longevity</span></div>
@@ -1426,7 +1447,7 @@ body {
 
     <!-- CLUSTER: Distribution & Visual Format -->
     <div class="cluster">
-      <div class="cluster-name">📦 Distribution &amp; Visual Format</div>
+      <div class="cluster-name">Distribution &amp; Visual Format</div>
       <div class="stickies">
         <div class="sticky blue idea r3"><span class="author-badge chris">C</span><span class="note-num">C5</span><span class="note-text">Voice notes via WhatsApp / Telegram channel</span></div>
         <div class="sticky blue-3 idea r6"><span class="author-badge chris">C</span><span class="note-num">C10</span><span class="note-text">Animated videos of complex situations — "what would happen"</span></div>
@@ -1447,7 +1468,7 @@ body {
 
     <!-- CLUSTER: Weekly Cadence -->
     <div class="cluster">
-      <div class="cluster-name">📅 Weekly Cadence &amp; Story Arcs</div>
+      <div class="cluster-name">Weekly Cadence &amp; Story Arcs</div>
       <div class="stickies">
         <div class="sticky blue idea r4"><span class="author-badge chris">C</span><span class="note-num">C4</span><span class="note-text">Weekly cycle — Mon headlines, Tue deep dive, Wed…</span></div>
         <div class="sticky lavender idea r7"><span class="author-badge kalina">K</span><span class="note-num">K6</span><span class="note-text">One story → development over the week (e.g. Ukraine)</span></div>
@@ -1456,7 +1477,7 @@ body {
 
     <!-- CLUSTER: Tone & Positioning -->
     <div class="cluster">
-      <div class="cluster-name">🎭 Tone &amp; Positioning</div>
+      <div class="cluster-name">Tone &amp; Positioning</div>
       <div class="stickies">
         <div class="sticky blue idea r6"><span class="author-badge chris">C</span><span class="note-num">C3</span><span class="note-text">Comedy vibes — funny small animated shows</span></div>
         <div class="sticky lavender-3 idea r3"><span class="author-badge kalina">K</span><span class="note-num">K2</span><span class="note-text">Newspaper for deep thinkers</span></div>
@@ -1465,7 +1486,7 @@ body {
 
     <!-- CLUSTER: Interactive Depth & Community -->
     <div class="cluster">
-      <div class="cluster-name">🌳 Interactive Depth &amp; Community</div>
+      <div class="cluster-name">Interactive Depth &amp; Community</div>
       <div class="stickies">
         <div class="sticky blue-3 idea r2"><span class="author-badge chris">C</span><span class="note-num">C9</span><span class="note-text">Decision tree simplification / interactive HTML daily mini-apps</span></div>
         <div class="sticky blue idea r5"><span class="author-badge chris">C</span><span class="note-num">C11</span><span class="note-text">"What would Brett think?" / Community predictions (Polymarket-style)</span></div>
@@ -1474,7 +1495,7 @@ body {
 
     <!-- CLUSTER: B2B Pivot -->
     <div class="cluster">
-      <div class="cluster-name">💼 B2B Pivot</div>
+      <div class="cluster-name">B2B Pivot</div>
       <div class="stickies">
         <div class="sticky blue-2 idea r8"><span class="author-badge chris">C</span><span class="note-num">C2</span><span class="note-text">B2B for company employees — 15min daily briefing to start the day</span></div>
       </div>
@@ -1482,7 +1503,7 @@ body {
 
     <!-- Editable area -->
     <div class="add-ideas-area">
-      <div class="add-ideas-label">✏️ Add more ideas here</div>
+      <div class="add-ideas-label">Add more ideas here</div>
       <div class="stickies">
         <div class="sticky blue editable r3"><span class="note-text" contenteditable="true" data-placeholder="Chris: type idea..."></span></div>
         <div class="sticky lavender editable r6"><span class="note-text" contenteditable="true" data-placeholder="Kalina: type idea..."></span></div>
@@ -1491,10 +1512,10 @@ body {
     </div>
   </div>
 
-  <!-- ═══════ ROUND 2: INDEPENDENT AI IDEATION ═══════ -->
+  <!--  ROUND 2: INDEPENDENT AI IDEATION  -->
   <details class="stimulus-block" style="border-color: rgba(33,150,243,0.2);">
     <summary>
-      <span class="round-num" style="background:#2196f3;">Round 2</span>
+      <span class="round-num" style="background:var(--c1);">Round 2</span>
       <span class="round-title">Independent AI Ideation</span>
       <span class="round-meta">20 fresh ideas · no bias from Round 1 · click to expand</span>
     </summary>
@@ -1525,37 +1546,37 @@ body {
     </div>
   </details>
 
-  <!-- ═══════ C2 SESSION DEBRIEF ═══════ -->
+  <!--  C2 SESSION DEBRIEF  -->
   <div class="debrief">
-    <div class="debrief-title">📋 C2 Session Debrief — What Resonated</div>
+    <div class="debrief-title">C2 Session Debrief — What Resonated</div>
 
     <div style="margin-bottom:16px;">
       <p style="font-size:0.78rem; color:var(--text-dim); margin:0 0 10px;">Rapid-fire review of 20 AI ideas. Votes:</p>
       <div style="display:flex; flex-wrap:wrap; gap:6px; font-size:0.75rem;">
-        <span class="vote-tag yes">🔥 #2 Binge Arc</span>
-        <span class="vote-tag yes">🔥 #7 Reader-Rendered</span>
-        <span class="vote-tag yes">🔥 #8 Argument Club</span>
-        <span class="vote-tag yes">🔥 #11 Boss Level Brief</span>
-        <span class="vote-tag maybe">🤔 #15 Earworm (mnemonic)</span>
-        <span class="vote-tag maybe">🤔 #17 Memory Palace</span>
-        <span class="vote-tag no">❌ #1 Streak</span>
-        <span class="vote-tag no">❌ #4 Wednesday Drop</span>
-        <span class="vote-tag no">❌ #5 Broadsheet</span>
-        <span class="vote-tag no">❌ #6 Listener's Digest</span>
-        <span class="vote-tag no">❌ #9 Analysis Reps</span>
-        <span class="vote-tag no">❌ #12 Spaced Dispatch</span>
-        <span class="vote-tag no">❌ #20 Kid's Version</span>
+        <span class="vote-tag yes">#2 Binge Arc</span>
+        <span class="vote-tag yes">#7 Reader-Rendered</span>
+        <span class="vote-tag yes">#8 Argument Club</span>
+        <span class="vote-tag yes">#11 Boss Level Brief</span>
+        <span class="vote-tag maybe">#15 Earworm (mnemonic)</span>
+        <span class="vote-tag maybe">#17 Memory Palace</span>
+        <span class="vote-tag no">#1 Streak</span>
+        <span class="vote-tag no">#4 Wednesday Drop</span>
+        <span class="vote-tag no">#5 Broadsheet</span>
+        <span class="vote-tag no">#6 Listener's Digest</span>
+        <span class="vote-tag no">#9 Analysis Reps</span>
+        <span class="vote-tag no">#12 Spaced Dispatch</span>
+        <span class="vote-tag no">#20 Kid's Version</span>
       </div>
     </div>
 
     <div class="spark-card">
-      <div class="spark-label">💡 Spark Idea — emerged during discussion</div>
+      <div class="spark-label">Spark Idea — emerged during discussion</div>
       <h4>Choose-Your-Path Interactive Analysis</h4>
       <p>Triggered by #8 Argument Club. Like video games with branching outcomes — give the reader a situation, let them choose A or B, then show the implications. Example: "If lung volume were 12L instead of 4L, you could stay underwater 15 minutes." Interactive cause-and-effect that makes analysis stick through decision-making, not passive reading.</p>
     </div>
 
     <div class="spark-card">
-      <div class="spark-label">💡 Key Insight</div>
+      <div class="spark-label">Key Insight</div>
       <h4>"We want them to remember by being good enough, not by explicitly teaching them"</h4>
       <p>Triggered by #15 Earworm and discussion of mnemonics ("Donkey Bridge" in German). The insight: don't design retention mechanisms (flashcards, quizzes). Design content that's inherently memorable because it's surprising, visceral, or story-driven. Retention should be a side effect, not a feature.</p>
     </div>
@@ -1563,13 +1584,13 @@ body {
 
   </div><!-- /concept-block c2 -->
 
-  <!-- ═══════════════════════════════════════════ -->
+  <!--  -->
   <!-- CONCEPT 3: COMMUNITY + AUTHENTICITY         -->
-  <!-- ═══════════════════════════════════════════ -->
+  <!--  -->
   <div class="concept-block c3" style="margin-top:32px;">
-    <div class="section-label green-label" style="font-size:1.3rem; margin-bottom:8px;">💚 Concept 3 — Community + Authenticity <span style="font-size:0.72rem; font-weight:400; color:var(--text-dim);">→ Path 2: becomes The Dinner Table Drop (news + AI trust)</span></div>
-    <div class="hmw-banner" style="border-left-color:#4caf50; opacity:0.6; text-decoration:line-through; font-size:0.85rem;">HMW give every curious person their 'smartest friend at the dinner table' — at scale — without losing the human voice that makes it worth trusting?</div>
-    <div class="hmw-banner" style="border-left-color:#2196f3; background:rgba(33,150,243,0.06);">🔄 <strong>Path 2 HMW:</strong> How might we deliver deep, trustworthy content powered by AI that never sounds like AI?</div>
+    <div class="section-label green-label" style="font-size:1.3rem; margin-bottom:8px;">Concept 3 &mdash; Community + Authenticity <span style="font-size:0.72rem; font-weight:400; color:var(--text-dim);">→ Path 2: becomes The Dinner Table Drop (news + AI trust)</span></div>
+    <div class="hmw-banner" style="border-left-color:var(--c3); opacity:0.6; text-decoration:line-through; font-size:0.85rem;">HMW give every curious person their 'smartest friend at the dinner table' — at scale — without losing the human voice that makes it worth trusting?</div>
+    <div class="hmw-banner" style="border-left-color:var(--c1); background:rgba(70,130,180,0.08);"><strong>Path 2 HMW:</strong> How might we deliver deep, trustworthy content powered by AI that never sounds like AI?</div>
 
     <!-- PROCESS TIMELINE C3 -->
     <div class="process-timeline" style="margin-top:12px;">
@@ -1582,7 +1603,7 @@ body {
       <div class="pt-step done"><div class="pt-num">4</div><div class="pt-label">Re-Define → Converge</div><div class="pt-detail">Path 2 · new HMWs</div></div>
     </div>
 
-    <!-- ═══════ ROUND 1: OUR OWN THINKING ═══════ -->
+    <!--  ROUND 1: OUR OWN THINKING  -->
     <div class="round-block">
       <div class="round-header-bar">
         <span class="round-num">Round 1</span>
@@ -1592,7 +1613,7 @@ body {
 
       <!-- CLUSTER: Games & Gamification -->
       <div class="cluster">
-        <div class="cluster-name">🃏 Games &amp; Gamification</div>
+        <div class="cluster-name">Games &amp; Gamification</div>
         <div class="stickies">
           <div class="sticky green idea r2"><span class="author-badge chris">C</span><span class="note-num">C7</span><span class="note-text">Physical cards — Cards Against Humanity style for fun facts at dinner table</span></div>
           <div class="sticky green-2 idea r5"><span class="author-badge chris">C</span><span class="note-num">C11</span><span class="note-text">Gamification — "who knows the weirdest fact wins"</span></div>
@@ -1604,7 +1625,7 @@ body {
 
       <!-- CLUSTER: Brett's Human Touch -->
       <div class="cluster">
-        <div class="cluster-name">🎤 Brett's Human Touch</div>
+        <div class="cluster-name">Brett's Human Touch</div>
         <div class="stickies">
           <div class="sticky green idea r3"><span class="author-badge chris">C</span><span class="note-num">C2</span><span class="note-text">Voice note input — Brett does voice overs, check if emotionally engaging enough</span></div>
           <div class="sticky green-3 idea r6"><span class="author-badge chris">C</span><span class="note-num">C3</span><span class="note-text">Community voting / Brett grades fun facts by wow factor</span></div>
@@ -1615,7 +1636,7 @@ body {
 
       <!-- CLUSTER: Community Spaces -->
       <div class="cluster">
-        <div class="cluster-name">🌍 Community Spaces</div>
+        <div class="cluster-name">Community Spaces</div>
         <div class="stickies">
           <div class="sticky green-2 idea r7"><span class="author-badge chris">C</span><span class="note-num">C4</span><span class="note-text">City meetups — Barcelona, running club vibes for discussion</span></div>
           <div class="sticky green idea r2"><span class="author-badge chris">C</span><span class="note-num">C8</span><span class="note-text">Discord / Reddit for sharing fun fact stories and reactions</span></div>
@@ -1626,7 +1647,7 @@ body {
 
       <!-- CLUSTER: Scale Brett's Brain -->
       <div class="cluster">
-        <div class="cluster-name">🎓 Scale Brett's Brain</div>
+        <div class="cluster-name">Scale Brett's Brain</div>
         <div class="stickies">
           <div class="sticky green idea r4"><span class="author-badge chris">C</span><span class="note-num">C1</span><span class="note-text">Train people in Brett's filtering/scanning ability (also B2B)</span></div>
           <div class="sticky lavender idea r7"><span class="author-badge kalina">K</span><span class="note-num">K1</span><span class="note-text">B2B industry inside fun facts — morning briefing connected to your work</span></div>
@@ -1636,7 +1657,7 @@ body {
 
       <!-- CLUSTER: Smart Content Discovery -->
       <div class="cluster">
-        <div class="cluster-name">🎯 Smart Content Discovery</div>
+        <div class="cluster-name">Smart Content Discovery</div>
         <div class="stickies">
           <div class="sticky green-2 idea r6"><span class="author-badge chris">C</span><span class="note-num">C6</span><span class="note-text">Based on user input — map what they know, give them what they DON'T know</span></div>
           <div class="sticky green idea r3"><span class="author-badge chris">C</span><span class="note-num">C9</span><span class="note-text">Physical/digital content for commute (train etc.)</span></div>
@@ -1646,10 +1667,10 @@ body {
 
     </div>
 
-    <!-- ═══════ ROUND 2: INDEPENDENT AI IDEATION C3 ═══════ -->
+    <!--  ROUND 2: INDEPENDENT AI IDEATION C3  -->
     <details class="stimulus-block" style="border-color: rgba(76,175,80,0.2);">
       <summary>
-        <span class="round-num" style="background:#4caf50;">Round 2</span>
+        <span class="round-num" style="background:var(--c3);">Round 2</span>
         <span class="round-title">Independent AI Ideation</span>
         <span class="round-meta">20 fresh ideas · no bias from Round 1 · click to expand</span>
       </summary>
@@ -1680,53 +1701,53 @@ body {
       </div>
     </details>
 
-    <!-- ═══════ C3 SESSION DEBRIEF ═══════ -->
+    <!--  C3 SESSION DEBRIEF  -->
     <div class="debrief c3-debrief">
-      <div class="debrief-title">📋 C3 Session Debrief — What Resonated</div>
+      <div class="debrief-title">C3 Session Debrief — What Resonated</div>
 
       <div style="margin-bottom:16px;">
         <p style="font-size:0.78rem; color:var(--text-dim); margin:0 0 10px;">Rapid-fire review of 20 AI ideas. Votes:</p>
         <div style="display:flex; flex-wrap:wrap; gap:6px; font-size:0.75rem;">
-          <span class="vote-tag split">🔥/❌ #3 Rogan Table (C: yes, K: no)</span>
-          <span class="vote-tag yes">🔥 #14 AI Dinner Table</span>
-          <span class="vote-tag yes">🔥 #20 Dinner Table Kit</span>
-          <span class="vote-tag maybe">🤔 #4 Values Franchise</span>
-          <span class="vote-tag maybe">🤔 #6 Anti-Expert</span>
-          <span class="vote-tag maybe">🤔 #17 Curiosity Matchmaker</span>
-          <span class="vote-tag no">❌ #1 Book Club</span>
-          <span class="vote-tag no">❌ #2 Oprah Endorsement</span>
-          <span class="vote-tag no">❌ #7 Vulnerability Archive</span>
-          <span class="vote-tag no">❌ #8 No Brett at Center</span>
-          <span class="vote-tag no">❌ #9 Parish Model</span>
-          <span class="vote-tag no">❌ #10 Ultras Fandom</span>
-          <span class="vote-tag no">❌ #13 Voice Clone</span>
-          <span class="vote-tag no">❌ #15 AR Annotations</span>
-          <span class="vote-tag no">❌ #16 Blockchain</span>
+          <span class="vote-tag split">#3 Rogan Table (C: yes, K: no)</span>
+          <span class="vote-tag yes">#14 AI Dinner Table</span>
+          <span class="vote-tag yes">#20 Dinner Table Kit</span>
+          <span class="vote-tag maybe">#4 Values Franchise</span>
+          <span class="vote-tag maybe">#6 Anti-Expert</span>
+          <span class="vote-tag maybe">#17 Curiosity Matchmaker</span>
+          <span class="vote-tag no">#1 Book Club</span>
+          <span class="vote-tag no">#2 Oprah Endorsement</span>
+          <span class="vote-tag no">#7 Vulnerability Archive</span>
+          <span class="vote-tag no">#8 No Brett at Center</span>
+          <span class="vote-tag no">#9 Parish Model</span>
+          <span class="vote-tag no">#10 Ultras Fandom</span>
+          <span class="vote-tag no">#13 Voice Clone</span>
+          <span class="vote-tag no">#15 AR Annotations</span>
+          <span class="vote-tag no">#16 Blockchain</span>
         </div>
       </div>
 
-      <div class="spark-card" style="border-left-color:#ff5722;">
-        <div class="spark-label" style="color:#ff5722;">🔥🔥🔥 Biggest Spark — both got excited</div>
+      <div class="spark-card" style="border-left-color:var(--c2);">
+        <div class="spark-label" style="color:var(--c2);">Biggest Spark — both got excited</div>
         <h4>AI Personality Debate Livestream</h4>
         <p>Triggered by #14 Spatial Audio Dinner Table. The idea: create AI personas with distinct personalities (like MasterClass experts) and have them DEBATE each other about a topic. Brett moves "from table to table with coffee" as moderator. Could run 24/7 as a livestream. Combines Brett's human curation with AI's scale. Content is generated continuously, Brett just picks which debates are worth having and adds his real voice when it matters.</p>
       </div>
 
       <div class="spark-card">
-        <div class="spark-label">💡 Spark Idea</div>
+        <div class="spark-label">Spark Idea</div>
         <h4>Brett Films Himself Scouring the Web</h4>
         <p>Triggered by #3 Rogan Table. Chris's insight: don't script it. Just film Brett doing what he already does — scrolling, filtering, getting excited about articles. The raw process IS the content. Then clip it. His personality shows through the selection, not the performance.</p>
       </div>
 
       <div class="spark-card">
-        <div class="spark-label">💡 Spark Idea</div>
+        <div class="spark-label">Spark Idea</div>
         <h4>Physical Dinner Table Kit</h4>
         <p>Triggered by #20. Something tangible: cards, a book, conversation starters, a QR to a Brett voice memo. Shipped quarterly. Gets left on coffee tables. Colleagues notice it. Word-of-mouth vector that digital content can't replicate.</p>
       </div>
     </div>
 
-    <!-- ═══════ STRATEGIC CONSTRAINTS (from session discussion) ═══════ -->
-    <div style="margin-top:20px; padding:20px; background:rgba(244,67,54,0.04); border:2px solid rgba(244,67,54,0.12); border-radius:14px;">
-      <div class="debrief-title" style="color:#c62828;">⚠️ Strategic Constraints — From Session Discussion</div>
+    <!--  STRATEGIC CONSTRAINTS (from session discussion)  -->
+    <div style="margin-top:20px; padding:20px; background:rgba(255,107,107,0.06); border:1px solid rgba(255,107,107,0.15); border-radius:14px;">
+      <div class="debrief-title" style="color:var(--c2);">Strategic Constraints — From Session Discussion</div>
 
       <div class="constraint-card">
         <strong>Brett has ZERO existing community</strong>
@@ -1751,67 +1772,67 @@ body {
 
   </div><!-- /concept-block c3 -->
 
-  <!-- ═══════════════════════════════════════════ -->
+  <!--  -->
   <!-- MEDIUM LANDSCAPE                             -->
-  <!-- ═══════════════════════════════════════════ -->
-  <details style="margin-top:32px; border:2px dashed rgba(0,0,0,0.08); border-radius:14px; overflow:hidden;">
-    <summary style="display:flex; align-items:baseline; gap:10px; padding:16px 20px; cursor:pointer; background:rgba(0,0,0,0.02); list-style:none; font-family:var(--font-serif); font-size:0.95rem; font-weight:600;">
-      <span style="content:'▶'; transition:transform 0.25s;">📡</span>
+  <!--  -->
+  <details style="margin-top:32px; border:1px dashed rgba(255,255,255,0.1); border-radius:14px; overflow:hidden;">
+    <summary style="display:flex; align-items:baseline; gap:10px; padding:16px 20px; cursor:pointer; background:rgba(255,255,255,0.03); list-style:none; font-family:var(--font-headline); font-size:0.95rem; font-weight:600;">
+      <span style="content:''; transition:transform 0.25s;">&bull;</span>
       <span>Information Medium Landscape</span>
       <span style="font-weight:400; font-size:0.78rem; color:var(--text-dim); margin-left:auto;">65 mediums across 8 categories · reference scan</span>
-      <button class="info-btn" onclick="event.stopPropagation(); openGuide('guide-mediums')" title="Why this section?" style="margin-left:8px;">ℹ</button>
+      <button class="info-btn" onclick="event.stopPropagation(); openGuide('guide-mediums')" title="Why this section?" style="margin-left:8px;">i</button>
     </summary>
     <div style="padding:20px; font-size:0.82rem; line-height:1.6;">
       <p style="color:var(--text-dim); margin:0 0 16px; font-style:italic;">Every product idea requires a MEDIUM — a way to deliver content from Brett to his audience. This is a complete landscape scan.</p>
 
       <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:16px;">
 
-        <div style="background:rgba(33,150,243,0.05); padding:14px; border-radius:10px; border-left:3px solid #2196f3;">
-          <strong>📝 Text-Based (11)</strong>
+        <div style="background:rgba(70,130,180,0.12); padding:14px; border-radius:10px; border-left:3px solid var(--c1);">
+          <strong>Text-Based (11)</strong>
           <div style="margin-top:8px; font-size:0.78rem; color:var(--text);">Newsletter · Long-form essay · Blog · Annotated digest · Substack/Beehiiv · Thread/micro-essay · LinkedIn articles · Zine · Book/ebook · Research report · Scrollytelling article</div>
-          <div style="margin-top:6px; font-size:0.72rem; color:var(--text-dim);">⭐ Highest leverage: Solo narrative podcast + annotated digest newsletter</div>
+          <div style="margin-top:6px; font-size:0.72rem; color:var(--text-dim);">Highest leverage: Solo narrative podcast + annotated digest newsletter</div>
         </div>
 
-        <div style="background:rgba(76,175,80,0.05); padding:14px; border-radius:10px; border-left:3px solid #4caf50;">
-          <strong>🎧 Audio (8)</strong>
+        <div style="background:rgba(100,200,130,0.1); padding:14px; border-radius:10px; border-left:3px solid #6ddb8a;">
+          <strong>Audio (8)</strong>
           <div style="margin-top:8px; font-size:0.78rem; color:var(--text);">Interview podcast · Solo/narrative podcast · Audio newsletter · Voice note series · Audiobook · Live social audio · Ambient audio · Spatial audio</div>
-          <div style="margin-top:6px; font-size:0.72rem; color:var(--text-dim);">⭐ Underexplored: Voice notes (WhatsApp/Telegram) — intimate &amp; scalable</div>
+          <div style="margin-top:6px; font-size:0.72rem; color:var(--text-dim);">Underexplored: Voice notes (WhatsApp/Telegram) — intimate &amp; scalable</div>
         </div>
 
-        <div style="background:rgba(156,39,176,0.05); padding:14px; border-radius:10px; border-left:3px solid #9c27b0;">
-          <strong>🎬 Video (8)</strong>
+        <div style="background:rgba(160,100,220,0.1); padding:14px; border-radius:10px; border-left:3px solid #9c27b0;">
+          <strong>Video (8)</strong>
           <div style="margin-top:8px; font-size:0.78rem; color:var(--text);">YouTube essay · Short-form (Reels/Shorts) · Livestream · Documentary/mini-doc · Screen recording · Animated explainer · Video newsletter · Video podcast</div>
-          <div style="margin-top:6px; font-size:0.72rem; color:var(--text-dim);">⭐ YouTube essays = only video with long-term search discoverability</div>
+          <div style="margin-top:6px; font-size:0.72rem; color:var(--text-dim);">YouTube essays = only video with long-term search discoverability</div>
         </div>
 
-        <div style="background:rgba(255,152,0,0.05); padding:14px; border-radius:10px; border-left:3px solid #ff9800;">
-          <strong>🎮 Interactive Digital (9)</strong>
+        <div style="background:rgba(201,169,110,0.1); padding:14px; border-radius:10px; border-left:3px solid #ff9800;">
+          <strong>Interactive Digital (9)</strong>
           <div style="margin-top:8px; font-size:0.78rem; color:var(--text);">Data dashboard · Quiz/assessment · Digital course · AI chatbot/agent · Simulation/game · Annotated reading platform · Interactive map/timeline · AR filter · VR experience</div>
-          <div style="margin-top:6px; font-size:0.72rem; color:var(--text-dim);">⭐ Most accessible: AI agent trained on Brett's writing (no-code tools)</div>
+          <div style="margin-top:6px; font-size:0.72rem; color:var(--text-dim);">Most accessible: AI agent trained on Brett's writing (no-code tools)</div>
         </div>
 
-        <div style="background:rgba(121,85,72,0.05); padding:14px; border-radius:10px; border-left:3px solid #795548;">
-          <strong>📦 Physical / Tangible (7)</strong>
+        <div style="background:rgba(180,140,100,0.1); padding:14px; border-radius:10px; border-left:3px solid #795548;">
+          <strong>Physical / Tangible (7)</strong>
           <div style="margin-top:8px; font-size:0.78rem; color:var(--text);">Print newsletter/broadsheet · Book · Card deck · Physical zine · Subscription box · Broadside/poster · Annotated book club edition</div>
-          <div style="margin-top:6px; font-size:0.72rem; color:var(--text-dim);">⭐ Physical = scarcity signal. Gets left on desks. Never algorithmically buried.</div>
+          <div style="margin-top:6px; font-size:0.72rem; color:var(--text-dim);">Physical = scarcity signal. Gets left on desks. Never algorithmically buried.</div>
         </div>
 
-        <div style="background:rgba(233,30,99,0.05); padding:14px; border-radius:10px; border-left:3px solid #e91e63;">
-          <strong>🎪 In-Person / Live (7)</strong>
+        <div style="background:rgba(255,107,107,0.1); padding:14px; border-radius:10px; border-left:3px solid #e91e63;">
+          <strong>In-Person / Live (7)</strong>
           <div style="margin-top:8px; font-size:0.78rem; color:var(--text);">Dinner salon · Workshop/masterclass · Conference · Office hours · Walking tour · Retreat · Reading group/book club</div>
-          <div style="margin-top:6px; font-size:0.72rem; color:var(--text-dim);">⭐ Dinner salon = low cost, high intimacy, strongest word-of-mouth</div>
+          <div style="margin-top:6px; font-size:0.72rem; color:var(--text-dim);">Dinner salon = low cost, high intimacy, strongest word-of-mouth</div>
         </div>
 
-        <div style="background:rgba(0,150,136,0.05); padding:14px; border-radius:10px; border-left:3px solid #009688;">
-          <strong>💬 Social / Community (7)</strong>
+        <div style="background:rgba(100,200,180,0.1); padding:14px; border-radius:10px; border-left:3px solid #009688;">
+          <strong>Social / Community (7)</strong>
           <div style="margin-top:8px; font-size:0.78rem; color:var(--text);">Discord · Slack community · Circle/Mighty Networks · WhatsApp/Telegram broadcast · Reddit/forum · Twitter list/community · Annotation layer</div>
-          <div style="margin-top:6px; font-size:0.72rem; color:var(--text-dim);">⭐ Community transforms readers into participants. Creator becomes curator.</div>
+          <div style="margin-top:6px; font-size:0.72rem; color:var(--text-dim);">Community transforms readers into participants. Creator becomes curator.</div>
         </div>
 
-        <div style="background:rgba(63,81,181,0.05); padding:14px; border-radius:10px; border-left:3px solid #3f51b5;">
-          <strong>🚀 Hybrid / Emerging (8)</strong>
+        <div style="background:rgba(100,120,220,0.1); padding:14px; border-radius:10px; border-left:3px solid #3f51b5;">
+          <strong>Hybrid / Emerging (8)</strong>
           <div style="margin-top:8px; font-size:0.78rem; color:var(--text);">AI-personalized newsletter · Creator AI clone · Spatial/Vision Pro · Phygital (NFC/QR) · Wearable content · AI-generated podcast · Live translation · Async video Q&amp;A</div>
-          <div style="margin-top:6px; font-size:0.72rem; color:var(--text-dim);">⭐ NotebookLM AI podcast = early proof-of-concept for personalized audio</div>
+          <div style="margin-top:6px; font-size:0.72rem; color:var(--text-dim);">NotebookLM AI podcast = early proof-of-concept for personalized audio</div>
         </div>
 
       </div>
@@ -1820,16 +1841,16 @@ body {
 
 </section>
 
-<!-- ════════════════════════════════════════════ -->
+<!--  -->
 <!-- PATH 2: WHY WE ITERATED                    -->
-<!-- ════════════════════════════════════════════ -->
+<!--  -->
 <div class="flow-arrow">
   <svg viewBox="0 0 48 48" fill="none"><path d="M24 8v24M16 24l8 8 8-8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
   <span class="arrow-label">session review revealed overlap → back to Define</span>
 </div>
 
-<section class="section" id="section-path2" style="background:linear-gradient(135deg, rgba(255,152,0,0.04), rgba(233,30,99,0.02));">
-  <div class="section-label" style="color:#e65100; font-size:1.2rem;">🔄 Path 2 — We Went Back to Define<button class="info-btn" onclick="openGuide('guide-path2')" title="Why this section?">ℹ</button></div>
+<section class="section" id="section-path2" style="background:linear-gradient(135deg, rgba(201,169,110,0.06), rgba(255,107,107,0.03));">
+  <div class="section-label" style="color:var(--c3);">Path 2 &mdash; We Went Back to Define<button class="info-btn" onclick="openGuide('guide-path2')" title="Why this section?">i</button></div>
 
   <p style="font-size:0.82rem; color:var(--text-dim); margin:0 0 20px; line-height:1.6;">
     After brainstorming 78 ideas and reviewing them rapid-fire in session, we hit a wall: <strong>our concepts didn't sound like different products.</strong> They all orbited "Brett delivers content to curious people" — the only difference was the delivery mechanism. Kalina called it: <em>"I don't like concept 3 at all. It doesn't sound different to me than concept 2."</em>
@@ -1840,51 +1861,51 @@ body {
 
   <!-- Before / After comparison -->
   <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px;">
-    <div style="padding:16px; background:rgba(244,67,54,0.05); border-radius:12px; border:1px solid rgba(244,67,54,0.15);">
-      <div style="font-weight:700; font-size:0.75rem; color:#c62828; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.05em;">❌ Path 1 — Concepts Overlapped</div>
+    <div style="padding:16px; background:rgba(255,107,107,0.08); border-radius:12px; border:1px solid rgba(255,107,107,0.15);">
+      <div style="font-weight:700; font-size:0.75rem; color:var(--c2); margin-bottom:10px; text-transform:uppercase; letter-spacing:0.05em;">Path 1 &mdash; Concepts Overlapped</div>
       <div style="font-size:0.75rem; line-height:1.5; color:var(--text);">
-        <div style="margin-bottom:8px; padding:8px; background:rgba(0,0,0,0.03); border-radius:6px;"><strong>C2:</strong> "HMW make consuming deep analysis feel effortless but leave knowledge that compounds?"</div>
-        <div style="padding:8px; background:rgba(0,0,0,0.03); border-radius:6px;"><strong>C3:</strong> "HMW give every curious person their smartest friend at the dinner table at scale?"</div>
+        <div style="margin-bottom:8px; padding:8px; background:rgba(255,255,255,0.04); border-radius:6px;"><strong>C2:</strong> "HMW make consuming deep analysis feel effortless but leave knowledge that compounds?"</div>
+        <div style="padding:8px; background:rgba(255,255,255,0.04); border-radius:6px;"><strong>C3:</strong> "HMW give every curious person their smartest friend at the dinner table at scale?"</div>
       </div>
-      <div style="margin-top:10px; font-size:0.72rem; color:#c62828; font-style:italic;">Both produce: "Brett delivers curated content in different wrappers." Same WHO, same WHAT.</div>
+      <div style="margin-top:10px; font-size:0.72rem; color:var(--c2); font-style:italic;">Both produce: "Brett delivers curated content in different wrappers." Same WHO, same WHAT.</div>
     </div>
 
-    <div style="padding:16px; background:rgba(76,175,80,0.05); border-radius:12px; border:1px solid rgba(76,175,80,0.15);">
-      <div style="font-weight:700; font-size:0.75rem; color:#2e7d32; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.05em;">✅ Path 2 — Genuinely Different Products</div>
+    <div style="padding:16px; background:rgba(100,200,130,0.08); border-radius:12px; border:1px solid rgba(100,200,130,0.15);">
+      <div style="font-weight:700; font-size:0.75rem; color:#6ddb8a; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.05em;">Path 2 &mdash; Genuinely Different Products</div>
       <div style="font-size:0.75rem; line-height:1.5; color:var(--text);">
-        <div style="margin-bottom:8px; padding:8px; background:rgba(76,175,80,0.06); border-radius:6px;"><strong>C2:</strong> "HMW turn Brett's curation into something people <em>remember, use, and talk about</em>?"</div>
-        <div style="padding:8px; background:rgba(33,150,243,0.06); border-radius:6px;"><strong>C3:</strong> "HMW deliver deep trustworthy content powered by AI that <em>never sounds like AI</em>?"</div>
+        <div style="margin-bottom:8px; padding:8px; background:rgba(201,169,110,0.08); border-radius:6px;"><strong>C2:</strong> "HMW turn Brett's curation into something people <em>remember, use, and talk about</em>?"</div>
+        <div style="padding:8px; background:rgba(70,130,180,0.08); border-radius:6px;"><strong>C3:</strong> "HMW deliver deep trustworthy content powered by AI that <em>never sounds like AI</em>?"</div>
       </div>
-      <div style="margin-top:10px; font-size:0.72rem; color:#2e7d32; font-style:italic;">C2 = curiosity game (science/quirky). C3 = news intelligence (spaced repetition). Different content, format, depth.</div>
+      <div style="margin-top:10px; font-size:0.72rem; color:#6ddb8a; font-style:italic;">C2 = curiosity game (science/quirky). C3 = news intelligence (spaced repetition). Different content, format, depth.</div>
     </div>
   </div>
 
   <!-- The killer move -->
-  <div class="spark-card" style="border-left-color:#ff9800;">
-    <div class="spark-label" style="color:#e65100;">🔑 The Killer Move — Splitting Content Territories</div>
+  <div class="spark-card" style="border-left-color:var(--c3);">
+    <div class="spark-label" style="color:var(--c3);">The Killer Move — Splitting Content Territories</div>
     <h4 style="margin:4px 0 6px;">C2 owns science + quirky. C3 owns news.</h4>
     <p style="margin:0;">Same team ideas, redistributed into genuinely different products. C2 is <strong>light, surprising, gamified</strong> — designed to make you interesting at dinner. C3 is <strong>deep, compounding, prediction-driven</strong> — designed to make you smarter over weeks. Different content territory, different user moment, different product experience.</p>
   </div>
 
   <!-- B2B merge -->
-  <div style="padding:14px 16px; background:rgba(33,150,243,0.05); border-radius:10px; border-left:3px solid #2196f3; margin-top:14px; font-size:0.78rem; line-height:1.5;">
-    <strong>💼 B2B merged into C2, not a separate concept:</strong> The B2B angle (corporate morning briefings, lunch-hour freshness for teams) is a <em>distribution channel</em> for The Curiosity Game — companies buy licenses, can infuse their own topics. Same product, different buyer. This gives C2 a business model without needing Brett to be famous first.
+  <div style="padding:14px 16px; background:rgba(70,130,180,0.12); border-radius:10px; border-left:3px solid var(--c1); margin-top:14px; font-size:0.78rem; line-height:1.5;">
+    <strong>B2B merged into C2, not a separate concept:</strong> The B2B angle (corporate morning briefings, lunch-hour freshness for teams) is a <em>distribution channel</em> for The Curiosity Game — companies buy licenses, can infuse their own topics. Same product, different buyer. This gives C2 a business model without needing Brett to be famous first.
   </div>
 
   <!-- How ideas were redistributed -->
-  <div style="margin-top:20px; padding:16px; background:rgba(0,0,0,0.02); border-radius:12px;">
-    <div style="font-weight:700; font-size:0.78rem; margin-bottom:12px;">📦 How Our Ideas Were Redistributed</div>
+  <div style="margin-top:20px; padding:16px; background:rgba(255,255,255,0.03); border-radius:12px;">
+    <div style="font-weight:700; font-size:0.78rem; margin-bottom:12px;">How Our Ideas Were Redistributed</div>
     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; font-size:0.72rem; line-height:1.5;">
       <div>
-        <div style="font-weight:600; color:#9e9e9e; margin-bottom:4px;">C1 — The Automated Pipeline</div>
+        <div style="font-weight:600; color:var(--c1); margin-bottom:4px;">C1 — The Automated Pipeline</div>
         <div style="color:var(--text-dim);">Brett's original ask. Due diligence — show it, score it honestly, explain the risk.</div>
       </div>
       <div>
-        <div style="font-weight:600; color:#4caf50; margin-bottom:4px;">C2 — The Curiosity Game</div>
+        <div style="font-weight:600; color:var(--c2); margin-bottom:4px;">C2 — The Curiosity Game</div>
         <div style="color:var(--text-dim);">Cards Against Humanity for fun facts · quiz format · "guess what happened" · gamification · physical dinner cards · B2B licenses · Brett's quirky/science curation</div>
       </div>
       <div>
-        <div style="font-weight:600; color:#2196f3; margin-bottom:4px;">C3 — The Dinner Table Drop</div>
+        <div style="font-weight:600; color:var(--c3); margin-bottom:4px;">C3 — The Dinner Table Drop</div>
         <div style="color:var(--text-dim);">Spaced repetition news · Polymarket predictions · follow story over week · two-layer format (fast surface + deep HTML) · AI does work, Brett's brain is the product</div>
       </div>
     </div>
@@ -1897,11 +1918,11 @@ body {
   <span class="arrow-label">converge into 3 final concepts</span>
 </div>
 
-<!-- ════════════════════════════════════════════ -->
+<!--  -->
 <!-- SECTION 5: CONVERGENCE ZONE                 -->
-<!-- ════════════════════════════════════════════ -->
+<!--  -->
 <section class="section" id="section-convergence">
-  <div class="section-label yellow">⭐ Convergence Zone — Final Concepts <span class="section-count">3 concepts · locked</span><button class="info-btn" onclick="openGuide('guide-convergence')" title="Why this section?">ℹ</button></div>
+  <div class="section-label yellow">Convergence Zone — Final Concepts <span class="section-count">3 concepts · locked</span><button class="info-btn" onclick="openGuide('guide-convergence')" title="Why this section?">i</button></div>
 
   <div class="convergence-cards" style="grid-template-columns:repeat(3, 1fr); gap:16px;">
 
@@ -1909,26 +1930,26 @@ body {
     <div class="concept-card c1" style="padding:16px 18px;">
       <div class="cc-num">Concept 1</div>
       <div class="cc-title" style="font-size:1.05rem;">The Automated Pipeline</div>
-      <span style="display:inline-block; font-size:0.6rem; font-family:var(--font-mono); background:rgba(0,0,0,0.06); padding:2px 8px; border-radius:8px; color:var(--text-dim); margin-bottom:8px;">DUE DILIGENCE</span>
+      <span style="display:inline-block; font-size:0.6rem; font-family:var(--font-body); background:rgba(255,255,255,0.06); padding:2px 8px; border-radius:8px; color:var(--text-dim); margin-bottom:8px;">DUE DILIGENCE</span>
       <div style="font-size:0.78rem; color:var(--text); margin-bottom:8px; line-height:1.5;">
         Brett's original ask, scoped honestly. RSS ingest → AI summarization → script → Brett records → multi-platform distribution. We show it, score it fairly, and explain the risk: <em>it produces content nobody asked for.</em>
       </div>
       <div style="font-size:0.7rem; color:var(--text-dim); margin-bottom:10px; font-style:italic;">
         HMW: How might we automate Brett's content creation so it takes under 1 hour per episode?
       </div>
-      <div style="display:flex; flex-wrap:wrap; gap:4px 10px; font-size:0.65rem; font-family:var(--font-mono);">
-        <span style="color:#4caf50;">■ Feasibility: HIGH</span>
-        <span style="color:#f44336;">■ Innovation: LOW</span>
-        <span style="color:#ff9800;">■ Impact: MED</span>
-        <span style="color:#9e9e9e;">■ Business: LOW</span>
+      <div style="display:flex; flex-wrap:wrap; gap:4px 10px; font-size:0.65rem; font-family:var(--font-body);">
+        <span style="color:var(--c3);">&bull; Feasibility: HIGH</span>
+        <span style="color:#f44336;">&bull; Innovation: LOW</span>
+        <span style="color:#ff9800;">&bull; Impact: MED</span>
+        <span style="color:#9e9e9e;">&bull; Business: LOW</span>
       </div>
     </div>
 
     <!-- C2 -->
-    <div class="concept-card c2" style="padding:16px 18px; border-top:3px solid #4caf50;">
+    <div class="concept-card c2" style="padding:16px 18px;">
       <div class="cc-num">Concept 2</div>
       <div class="cc-title" style="font-size:1.05rem;">The Curiosity Game</div>
-      <span style="display:inline-block; font-size:0.6rem; font-family:var(--font-mono); background:rgba(76,175,80,0.12); padding:2px 8px; border-radius:8px; color:#2e7d32; margin-bottom:8px;">INNOVATIVE</span>
+      <span style="display:inline-block; font-size:0.6rem; font-family:var(--font-body); background:rgba(255,107,107,0.12); padding:2px 8px; border-radius:8px; color:var(--c2); margin-bottom:8px;">INNOVATIVE</span>
       <div style="font-size:0.78rem; color:var(--text); margin-bottom:8px; line-height:1.5;">
         Brett's quirky stories &amp; science obsession → a <strong>daily interactive game that replaces doom scrolling</strong>. "Guess what happened" scenarios, quizzes (3 fake, 1 real), physical fun fact cards for the dinner table. You don't read — you <em>play</em>.
       </div>
@@ -1936,25 +1957,25 @@ body {
         HMW: How might we turn Brett's curation into something people remember, use, and talk about?
       </div>
       <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px;">
-        <span style="font-size:0.62rem; background:rgba(76,175,80,0.08); padding:2px 6px; border-radius:8px; color:#2e7d32;">🎮 Quizzes</span>
-        <span style="font-size:0.62rem; background:rgba(76,175,80,0.08); padding:2px 6px; border-radius:8px; color:#2e7d32;">🃏 Physical cards</span>
-        <span style="font-size:0.62rem; background:rgba(76,175,80,0.08); padding:2px 6px; border-radius:8px; color:#2e7d32;">🔬 Science</span>
-        <span style="font-size:0.62rem; background:rgba(76,175,80,0.08); padding:2px 6px; border-radius:8px; color:#2e7d32;">💼 B2B</span>
-        <span style="font-size:0.62rem; background:rgba(76,175,80,0.08); padding:2px 6px; border-radius:8px; color:#2e7d32;">📱 3 min/day</span>
+        <span style="font-size:0.62rem; background:rgba(255,107,107,0.12); padding:2px 6px; border-radius:8px; color:var(--c2);">Quizzes</span>
+        <span style="font-size:0.62rem; background:rgba(255,107,107,0.12); padding:2px 6px; border-radius:8px; color:var(--c2);">Physical cards</span>
+        <span style="font-size:0.62rem; background:rgba(255,107,107,0.12); padding:2px 6px; border-radius:8px; color:var(--c2);">Science</span>
+        <span style="font-size:0.62rem; background:rgba(255,107,107,0.12); padding:2px 6px; border-radius:8px; color:var(--c2);">B2B</span>
+        <span style="font-size:0.62rem; background:rgba(255,107,107,0.12); padding:2px 6px; border-radius:8px; color:var(--c2);">3 min/day</span>
       </div>
-      <div style="display:flex; flex-wrap:wrap; gap:4px 10px; font-size:0.65rem; font-family:var(--font-mono);">
-        <span style="color:#4caf50;">■ Innovation: HIGH</span>
-        <span style="color:#ff9800;">■ Feasibility: MED-LOW</span>
-        <span style="color:#4caf50;">■ Impact: HIGH</span>
-        <span style="color:#4caf50;">■ Business: HIGH</span>
+      <div style="display:flex; flex-wrap:wrap; gap:4px 10px; font-size:0.65rem; font-family:var(--font-body);">
+        <span style="color:var(--c3);">&bull; Innovation: HIGH</span>
+        <span style="color:#ff9800;">&bull; Feasibility: MED-LOW</span>
+        <span style="color:var(--c3);">&bull; Impact: HIGH</span>
+        <span style="color:var(--c3);">&bull; Business: HIGH</span>
       </div>
     </div>
 
     <!-- C3 -->
-    <div class="concept-card c3" style="padding:16px 18px; border-top:3px solid #2196f3;">
+    <div class="concept-card c3" style="padding:16px 18px;">
       <div class="cc-num">Concept 3</div>
       <div class="cc-title" style="font-size:1.05rem;">The Dinner Table Drop</div>
-      <span style="display:inline-block; font-size:0.6rem; font-family:var(--font-mono); background:rgba(33,150,243,0.12); padding:2px 8px; border-radius:8px; color:#1565c0; margin-bottom:8px;">TEAM RECOMMENDATION</span>
+      <span style="display:inline-block; font-size:0.6rem; font-family:var(--font-body); background:rgba(201,169,110,0.12); padding:2px 8px; border-radius:8px; color:var(--c3); margin-bottom:8px;">TEAM RECOMMENDATION</span>
       <div style="font-size:0.78rem; color:var(--text); margin-bottom:8px; line-height:1.5;">
         Daily intellectual ammunition to <strong>make you the smartest person at dinner</strong>. Brett curates 3 news stories. The system resurfaces them with new developments. Polymarket-style predictions gamify engagement. Two layers: 2-min audio + deep HTML dive. AI does the heavy lifting — Brett's brain is the editorial product.
       </div>
@@ -1962,17 +1983,17 @@ body {
         HMW: How might we deliver deep, trustworthy content powered by AI that never sounds like AI?
       </div>
       <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px;">
-        <span style="font-size:0.62rem; background:rgba(33,150,243,0.08); padding:2px 6px; border-radius:8px; color:#1565c0;">📰 News</span>
-        <span style="font-size:0.62rem; background:rgba(33,150,243,0.08); padding:2px 6px; border-radius:8px; color:#1565c0;">🔁 Spaced repetition</span>
-        <span style="font-size:0.62rem; background:rgba(33,150,243,0.08); padding:2px 6px; border-radius:8px; color:#1565c0;">📊 Predictions</span>
-        <span style="font-size:0.62rem; background:rgba(33,150,243,0.08); padding:2px 6px; border-radius:8px; color:#1565c0;">🎧 Audio + HTML</span>
-        <span style="font-size:0.62rem; background:rgba(33,150,243,0.08); padding:2px 6px; border-radius:8px; color:#1565c0;">🧠 Compounds</span>
+        <span style="font-size:0.62rem; background:rgba(201,169,110,0.12); padding:2px 6px; border-radius:8px; color:var(--c3);">News</span>
+        <span style="font-size:0.62rem; background:rgba(201,169,110,0.12); padding:2px 6px; border-radius:8px; color:var(--c3);">Spaced repetition</span>
+        <span style="font-size:0.62rem; background:rgba(201,169,110,0.12); padding:2px 6px; border-radius:8px; color:var(--c3);">Predictions</span>
+        <span style="font-size:0.62rem; background:rgba(201,169,110,0.12); padding:2px 6px; border-radius:8px; color:var(--c3);">Audio + HTML</span>
+        <span style="font-size:0.62rem; background:rgba(201,169,110,0.12); padding:2px 6px; border-radius:8px; color:var(--c3);">Compounds</span>
       </div>
-      <div style="display:flex; flex-wrap:wrap; gap:4px 10px; font-size:0.65rem; font-family:var(--font-mono);">
-        <span style="color:#4caf50;">■ Innovation: MED-HIGH</span>
-        <span style="color:#ff9800;">■ Feasibility: MED</span>
-        <span style="color:#4caf50;">■ Impact: HIGH</span>
-        <span style="color:#ff9800;">■ Business: MED</span>
+      <div style="display:flex; flex-wrap:wrap; gap:4px 10px; font-size:0.65rem; font-family:var(--font-body);">
+        <span style="color:var(--c3);">&bull; Innovation: MED-HIGH</span>
+        <span style="color:#ff9800;">&bull; Feasibility: MED</span>
+        <span style="color:var(--c3);">&bull; Impact: HIGH</span>
+        <span style="color:#ff9800;">&bull; Business: MED</span>
       </div>
     </div>
 
@@ -1980,7 +2001,7 @@ body {
 </section>
 
 <!-- FOOTER -->
-<footer style="text-align:center; padding:40px 24px 30px; color:var(--text-light); font-size:0.75rem; font-family:var(--font-mono);">
+<footer style="text-align:center; padding:40px 24px 30px; color:var(--text-light); font-size:0.75rem; font-family:var(--font-body);">
   I2P Radical Concepts — ESADE MIE — Sprint 1 — March 2026<br>
   20 Brett PPs + 28 Audience PPs → 6 Intersections → 78 ideas → Session Review → Path 2 Re-Define → 3 Final Concepts
 </footer>

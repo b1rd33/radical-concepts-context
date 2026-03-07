@@ -1,7 +1,7 @@
 # Radical Concepts — AI Podcast Pipeline
 
 ## What This Is
-Automated podcast system for Brett Moore (client). The pipeline: curated news sources → AI validates & filters → summarizes → generates script in Brett's voice → clones voice via TTS → distributes to all platforms. ESADE I2P student project (5 people, 3 sprints).
+Modular AI content platform for Brett Moore. Originally 3 separate concepts, now unified: shared foundation (source ingestion → AI curation → Brett's editorial gate) with three output paths (daily podcast, curiosity game, weekly deep dive). Sprint 2 focus: curation dashboard + podcast MVP.
 
 ## Client
 **Brett Moore** — Australian entrepreneur in Barcelona. Law/business/tech background, 6 startups (MedTech). Passionate about politics, science, and journalism. Reads 2+ newspapers daily. Wants: "I read something interesting this morning" → "it's live on five platforms" in under an hour of his time.
@@ -18,11 +18,17 @@ Automated podcast system for Brett Moore (client). The pipeline: curated news so
 **Advisor:** Farid (ESADE mentor)
 
 ## Current Sprint
-**Sprint 1** (Feb 24 – Mar 9): Research foundation. No building yet.
-- Validated pipeline design
-- Brett's persona profile
-- Tool/platform research
-- Content strategy
+**Sprint 2** (Mar 10 – Mar 23): Build MVP. Modular platform architecture defined. Building curation dashboard prototype. Setting up podcast pipeline. Weekly Friday check-ins with Brett established.
+
+## Modular Platform (Post-Pivot)
+```
+SHARED FOUNDATION (all paths):
+📥 Sources (928 RSS feeds) → 🤖 AI Filter → 📝 Summarize → 🎭 Persona → 👆 Brett Picks
+
+PATH A — Daily Podcast (C1, Sprint 2-3): Script → Record → Distribute ← GREEN
+PATH B — Curiosity Game (C2, Phase 2): Quiz → Streaks → Share ← ORANGE
+PATH C — Weekly Deep Dive (C3, Phase 2): Mon/Wed/Fri → Spaced Repetition ← ORANGE
+```
 
 ## Key Decisions (Active)
 | Decision | Reasoning |
@@ -33,6 +39,9 @@ Automated podcast system for Brett Moore (client). The pipeline: curated news so
 | **Audio-only for Sprint 1** | No video avatars. Mentor: "avatar is nothing without the audio." |
 | **Quality-driven schedule** | Not fixed twice-a-week. Publish when material is good. |
 | **TTS: Testing Fish Audio + ElevenLabs** | Angelo running side-by-side voice cloning tests. Fish Audio = best cost/quality, ElevenLabs = quality benchmark. |
+| **Modular platform over 3 separate concepts** | Farid recommendation after Meeting #8. Brett's concept is core, team innovations are expansion modules. Reduces scope, respects client's vision. |
+| **Product Backlog added** | Features DB (5 modules) + Tasks DB. Sprint Board for daily execution, Product Backlog for product vision. |
+| **Hume AI evaluation** | Farid recommended. Comparing against ElevenLabs and Fish Audio for voice quality. |
 
 ## Tool Stack
 - **Orchestration:** n8n (self-hosted, Oracle Cloud Always Free: 4 vCPU, 24GB RAM)
@@ -73,6 +82,15 @@ PRODUCTION PIPELINE (Sprint 2+):
 - Decision Log: https://www.notion.so/95c98cc886ec448ba1d34be313cf32f3
 - Pipeline Diagrams: https://www.notion.so/3124d347036281dd9a8ef8087432f63b
 - Brett Kickoff Brief: https://www.notion.so/3104d34703628156ab96f5e23700217d
+- Product Backlog: https://www.notion.so/8304d347036283f7981b819cf684f990
+- Deliverables: https://www.notion.so/1d95fcfd9f6d416c81898f48e7c627ef
+
+## Brett-Facing Deliverables (HTML)
+All in /deliverables/ and repo root:
+- deliverables/index.html — Project hub (Brett's entry point)
+- radical-concepts-all-pitches.html — 3 concept pitches (Deliverable #1)
+- i2p-brainstorming-board.html — Design thinking process
+- radical-concepts-modular-platform.html — Modular platform architecture
 
 ## Context Files
 See `/context/` for distilled reference material:

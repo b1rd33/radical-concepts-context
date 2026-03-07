@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radical Concepts</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --text-xs: clamp(0.65rem, 0.55rem + 0.25vw, 0.78rem);
+            --text-sm: clamp(0.78rem, 0.65rem + 0.35vw, 0.92rem);
+            --text-base: clamp(0.9rem, 0.75rem + 0.4vw, 1.1rem);
+            --text-lg: clamp(1rem, 0.8rem + 0.55vw, 1.3rem);
+            --text-xl: clamp(1.1rem, 0.85rem + 0.7vw, 1.5rem);
+            --text-2xl: clamp(1.6rem, 1.2rem + 1.2vw, 2.5rem);
+            --text-3xl: clamp(2rem, 1.4rem + 1.8vw, 3.2rem);
+            --text-hero: clamp(3rem, 2rem + 3vw, 6rem);
+            --space-slide: clamp(2.5rem, 2rem + 3vw, 6rem);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            color: #fff;
+            background: #111827;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        a { color: inherit; text-decoration: none; }
+
+        .page { max-width: 1100px; margin: 0 auto; padding: var(--space-slide); }
+
+        /* Header Bar */
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: clamp(4rem, 3rem + 3vw, 8rem);
+        }
+        .team-name {
+            font-size: var(--text-sm);
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            opacity: 0.7;
+        }
+        .client-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            font-size: var(--text-sm);
+        }
+        .logo-mark {
+            width: 34px; height: 34px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.72rem; font-weight: 700;
+        }
+
+        /* Hero */
+        .hero {
+            margin-bottom: clamp(3rem, 2rem + 2vw, 5rem);
+        }
+        .hero h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: var(--text-hero);
+            font-weight: 400;
+            line-height: 1.05;
+            margin-bottom: 1rem;
+        }
+        .hero .subtitle {
+            font-size: var(--text-xl);
+            opacity: 0.6;
+            line-height: 1.5;
+            max-width: 600px;
+        }
+
+        /* Section Labels */
+        .section-label {
+            font-size: var(--text-xs);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+            opacity: 0.5;
+            margin-bottom: clamp(1rem, 0.75rem + 0.5vw, 1.5rem);
+        }
+
+        /* Latest Update */
+        .update-card {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: clamp(1.25rem, 1rem + 0.75vw, 2rem);
+            margin-bottom: clamp(3rem, 2rem + 2vw, 5rem);
+        }
+        .update-date {
+            font-size: var(--text-xs);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.4;
+            margin-bottom: 0.75rem;
+        }
+        .update-card p {
+            font-size: var(--text-base);
+            line-height: 1.65;
+            opacity: 0.85;
+            max-width: 700px;
+        }
+
+        /* Deliverables Grid */
+        .deliverables-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: clamp(0.75rem, 0.5rem + 0.75vw, 1.5rem);
+            margin-bottom: clamp(3rem, 2rem + 2vw, 5rem);
+        }
+        .deliverable-card {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: clamp(1.25rem, 1rem + 0.75vw, 2rem);
+            border-top: 3px solid;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .deliverable-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 36px rgba(0,0,0,0.3);
+        }
+        .deliverable-card--c1 { border-top-color: #4682B4; }
+        .deliverable-card--c2 { border-top-color: #FF6B6B; }
+        .deliverable-card--c3 { border-top-color: #C9A96E; }
+
+        .deliverable-icon {
+            width: 48px; height: 48px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 1rem;
+        }
+        .deliverable-icon svg {
+            width: 24px; height: 24px;
+            stroke: currentColor; fill: none;
+            stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+        }
+        .deliverable-card h3 {
+            font-family: 'DM Serif Display', serif;
+            font-size: var(--text-lg);
+            font-weight: 400;
+            margin-bottom: 0.5rem;
+        }
+        .deliverable-card .desc {
+            font-size: var(--text-sm);
+            opacity: 0.6;
+            line-height: 1.5;
+            flex-grow: 1;
+        }
+        .deliverable-card .card-link {
+            font-size: var(--text-sm);
+            font-weight: 600;
+            opacity: 0.5;
+            margin-top: 1.25rem;
+            transition: opacity 0.2s;
+        }
+        .deliverable-card:hover .card-link { opacity: 1; }
+
+        /* What's Next */
+        .next-section {
+            margin-bottom: clamp(3rem, 2rem + 2vw, 5rem);
+        }
+        .next-list {
+            list-style: none;
+            padding: 0;
+        }
+        .next-list li {
+            font-size: var(--text-base);
+            padding: 0.6rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            opacity: 0.75;
+            line-height: 1.5;
+        }
+        .next-list li:last-child { border-bottom: none; }
+        .next-list li::before {
+            content: '\2192';
+            margin-right: 0.75rem;
+            opacity: 0.4;
+        }
+
+        /* Footer */
+        .footer {
+            padding-top: clamp(2rem, 1.5rem + 1vw, 3rem);
+            border-top: 1px solid rgba(255,255,255,0.06);
+            font-size: var(--text-xs);
+            opacity: 0.3;
+            letter-spacing: 0.06em;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .deliverables-grid { grid-template-columns: 1fr; }
+            .header-bar { flex-direction: column; gap: 1rem; align-items: flex-start; }
+        }
+
+        /* Print */
+        @page { margin: 1.5cm; size: A4; }
+        @media print {
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+            body { font-size: 11pt; }
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+
+    <div class="header-bar">
+        <div class="team-name">Team Radical &middot; I2P 2026</div>
+        <div class="client-logo"><div class="logo-mark">RC</div> Radical Concepts</div>
+    </div>
+
+    <div class="hero">
+        <h1>Radical Concepts</h1>
+        <p class="subtitle">Your AI-powered content platform &mdash; everything we're building, in one place.</p>
+    </div>
+
+    <!-- Latest Update -->
+    <div class="section-label">What's happening now</div>
+    <div class="update-card">
+        <div class="update-date">March 7, 2026</div>
+        <p>We've locked in the modular platform architecture &mdash; one shared foundation with three output paths. Sprint 2 kicks off Monday, focused on the curation dashboard prototype and podcast pipeline setup. Weekly Friday check-ins with you start next week.</p>
+    </div>
+
+    <!-- Deliverables -->
+    <div class="section-label">Your deliverables</div>
+    <div class="deliverables-grid">
+
+        <a href="../i2p-brainstorming-board.html" class="deliverable-card deliverable-card--c1">
+            <div class="deliverable-icon">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+            </div>
+            <h3>Brainstorming Board</h3>
+            <p class="desc">Our design thinking process &mdash; empathy maps, HMW questions, ideation.</p>
+            <div class="card-link">View &rarr;</div>
+        </a>
+
+        <a href="../radical-concepts-all-pitches.html" class="deliverable-card deliverable-card--c2">
+            <div class="deliverable-icon">
+                <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            </div>
+            <h3>Concept Pitches</h3>
+            <p class="desc">Three original concepts with research, scoring, and honest trade-offs.</p>
+            <div class="card-link">View &rarr;</div>
+        </a>
+
+        <a href="../radical-concepts-modular-platform.html" class="deliverable-card deliverable-card--c3">
+            <div class="deliverable-icon">
+                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            </div>
+            <h3>Platform Architecture</h3>
+            <p class="desc">How the three concepts merge into one modular foundation.</p>
+            <div class="card-link">View &rarr;</div>
+        </a>
+
+    </div>
+
+    <!-- What's Next -->
+    <div class="next-section">
+        <div class="section-label">Incoming</div>
+        <ul class="next-list">
+            <li>Build curation dashboard prototype &mdash; where you'll review and approve content</li>
+            <li>Set up podcast pipeline with n8n, Jina Reader, and Claude</li>
+            <li>Voice cloning tests with Fish Audio and ElevenLabs</li>
+            <li>First Friday check-in &mdash; March 14</li>
+        </ul>
+    </div>
+
+    <div class="footer">Team Radical &mdash; ESADE I2P 2026</div>
+
+</div>
+</body>
+</html>
