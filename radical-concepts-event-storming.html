@@ -97,20 +97,26 @@
             pointer-events: none;
         }
 
-        /* ── HEADER ── */
+        /* ── UNIFIED HEADER BAR ── */
         .header-bar {
             position: sticky;
             top: 0;
             z-index: 100;
+            width: 100%;
+            background: rgba(17, 24, 39, 0.94);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .header-bar-inner {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem 2rem;
-            background: rgba(17,24,39,0.94);
-            backdrop-filter: blur(14px);
-            border-bottom: 1px solid rgba(255,255,255,0.06);
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 1rem var(--space-slide);
         }
-        .header-bar a.nav-link {
+        .back-link {
             font-size: var(--text-xs);
             font-weight: 600;
             text-transform: uppercase;
@@ -122,7 +128,7 @@
             padding: 0.4rem 1rem;
             transition: background 0.2s, transform 0.2s;
         }
-        .header-bar a.nav-link:hover { background: rgba(255,255,255,0.2); transform: translateY(-1px); }
+        .back-link:hover { background: rgba(255,255,255,0.2); transform: translateY(-1px); }
         .client-logo {
             display: flex; align-items: center; gap: 0.5rem;
             font-weight: 600; font-size: var(--text-sm);
@@ -455,7 +461,7 @@
         }
 
         @media (max-width: 900px) {
-            .header-bar { flex-wrap: wrap; gap: 0.75rem; padding: 0.75rem 1rem; }
+            .header-bar-inner { flex-wrap: wrap; gap: 0.75rem; padding: 0.75rem 1rem; }
             .nav-links { gap: 0.5rem; }
         }
 
@@ -611,6 +617,26 @@
             background: rgba(255,255,255,0.06);
             color: rgba(255,255,255,0.8);
         }
+        .mermaid-float-btn {
+            position: absolute;
+            top: 10px; left: 10px;
+            z-index: 10;
+            font-family: 'DM Sans', sans-serif;
+            font-size: var(--text-xs);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #fff;
+            background: rgba(15,18,25,0.9);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 6px;
+            padding: 0.35rem 0.85rem;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+        }
+        .mermaid-float-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
         .diagram-wrap.is-zoomed .diagram-inner { cursor: grab; }
         .diagram-wrap.is-panning .diagram-inner { cursor: grabbing; user-select: none; }
 
@@ -676,12 +702,13 @@
 <div class="canvas-bg"></div>
 
 <div class="header-bar">
-    <a href="deliverables/index.html" class="nav-link">&larr; Dashboard</a>
-    <div class="client-logo"><div class="logo-mark">RC</div> Radical Concepts</div>
-    <div class="nav-links">
-        <a href="radical-concepts-all-pitches.html" class="nav-link">Pitches</a>
-        <a href="radical-concepts-modular-platform.html" class="nav-link">Platform</a>
-        <a href="#" class="nav-link" id="mermaid-btn" onclick="var m=document.getElementById('mermaid-modal');m.setAttribute('data-user-opened','1');m.style.display='flex';return false;">Mermaid</a>
+    <div class="header-bar-inner">
+        <a href="deliverables/index.html" class="back-link">&larr; Dashboard</a>
+        <div class="client-logo"><div class="logo-mark">RC</div> Radical Concepts</div>
+        <div class="nav-links">
+            <a href="radical-concepts-all-pitches.html" class="back-link">Pitches</a>
+            <a href="radical-concepts-modular-platform.html" class="back-link">Platform</a>
+        </div>
     </div>
 </div>
 
@@ -719,6 +746,7 @@
 <!-- MERMAID DIAGRAM (primary view with ELK layout)  -->
 <!-- ═══════════════════════════════════════════════ -->
 <div class="diagram-wrap" id="diagram-wrap">
+    <button class="mermaid-float-btn" onclick="var m=document.getElementById('mermaid-modal');m.setAttribute('data-user-opened','1');m.style.display='flex';return false;">Mermaid</button>
     <div class="zoom-controls">
         <button onclick="zoomDiagram(this, 1.25)" title="Zoom in">+</button>
         <button onclick="zoomDiagram(this, 0.8)" title="Zoom out">&minus;</button>
