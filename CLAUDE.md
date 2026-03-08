@@ -30,5 +30,11 @@ AI-powered content platform for Brett Moore. ESADE I2P university project. Helps
 
 ## Working Conventions
 - Notion = living workspace (source of truth)
-- This repo = context snapshot for Claude sessions + HTML deliverables for Brett
-- `/learnings/` = compounded knowledge from past Claude sessions
+- This repo = HTML deliverables for Brett + session context (CLAUDE.md, event-storming-flow.md)
+
+## Versioning
+After any change to the HTML deliverables, create a GitHub release:
+- **Patch** (x.x.1) — small fixes, copy tweaks, styling
+- **Minor** (x.1.0) — new section, new page, significant content update
+- **Major** (1.0.0) — new deliverable, major redesign, sprint milestone
+Use `gh release create vX.Y.Z --title "..." --notes "..."`
