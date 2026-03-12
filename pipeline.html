@@ -431,11 +431,9 @@ body {
 }
 /* --- vertical pills drop --- */
 .flow-drop {
-  margin-top: 0.5rem;
   border-radius: 12px;
-  border: 1px dashed rgba(255,255,255,0.1);
+  border: 1px dashed transparent;
   background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015));
-  padding: 0.6rem;
   position: relative;
   z-index: 1;
 }
@@ -857,6 +855,62 @@ body {
   .stage-modules-arrow { display: block; transform: rotate(90deg); }
   .axis-body-inner { grid-template-columns: 1fr; }
 }
+/* --- entrance animations --- */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulseDown {
+  0%, 100% { opacity: 0.3; }
+  50%      { opacity: 1; }
+}
+.stage-band, .feedback-loop {
+  opacity: 0;
+  transform: translateY(18px);
+}
+.stage-band.visible, .feedback-loop.visible {
+  animation: fadeSlideUp 0.5s ease forwards;
+}
+.stage-connector { opacity: 0; }
+.stage-connector.visible { animation: fadeSlideUp 0.35s ease forwards; }
+.stage-connector.visible .stage-connector-line::after {
+  animation: pulseDown 1.8s ease-in-out infinite;
+}
+/* stagger module cards within a stage */
+.module-node { opacity: 0; transform: translateY(12px); transition: opacity 0.4s ease, transform 0.4s ease; }
+.stage-band.visible .module-node { opacity: 1; transform: translateY(0); }
+.stage-band.visible .module-node:nth-child(2) { transition-delay: 0.08s; }
+.stage-band.visible .module-node:nth-child(3) { transition-delay: 0.16s; }
+.stage-modules-arrow { opacity: 0; transition: opacity 0.3s ease 0.1s; }
+.stage-band.visible .stage-modules-arrow { opacity: 1; }
+/* --- collapsible flow-drop --- */
+.flow-drop {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  border-color: transparent;
+  transition: max-height 0.35s ease, opacity 0.3s ease, padding 0.3s ease, margin 0.3s ease, border-color 0.3s ease;
+}
+.module-node.expanded .flow-drop {
+  max-height: 600px;
+  opacity: 1;
+  padding: 0.6rem;
+  margin-top: 0.5rem;
+  border-color: rgba(255,255,255,0.1);
+}
+/* --- active module highlight --- */
+.module-box.active {
+  background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06));
+}
+.module-box.active.input    { border-color: rgba(59,130,246,0.45);  box-shadow: 0 4px 24px rgba(59,130,246,0.15); }
+.module-box.active.creation { border-color: rgba(168,85,247,0.45); box-shadow: 0 4px 24px rgba(168,85,247,0.15); }
+.module-box.active.output   { border-color: rgba(34,197,94,0.45);  box-shadow: 0 4px 24px rgba(34,197,94,0.15); }
+.module-box.active.growth   { border-color: rgba(234,179,8,0.45);  box-shadow: 0 4px 24px rgba(234,179,8,0.15); }
+/* --- clickable count chips --- */
+.mod-count-chip { cursor: pointer; transition: transform 0.15s ease, filter 0.15s ease; }
+.mod-count-chip:hover { transform: scale(1.08); filter: brightness(1.2); }
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 999px; }
@@ -1801,21 +1855,21 @@ function renderFlowchart() {
       const counts = getModuleCounts(module);
       const sections = getSelectedFlowSections(module);
 
-      html += `<div class="module-node">
-        <div class="module-box ${stage.cls}">
+      html += `<div class="module-node" id="flow-node-${module.id}">
+        <div class="module-box ${stage.cls}" onclick="toggleFlowNode('${module.id}')">
           <div class="module-box-top">
             <div class="mod-icon">${getModuleIconSvg(module.id)}</div>
             <div>
               <div class="mod-name">${module.name}</div>
               <div class="mod-subtitle">${module.subtitle}</div>
               <div class="mod-counts" id="fc-count-${module.id}">
-                <span class="mod-count-chip v0">${counts.v0} V0</span>
-                <span class="mod-count-chip v1">${counts.v1} V1</span>
-                <span class="mod-count-chip total">${counts.total} total</span>
+                <span class="mod-count-chip v0" onclick="event.stopPropagation();setPhaseFilter('v0')">${counts.v0} V0</span>
+                <span class="mod-count-chip v1" onclick="event.stopPropagation();setPhaseFilter('v1')">${counts.v1} V1</span>
+                <span class="mod-count-chip total" onclick="event.stopPropagation();setPhaseFilter('all')">${counts.total} total</span>
               </div>
             </div>
           </div>
-          <button class="module-box-action" onclick="scrollToModule('${module.id}')">Open Card</button>
+          <button class="module-box-action" onclick="event.stopPropagation();scrollToModule('${module.id}')">Open Card</button>
         </div>`;
 
       const hasAnyItems = sections.some(section => section.items.length);
@@ -1851,6 +1905,42 @@ function renderFlowchart() {
   </div>`;
 
   document.getElementById('flowchart').innerHTML = html;
+  observeFlowchartEntrance();
+}
+
+function toggleFlowNode(moduleId) {
+  const node = document.getElementById(`flow-node-${moduleId}`);
+  if (!node) return;
+  const box = node.querySelector('.module-box');
+  const wasExpanded = node.classList.contains('expanded');
+
+  // collapse any other expanded nodes
+  document.querySelectorAll('.module-node.expanded').forEach(n => {
+    n.classList.remove('expanded');
+    n.querySelector('.module-box')?.classList.remove('active');
+  });
+
+  if (!wasExpanded) {
+    node.classList.add('expanded');
+    box?.classList.add('active');
+  }
+}
+
+function observeFlowchartEntrance() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        const delay = entry.target.dataset.stagger || 0;
+        setTimeout(() => entry.target.classList.add('visible'), delay * 120);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.stage-band, .stage-connector, .feedback-loop').forEach((el, i) => {
+    el.dataset.stagger = i;
+    observer.observe(el);
+  });
 }
 
 function renderModuleCards() {
@@ -2017,7 +2107,7 @@ function updateSummary() {
     const badge = document.getElementById(`badge-${module.id}`);
     if (badge) badge.textContent = `${counts.v0} V0 · ${counts.v1} V1`;
     const flowCount = document.getElementById(`fc-count-${module.id}`);
-    if (flowCount) flowCount.innerHTML = `<span class="mod-count-chip v0">${counts.v0} V0</span><span class="mod-count-chip v1">${counts.v1} V1</span><span class="mod-count-chip total">${counts.total} total</span>`;
+    if (flowCount) flowCount.innerHTML = `<span class="mod-count-chip v0" onclick="event.stopPropagation();setPhaseFilter('v0')">${counts.v0} V0</span><span class="mod-count-chip v1" onclick="event.stopPropagation();setPhaseFilter('v1')">${counts.v1} V1</span><span class="mod-count-chip total" onclick="event.stopPropagation();setPhaseFilter('all')">${counts.total} total</span>`;
   });
 }
 
