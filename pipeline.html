@@ -802,6 +802,54 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
+.reasoning-toggle {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: rgba(134,239,172,0.88);
+  cursor: pointer;
+}
+.reasoning-toggle:hover { text-decoration: underline; }
+.reasoning-callout {
+  display: none;
+  margin-bottom: 0.7rem;
+  padding: 0.7rem 0.8rem;
+  border-radius: 12px;
+  background: rgba(34,197,94,0.06);
+  border: 1px solid rgba(34,197,94,0.2);
+  color: rgba(187,247,208,0.92);
+  font-size: 0.76rem;
+  line-height: 1.55;
+}
+.reasoning-callout.open { display: block; }
+.reasoning-callout strong {
+  display: block;
+  margin-bottom: 0.22rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.reasoning-callout .reasoning-section { margin-bottom: 0.4rem; }
+.reasoning-callout .reasoning-label {
+  font-weight: 600;
+  font-size: 0.68rem;
+  color: rgba(134,239,172,0.72);
+  margin-bottom: 0.1rem;
+}
+.reset-state-btn {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.35rem 0.7rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.reset-state-btn:hover { background: var(--surface-hover); color: var(--text); }
 .vert-footer {
   display: flex;
   justify-content: space-between;
@@ -959,6 +1007,7 @@ body {
     <div class="nav-links">
       <a href="deliverables/index.html" class="back-link">Dashboard</a>
       <a href="radical-concepts-all-pitches.html" class="back-link">Pitches</a>
+      <button class="reset-state-btn" onclick="if(confirm('Reset all selections to defaults?')) resetState()">Reset selections</button>
     </div>
   </div>
 </div>
@@ -1090,30 +1139,35 @@ const MODULES = [
           id: "cu-v1", name: "V1: Keyword/Topic Matching",
           description: "Simplest approach. Brett defines topics: \u201cgeopolitics,\u201d \u201cAI regulation,\u201d \u201cquantum physics,\u201d \u201cweird science.\u201d System matches articles against those keywords. Pros: transparent, easy to explain to Brett, easy to build. Cons: dumb \u2014 misses nuance, catches too much noise, can\u2019t understand context.",
           feasibilityNote: "Brett has to maintain his topic list, which he\u2019ll forget to update. Low recommendation.",
+          reasoning: { rationale: "V0 as baseline only. Easiest to build but limited long-term value \u2014 keyword matching misses nuance and catches too much noise. Serves as a fallback while Persona-Based Scoring (cu-v2) is being trained.", effort: "Low setup effort, but high ongoing maintenance \u2014 Brett has to manually curate and update his topic list. If the list goes stale, filtering quality degrades silently.", dependencies: "Brett\u2019s initial topic list. Hamid\u2019s 928 RSS feeds as input source." },
           feasibilityScore: 2, defaultPhase: "v0"
         },
         {
           id: "cu-v2", name: "V2: Persona-Based Scoring",
           description: "This connects to the Persona Engine from the Modular Architecture doc. The system doesn\u2019t just match topics \u2014 it scores each article against Brett\u2019s editorial style, interests, and past preferences. \u201cWould Brett find this interesting?\u201d not just \u201cIs this about geopolitics?\u201d The Persona Engine was flagged as CRITICAL in the gap analysis. For V0, this could be a lightweight version: a set of rules and prompt blocks that define Brett\u2019s taste.",
           feasibilityNote: "Better, because Brett doesn\u2019t have to manage anything \u2014 the system learns him. But it needs training data to start.",
+          reasoning: { rationale: "Core V0 pick. The Persona Engine was flagged as CRITICAL in the gap analysis \u2014 it\u2019s \u2018hidden everywhere, owned nowhere.\u2019 A lightweight V0 version (prompt-based rules defining Brett\u2019s taste) is achievable without a full ML system. This is the foundation every downstream module depends on.", effort: "Moderate setup (need to define Brett\u2019s editorial preferences as prompt rules), but near-zero maintenance once running. The system learns from usage, so it improves without manual intervention.", dependencies: "Initial training data from Brett\u2019s past selections. Persona Engine architecture (even lightweight prompt-based version). Hamid\u2019s RSS feed infrastructure." },
           feasibilityScore: 4, defaultPhase: "v0"
         },
         {
           id: "cu-v3", name: "V3: Trend/Novelty Detection",
           description: "The system doesn\u2019t just ask \u201cis this relevant to Brett?\u201d but \u201cis this new and trending?\u201d Detects when a story is gaining momentum across multiple sources before it peaks. Brett wants to be the guy who catches things early \u2014 this is his differentiator per the competitor analysis (the \u201csynthesis gap\u201d).",
           feasibilityNote: "Novelty is great for Brett \u2014 new/surprising content is more engaging than routine topics.",
+          reasoning: { rationale: "V1 because it requires cross-source frequency analysis that\u2019s more complex than V0 persona scoring. But it\u2019s strategically important \u2014 the competitor analysis identified early trend-catching as Brett\u2019s key differentiator (the \u2018synthesis gap\u2019). Worth building once V0 pipeline is stable.", effort: "High setup complexity \u2014 needs cross-source frequency analysis, story deduplication, and momentum tracking across 928 feeds. Not a first-build feature, but adds significant editorial value once the foundation works.", dependencies: "Working V0 curation pipeline. Multiple source feeds tracking the same topics for cross-referencing. Frequency analysis logic." },
           feasibilityScore: 4, defaultPhase: "v1"
         },
         {
           id: "cu-v4", name: "V4: Cross-Domain Synthesis Detection",
           description: "Most sophisticated and most aligned with Brett\u2019s unique value. The AI detects when stories from different domains connect. A geopolitics story + a science breakthrough + an economic trend that together tell a bigger story. Brett\u2019s differentiator is connecting dots across domains nobody else connects.",
           feasibilityNote: "Excellent \u2014 this leans into Brett\u2019s pattern-matching strengths. The system does the gathering, Brett does the connecting.",
+          reasoning: { rationale: "Future/V2 because it\u2019s the most computationally sophisticated filtering approach. Requires semantic understanding across domains, not just topic matching. However, it\u2019s the most aligned with Brett\u2019s unique value proposition \u2014 he\u2019s the person who connects geopolitics + science + economics into one narrative.", effort: "Very high setup complexity \u2014 requires semantic embeddings or LLM-based cross-domain analysis, plus sufficient article volume across multiple domains. This is advanced AI work, not a first-sprint deliverable. But it\u2019s the long-term vision.", dependencies: "Mature V0+V1 curation pipeline. Semantic embeddings or LLM-based cross-domain analysis. Sufficient article volume across multiple domains." },
           feasibilityScore: 4, defaultPhase: "v2"
         },
         {
           id: "cu-v5", name: "V5: Audience-Informed Curation (Future)",
           description: "Once there\u2019s an audience, the system factors in what listeners engage with, what quiz questions get answered, what clips get shared. Content that resonates with the audience gets weighted higher. Creates the feedback loop flagged as missing in the gap analysis.",
           feasibilityNote: "Zero effort from Brett. The system gets smarter without him managing it.",
+          reasoning: { rationale: "Future because it requires an existing audience generating engagement data. The gap analysis flagged the missing feedback loop as a critical gap \u2014 this closes it. But you need listeners first, so it\u2019s sequentially dependent on a working V0 pipeline + distribution.", effort: "Low incremental effort once analytics infrastructure exists \u2014 it\u2019s mostly piping engagement signals back into curation weights. But the prerequisites (audience, analytics, gamification) are themselves multi-sprint deliverables.", dependencies: "Active listener base generating data. Quiz/gamification system (Module 7). Analytics tracking (Module 7). Working distribution pipeline (Module 6)." },
           feasibilityScore: 5, defaultPhase: "future"
         }
       ]
@@ -1125,30 +1179,35 @@ const MODULES = [
           id: "cu-v6", name: "V6: Ranked List (Top N)",
           description: "System shows Brett a numbered list: \u201cHere are your top 5 stories today, ranked.\u201d Brett sees the #1 pick and works down. Simple, decisive.",
           feasibilityNote: "Good \u2014 clear hierarchy, no decision paralysis. Brett knows #1 is the AI\u2019s best pick.",
+          reasoning: { rationale: "V0 because it\u2019s the simplest presentation layer to build and pairs naturally with Persona-Based Scoring. A numbered list is transparent \u2014 Brett can see exactly what the AI thinks is most relevant and work down.", effort: "Very low setup \u2014 essentially a sorted output of the scoring mechanism. Minimal UI needed. Can be delivered via WhatsApp message or a simple web view.", dependencies: "Working scoring/filtering mechanism (cu-v1 or cu-v2). Delivery channel (WhatsApp or web dashboard)." },
           feasibilityScore: 4, defaultPhase: "v0"
         },
         {
           id: "cu-v7", name: "V7: Grouped by Theme/Domain",
           description: "Instead of one ranked list, content is grouped: \u201c2 geopolitics stories, 1 science, 1 quirky.\u201d Brett picks one from each bucket. Ensures topic diversity \u2014 the ranked list might give 5 geopolitics stories and nothing quirky.",
           feasibilityNote: "Moderate \u2014 more structure helps, but more groups = more decisions = more friction.",
+          reasoning: { rationale: "Deprioritized from V0 because it adds decision complexity. While it ensures topic diversity (prevents 5 geopolitics stories), it forces Brett to make multiple pick-from-bucket decisions instead of one linear scan. Better as a V1 enhancement once Brett\u2019s preferences are clearer.", effort: "Moderate setup \u2014 requires topic classification/clustering on top of basic scoring. More UI complexity than a simple ranked list. The grouping logic also needs editorial rules (how many per bucket?).", dependencies: "Topic classification/clustering system. Working scoring mechanism. Editorial rules for bucket sizes." },
           feasibilityScore: 3, defaultPhase: "v0"
         },
         {
           id: "cu-v8", name: "V8: Story Bundles (Pre-Packaged Episodes)",
           description: "The AI doesn\u2019t just rank individual articles \u2014 it proposes a complete episode bundle: \u201cToday\u2019s episode: Story A (geopolitics, 8 min) + Story B (science, 7 min) + Story C (quirky, 5 min) = 20 min episode.\u201d Brett approves or swaps one out. A level above individual curation \u2014 the AI does editorial planning.",
           feasibilityNote: "Excellent. Lowest-friction option \u2014 Brett makes ONE decision (\u201cyes\u201d or \u201cswap story C\u201d) instead of building the episode himself.",
+          reasoning: { rationale: "V1 because it requires the AI to understand episode structure, timing, and topic balance \u2014 a layer above simple filtering. But it\u2019s the ultimate goal: Brett sees a pre-built episode and just says yes/no. Depends on V0 curation + script writing working first.", effort: "High setup \u2014 needs episode structure templates, per-story timing estimates, topic balancing logic, and integration with script generation. This is editorial AI, not just filtering. Worth the investment once V0 proves the concept.", dependencies: "Working V0 curation + persona scoring. Episode format decisions (Module 4). Script generation templates (Module 3). Timing estimates per story." },
           feasibilityScore: 5, defaultPhase: "v1"
         },
         {
           id: "cu-v9", name: "V9: Binary Swipe (Tinder-Style)",
           description: "Brett sees one story at a time: swipe right = include, swipe left = skip. Dead simple. Could work in WhatsApp (thumbs up / thumbs down) or a minimal mobile interface.",
           feasibilityNote: "Very feasible. One decision at a time, no overwhelm, gamified feel. If AI pre-filters to 10\u201315, Brett swipes through in 2 minutes.",
+          reasoning: { rationale: "V0 because it\u2019s the lowest-friction approval mechanism. Binary yes/no is the simplest decision possible. Can be implemented in WhatsApp (thumbs up/down) which Brett already uses constantly \u2014 no new app needed.", effort: "Low setup \u2014 can piggyback on the WhatsApp bot infrastructure. Each story presented as a message with thumbs up/down. Requires AI pre-filtering to keep the swipe set manageable (10\u201315 items max, otherwise it becomes tedious).", dependencies: "Pre-filtered article list from scoring mechanism. WhatsApp bot or minimal mobile UI. AI pre-filtering to keep the swipe set manageable (10\u201315 items max)." },
           feasibilityScore: 5, defaultPhase: "v0"
         },
         {
           id: "cu-v10", name: "V10: Exception-Based (\u201cApprove Unless...\u201d)",
           description: "The AI auto-selects everything. Brett only gets notified if there\u2019s a story the AI is uncertain about or if it detected something potentially controversial. Brett\u2019s daily action is: \u201cnothing flagged, looks good\u201d or \u201cthis one story \u2014 swap it.\u201d",
           feasibilityNote: "Absolute minimum cognitive load. Brett only engages when something needs attention. Risk: Brett might feel disconnected from his own content.",
+          reasoning: { rationale: "V1 because it requires high trust in the AI\u2019s judgment, which needs to be earned through V0 usage. Brett red-teams everything 2\u20133 times \u2014 he won\u2019t accept full autopilot on day one. But once V0 proves the AI\u2019s taste is calibrated, this becomes the ideal steady-state.", effort: "Low technical effort (it\u2019s simpler than swipe/rank \u2014 the AI just runs). But the real cost is trust-building: Brett needs weeks of V0 usage seeing the AI get it right before he\u2019ll accept hands-off mode. Risk: Brett may feel disconnected from his own content.", dependencies: "Proven V0 curation accuracy. Brett\u2019s trust in the system (earned over weeks of V0 usage). Confidence scoring so the AI knows when to flag uncertainty." },
           feasibilityScore: 5, defaultPhase: "v1"
         }
       ]
@@ -1160,18 +1219,21 @@ const MODULES = [
           id: "cu-v11", name: "V11: Morning Batch",
           description: "One curation session per day, every morning. System sends the day\u2019s picks at 7am. Brett approves by 8am. Pipeline kicks off. Pros: predictable routine, one daily touch.",
           feasibilityNote: "Routines are critical for feasibility. Same time, same action, every day. But if Brett misses the morning window, the whole day stalls.",
+          reasoning: { rationale: "V0 because routine and predictability are the #1 enabler for sustained engagement. One fixed daily touchpoint is the simplest workflow to build and the easiest for Brett to form a habit around. The risk (missed morning = stalled day) is mitigated by fallback content (Module 4).", effort: "Very low setup \u2014 essentially a scheduled message (7am daily). The simplest workflow to build and maintain. Needs a fallback plan if Brett misses the window so the pipeline doesn\u2019t stall.", dependencies: "Automated morning delivery (7am). WhatsApp or notification channel. Fallback content plan if Brett misses the window." },
           feasibilityScore: 4, defaultPhase: "v0"
         },
         {
           id: "cu-v12", name: "V12: Rolling/Continuous",
           description: "The system curates throughout the day as stories come in. Brett can engage whenever he has a moment. Accumulated picks form tomorrow\u2019s episode. Pros: flexible, no single pressure point.",
           feasibilityNote: "Mixed. Flexibility is good for hyperfocus patterns (Brett might batch all approvals at 11pm), but can also mean \u201cI\u2019ll do it later\u201d which becomes never.",
+          reasoning: { rationale: "V1 because flexibility sounds good in theory but undermines habit formation. Without a fixed touchpoint, engagement becomes unpredictable. \u2018I\u2019ll do it later\u2019 easily becomes never. Better as an option once the daily habit is already established through V0 morning batch.", effort: "Moderate setup \u2014 needs real-time feed processing, accumulation logic, and a deadline mechanism (\u2018stories selected by midnight become tomorrow\u2019s episode\u2019). More moving parts than a simple morning batch.", dependencies: "Real-time feed ingestion. Accumulation/deadline logic. Working notification system." },
           feasibilityScore: 2, defaultPhase: "v1"
         },
         {
           id: "cu-v13", name: "V13: Multi-Window",
           description: "Structured windows: morning curation (pick stories), afternoon script review, evening final approval. Each step has a time slot. Pros: distributes cognitive load. The Strategic Options doc suggests 45\u201375 minutes total daily \u2014 spreading across 3 windows keeps each one short.",
           feasibilityNote: "Good if Brett can stick to it, but three daily touchpoints might be too many.",
+          reasoning: { rationale: "V2/Future because three daily touchpoints is a significant commitment. The Strategic Options doc suggests 45\u201375 minutes total daily \u2014 achievable in theory, but three separate scheduled interactions per day is hard to sustain. Better to start with one touchpoint (V0) and expand only if Brett asks for it.", effort: "Moderate setup per window, but 3x the notification/reminder infrastructure. Also requires Brett to maintain three separate daily routines, which is the real maintenance cost \u2014 not technical, but behavioral.", dependencies: "All three pipeline stages operational (curation, scripting, approval). Scheduling/reminder system. Brett\u2019s sustained commitment to the routine." },
           feasibilityScore: 3, defaultPhase: "v2"
         }
       ]
@@ -1749,6 +1811,7 @@ function initState() {
   });
 }
 initState();
+loadSavedState();
 
 const verticalLookup = new Map();
 MODULES.forEach(module => {
@@ -2049,6 +2112,15 @@ function renderModuleCards() {
                           <div class="vert-desc collapsed" id="desc-${vertical.id}">${vertical.description}</div>
                           <div class="expand-toggle" onclick="event.stopPropagation();toggleDesc('${vertical.id}')">show more</div>
                           <div class="feasibility-callout"><strong>Feasibility note</strong>${vertical.feasibilityNote}</div>
+                          ${vertical.reasoning ? `
+                          <div class="reasoning-toggle" onclick="event.stopPropagation();toggleReasoning('${vertical.id}')">why this phase?</div>
+                          <div class="reasoning-callout" id="reasoning-${vertical.id}">
+                            <strong>Phase Reasoning</strong>
+                            <div class="reasoning-section"><div class="reasoning-label">Rationale</div>${vertical.reasoning.rationale}</div>
+                            <div class="reasoning-section"><div class="reasoning-label">Setup &amp; Maintenance</div>${vertical.reasoning.effort}</div>
+                            <div class="reasoning-section"><div class="reasoning-label">Dependencies</div>${vertical.reasoning.dependencies}</div>
+                          </div>
+                          ` : ''}
                           <div class="vert-footer">
                             <div class="feasibility-meter">${renderFeasibilityMeter(vertical.feasibilityScore)}<span class="feasibility-meter-label">${vertical.feasibilityScore}/5</span></div>
                             <div class="selection-indicator ${selected === 'none' ? 'none' : selected}" id="sel-${vertical.id}">${selected === 'none' ? 'click to select' : selected.toUpperCase()}</div>
@@ -2093,6 +2165,39 @@ function toggleDesc(id) {
   toggle.textContent = desc.classList.contains('collapsed') ? 'show more' : 'show less';
 }
 
+function toggleReasoning(id) {
+  const el = document.getElementById(`reasoning-${id}`);
+  if (!el) return;
+  el.classList.toggle('open');
+  const toggle = el.previousElementSibling;
+  toggle.textContent = el.classList.contains('open') ? 'hide reasoning' : 'why this phase?';
+}
+
+function saveState() {
+  try { localStorage.setItem('pipeline-state', JSON.stringify(state)); } catch(e) {}
+}
+
+function loadSavedState() {
+  try {
+    const saved = localStorage.getItem('pipeline-state');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      Object.keys(parsed).forEach(k => { if (k in state) state[k] = parsed[k]; });
+      return true;
+    }
+  } catch(e) {}
+  return false;
+}
+
+function resetState() {
+  localStorage.removeItem('pipeline-state');
+  Object.keys(state).forEach(k => { state[k] = 'none'; });
+  MODULES.forEach(m => m.axes.forEach(a => a.verticals.forEach(v => {
+    state[v.id] = v.defaultPhase === 'v0' ? 'v0' : (v.defaultPhase === 'v1' ? 'v1' : 'none');
+  })));
+  renderAll();
+}
+
 function cycleSelection(id) {
   const current = state[id];
   if (current === 'none') state[id] = 'v0';
@@ -2105,6 +2210,7 @@ function cycleSelection(id) {
   applyFilter();
   renderFlowchart();
   updateModuleDimming();
+  saveState();
 }
 
 function updateVerticalCard(id) {
@@ -2262,11 +2368,14 @@ document.addEventListener('keydown', event => {
   }
 });
 
-renderFilterControls();
-renderFlowchart();
-renderModuleCards();
-updateSummary();
-applyFilter();
+function renderAll() {
+  renderFilterControls();
+  renderFlowchart();
+  renderModuleCards();
+  updateSummary();
+  applyFilter();
+}
+renderAll();
 </script>
 </body>
 </html>
