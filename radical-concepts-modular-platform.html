@@ -33,6 +33,10 @@
             font-family: 'DM Sans', sans-serif;
             color: #fff;
             background: #111827;
+            background-image:
+                radial-gradient(ellipse 60% 50% at 20% 0%, rgba(59,130,246,0.06) 0%, transparent 70%),
+                radial-gradient(ellipse 50% 40% at 80% 10%, rgba(168,85,247,0.05) 0%, transparent 70%),
+                radial-gradient(ellipse 50% 40% at 50% 100%, rgba(34,197,94,0.04) 0%, transparent 70%);
             -webkit-font-smoothing: antialiased;
             min-height: 100vh;
             line-height: 1.6;
@@ -44,7 +48,8 @@
 
         /* ── UNIFIED HEADER BAR ── */
         .header-bar {
-            position: relative;
+            position: sticky;
+            top: 0;
             z-index: 100;
             width: 100%;
             background: rgba(17, 24, 39, 0.94);
@@ -233,17 +238,13 @@
 
         /* Pipeline Detail Panels */
         .pipeline-detail {
-            display: none;
+            display: block;
             background: rgba(255,255,255,0.04);
             border: 1px solid rgba(255,255,255,0.08);
             border-radius: 12px;
-            padding: clamp(1rem, 0.75rem + 0.5vw, 1.5rem);
-            margin-top: 1.5rem;
             font-size: var(--text-sm);
             line-height: 1.6;
-            opacity: 0.85;
         }
-        .pipeline-detail.active { display: block; }
         .pipeline-detail h4 {
             font-size: var(--text-sm);
             font-weight: 600;
@@ -614,6 +615,139 @@
             letter-spacing: 0.06em;
         }
 
+        /* ── ENTRANCE ANIMATIONS ── */
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .hero, .pipeline-section, .modules-section, .diverge,
+        .paths-section, .v0-section, .decisions-section {
+            opacity: 0; transform: translateY(20px);
+        }
+        .hero.visible, .pipeline-section.visible, .modules-section.visible,
+        .diverge.visible, .paths-section.visible, .v0-section.visible,
+        .decisions-section.visible {
+            animation: fadeSlideUp 0.5s ease forwards;
+        }
+        /* stagger children */
+        .pipeline-step, .module-card, .path-card, .v0-card, .decision-list li {
+            opacity: 0; transform: translateY(12px);
+            transition: opacity 0.35s ease, transform 0.35s ease;
+        }
+        .pipeline-section.visible .pipeline-step,
+        .modules-section.visible .module-card,
+        .paths-section.visible .path-card,
+        .v0-section.visible .v0-card,
+        .decisions-section.visible .decision-list li {
+            opacity: 1; transform: translateY(0);
+        }
+        .pipeline-section.visible .pipeline-step:nth-child(1) { transition-delay: 0s; }
+        .pipeline-section.visible .pipeline-step:nth-child(3) { transition-delay: 0.06s; }
+        .pipeline-section.visible .pipeline-step:nth-child(5) { transition-delay: 0.12s; }
+        .pipeline-section.visible .pipeline-step:nth-child(7) { transition-delay: 0.18s; }
+        .pipeline-section.visible .pipeline-step:nth-child(9) { transition-delay: 0.24s; }
+        .pipeline-section.visible .pipeline-step:nth-child(11) { transition-delay: 0.3s; }
+        .pipeline-arrow { opacity: 0; transition: opacity 0.3s ease 0.1s; }
+        .pipeline-section.visible .pipeline-arrow { opacity: 1; }
+        .modules-section.visible .module-card:nth-child(1) { transition-delay: 0s; }
+        .modules-section.visible .module-card:nth-child(2) { transition-delay: 0.08s; }
+        .modules-section.visible .module-card:nth-child(3) { transition-delay: 0.16s; }
+        .paths-section.visible .path-card:nth-child(1) { transition-delay: 0s; }
+        .paths-section.visible .path-card:nth-child(2) { transition-delay: 0.1s; }
+        .paths-section.visible .path-card:nth-child(3) { transition-delay: 0.2s; }
+
+        /* ── ACTIVE PIPELINE STEP ── */
+        .pipeline-step.active .pipeline-icon {
+            transform: translateY(-5px) scale(1.08);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+        }
+        .pipeline-step.active h3 { color: #fff; }
+        .pipeline-step--green.active .pipeline-icon {
+            background: rgba(34,197,94,0.2);
+            border-color: rgba(34,197,94,0.5);
+            box-shadow: 0 8px 28px rgba(34,197,94,0.15);
+        }
+        .pipeline-step--amber.active .pipeline-icon {
+            background: rgba(234,179,8,0.2);
+            border-color: rgba(234,179,8,0.5);
+            box-shadow: 0 8px 28px rgba(234,179,8,0.15);
+        }
+        .pipeline-step--red.active .pipeline-icon {
+            background: rgba(239,68,68,0.2);
+            border-color: rgba(239,68,68,0.5);
+            box-shadow: 0 8px 28px rgba(239,68,68,0.15);
+        }
+        .pipeline-step--gate.active .pipeline-icon {
+            background: rgba(70,130,180,0.25);
+            border-color: rgba(70,130,180,0.6);
+            box-shadow: 0 8px 28px rgba(70,130,180,0.15);
+        }
+
+        /* ── DETAIL PANEL TRANSITION ── */
+        .pipeline-detail {
+            max-height: 0; overflow: hidden; opacity: 0;
+            padding: 0 clamp(1rem, 0.75rem + 0.5vw, 1.5rem);
+            transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.3s ease, margin 0.3s ease;
+            margin-top: 0;
+        }
+        .pipeline-detail.active {
+            display: block;
+            max-height: 300px; opacity: 1;
+            padding: clamp(1rem, 0.75rem + 0.5vw, 1.5rem);
+            margin-top: 1.5rem;
+        }
+
+        /* ── EXPANDABLE MODULE CARDS ── */
+        .module-card { cursor: pointer; }
+        .module-io, .module-components, .module-questions {
+            max-height: 0; overflow: hidden; opacity: 0;
+            margin-bottom: 0;
+            transition: max-height 0.35s ease, opacity 0.3s ease, margin 0.3s ease;
+        }
+        .module-card.expanded .module-io { max-height: 200px; opacity: 1; margin-bottom: 1rem; }
+        .module-card.expanded .module-components { max-height: 200px; opacity: 1; margin-bottom: 1rem; }
+        .module-card.expanded .module-questions { max-height: 300px; opacity: 1; padding-top: 0.75rem; }
+        .module-card::after {
+            content: 'Click to expand';
+            display: block;
+            font-size: var(--text-xs);
+            opacity: 0.25;
+            margin-top: 0.5rem;
+            transition: opacity 0.2s;
+        }
+        .module-card.expanded::after { content: 'Click to collapse'; opacity: 0.35; }
+        .module-card.expanded {
+            border-color: rgba(255,255,255,0.18);
+            background: rgba(255,255,255,0.06);
+        }
+
+        /* ── PATH CARD: highlight matching modules ── */
+        .path-card { cursor: pointer; transition: transform 0.2s ease, box-shadow 0.25s ease; }
+        .path-card.active {
+            transform: translateY(-4px);
+        }
+        .path-card--a.active { box-shadow: 0 8px 32px rgba(70,130,180,0.15); }
+        .path-card--b.active { box-shadow: 0 8px 32px rgba(255,107,107,0.15); }
+        .path-card--c.active { box-shadow: 0 8px 32px rgba(201,169,110,0.15); }
+        .module-card.highlighted {
+            border-color: rgba(255,255,255,0.3) !important;
+            background: rgba(255,255,255,0.08);
+            transform: translateY(-2px);
+        }
+        @keyframes flashBorder {
+            0%   { box-shadow: 0 0 0 2px rgba(255,255,255,0.3); }
+            100% { box-shadow: 0 0 0 0 transparent; }
+        }
+        .module-card.flash { animation: flashBorder 1s ease-out; }
+
+        /* ── V0 CARDS INTERACTIVE ── */
+        .v0-card { cursor: pointer; transition: transform 0.2s ease, border-color 0.25s ease, box-shadow 0.25s ease; }
+        .v0-card.active {
+            transform: translateY(-4px);
+            border-color: rgba(34,197,94,0.5);
+            box-shadow: 0 8px 28px rgba(34,197,94,0.12);
+        }
+
         /* Responsive */
         @media (max-width: 900px) {
             .pipeline-flow { flex-wrap: wrap; justify-content: center; }
@@ -645,6 +779,7 @@
         <div class="client-logo"><div class="logo-mark">RC</div> Radical Concepts</div>
         <div class="nav-links">
             <a href="radical-concepts-all-pitches.html" class="back-link">Pitches</a>
+            <a href="pipeline.html" class="back-link">Pipeline</a>
             <a href="radical-concepts-event-storming.html" class="back-link">Event Storming</a>
         </div>
     </div>
@@ -1202,16 +1337,116 @@
 </div>
 
 <script>
-    function toggleDetail(id) {
-        var panels = document.querySelectorAll('.pipeline-detail');
-        panels.forEach(function(p) {
-            if (p.id === id) {
-                p.classList.toggle('active');
-            } else {
-                p.classList.remove('active');
-            }
-        });
+/* ── Pipeline step toggle ── */
+function toggleDetail(id) {
+    const panels = document.querySelectorAll('.pipeline-detail');
+    const steps = document.querySelectorAll('.pipeline-step');
+    const target = document.getElementById(id);
+    const wasActive = target && target.classList.contains('active');
+
+    panels.forEach(p => p.classList.remove('active'));
+    steps.forEach(s => s.classList.remove('active'));
+
+    if (!wasActive && target) {
+        target.classList.add('active');
+        // find and highlight the matching step
+        const stepIndex = Array.from(panels).indexOf(target);
+        const matchingSteps = document.querySelectorAll('.pipeline-step');
+        if (matchingSteps[stepIndex]) matchingSteps[stepIndex].classList.add('active');
     }
+}
+
+/* ── Module card expand/collapse ── */
+document.addEventListener('click', function(e) {
+    const card = e.target.closest('.module-card');
+    if (!card || !card.closest('.modules-section')) return;
+    card.classList.toggle('expanded');
+});
+
+/* ── Path card: highlight module chain ── */
+const pathModuleMap = {
+    0: [0, 1, 2, 3, 4, 5],  // Path A: all 6 production modules
+    1: [0, 1, 2, 3, 6],      // Path B: core + script + learning
+    2: [0, 1, 2, 3, 6]       // Path C: core + script + learning
+};
+
+document.querySelectorAll('.path-card').forEach((card, i) => {
+    card.addEventListener('click', function() {
+        const wasActive = card.classList.contains('active');
+        // clear all
+        document.querySelectorAll('.path-card').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.module-card').forEach(c => {
+            c.classList.remove('highlighted', 'flash');
+        });
+
+        if (!wasActive) {
+            card.classList.add('active');
+            const moduleCards = document.querySelectorAll('.modules-section .module-card');
+            const indices = pathModuleMap[i] || [];
+            indices.forEach((idx, delay) => {
+                if (moduleCards[idx]) {
+                    setTimeout(() => {
+                        moduleCards[idx].classList.add('highlighted');
+                        moduleCards[idx].classList.remove('flash');
+                        void moduleCards[idx].offsetWidth;
+                        moduleCards[idx].classList.add('flash');
+                    }, delay * 60);
+                }
+            });
+        }
+    });
+});
+
+/* ── V0 card: scroll to related module ── */
+const v0ModuleMap = [
+    [0, 2],   // Foundation 1: Source Intel + Editorial Control
+    [3, 4],   // Foundation 2: Script + Media
+    [6]       // Differentiator: Learning Engine
+];
+document.querySelectorAll('.v0-card').forEach((card, i) => {
+    card.addEventListener('click', function() {
+        const wasActive = card.classList.contains('active');
+        document.querySelectorAll('.v0-card').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.module-card').forEach(c => c.classList.remove('highlighted', 'flash'));
+
+        if (!wasActive) {
+            card.classList.add('active');
+            const moduleCards = document.querySelectorAll('.modules-section .module-card');
+            const indices = v0ModuleMap[i] || [];
+            indices.forEach((idx, delay) => {
+                if (moduleCards[idx]) {
+                    setTimeout(() => {
+                        moduleCards[idx].classList.add('highlighted');
+                        moduleCards[idx].classList.remove('flash');
+                        void moduleCards[idx].offsetWidth;
+                        moduleCards[idx].classList.add('flash');
+                    }, delay * 80);
+                }
+            });
+            // scroll to module section
+            const modulesSection = document.querySelector('.modules-section');
+            if (modulesSection) {
+                setTimeout(() => modulesSection.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+            }
+        }
+    });
+});
+
+/* ── Scroll-triggered entrance animations ── */
+const entranceObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const delay = entry.target.dataset.stagger || 0;
+            setTimeout(() => entry.target.classList.add('visible'), delay * 100);
+            entranceObserver.unobserve(entry.target);
+        }
+    });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.hero, .pipeline-section, .modules-section, .diverge, .paths-section, .v0-section, .decisions-section').forEach((el, i) => {
+    el.dataset.stagger = i;
+    entranceObserver.observe(el);
+});
 </script>
 </body>
 </html>
