@@ -25,12 +25,12 @@ AI-powered content platform for Brett Moore. ESADE I2P university project. Helps
 - `deliverables/index.html` — Project hub (Brett's entry point)
 - `radical-concepts-all-pitches.html` — 3 concept pitches
 - `radical-concepts-modular-platform.html` — Platform architecture
+- `pipeline.html` — Interactive pipeline builder (V0/V1 module decisions)
 - `i2p-brainstorming-board.html` — Design thinking process
-- `radical-concepts-event-storming.html` — DDD pipeline flow
 
 ## Working Conventions
 - Notion = living workspace (source of truth)
-- This repo = HTML deliverables for Brett + session context (CLAUDE.md, event-storming-flow.md)
+- This repo = HTML deliverables for Brett + session context
 
 ## Versioning
 After any change to the HTML deliverables, create a GitHub release:
