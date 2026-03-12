@@ -24,7 +24,6 @@ AI-powered content platform for Brett Moore. ESADE I2P university project. Helps
 ## Brett-Facing Deliverables (HTML)
 - `deliverables/index.html` — Project hub (Brett's entry point)
 - `radical-concepts-all-pitches.html` — 3 concept pitches
-- `radical-concepts-modular-platform.html` — Platform architecture
 - `pipeline.html` — Interactive pipeline builder (V0/V1 module decisions)
 - `i2p-brainstorming-board.html` — Design thinking process
 
