@@ -217,6 +217,26 @@ body {
 .flowchart-copy {
   max-width: 430px;
 }
+.flowchart-filter-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.45rem;
+}
+.flowchart-filter-hint {
+  font-size: 0.66rem;
+  color: var(--text-light);
+  transition: color 0.2s ease;
+}
+.flowchart-filter-hint.active { color: var(--text-dim); }
+/* --- module dimming when filter active --- */
+.module-node.dimmed .module-box {
+  opacity: 0.35;
+  transform: scale(0.97);
+  pointer-events: none;
+}
+.module-node.dimmed .flow-drop { display: none; }
+.module-node { transition: opacity 0.3s ease, transform 0.3s ease; }
 /* --- feedback accent line on left edge --- */
 .flowchart {
   display: flex;
@@ -478,7 +498,10 @@ body {
   letter-spacing: 0.1em;
   color: var(--text-light);
   margin-bottom: 0.32rem;
+  cursor: pointer;
+  transition: color 0.15s ease;
 }
+.flow-drop-group-label:hover { color: var(--text-dim); }
 .flow-pill {
   padding: 0.38rem 0.5rem;
   border-radius: 8px;
@@ -488,10 +511,22 @@ body {
   line-height: 1.35;
   color: var(--text-dim);
 }
+.flow-pill { cursor: pointer; transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease; }
+.flow-pill:hover { transform: translateX(4px); filter: brightness(1.15); }
+.flow-pill:active { transform: translateX(2px) scale(0.98); }
 .flow-pill.v0 { background: var(--green-bg); border-color: var(--green-border); color: rgba(220,252,231,0.95); }
 .flow-pill.v1 { background: var(--amber-bg); border-color: var(--amber-border); color: rgba(254,243,199,0.95); }
-.flow-pill.more { border-style: dashed; color: var(--text-light); }
+.flow-pill.more { border-style: dashed; color: var(--text-light); cursor: default; }
+.flow-pill.more:hover { transform: none; filter: none; }
 .flow-empty { font-size: 0.72rem; color: var(--text-light); line-height: 1.5; }
+/* --- pill scroll highlight on target card --- */
+@keyframes flashHighlight {
+  0%   { box-shadow: 0 0 0 2px rgba(255,255,255,0.4); }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+.vertical-card.flash {
+  animation: flashHighlight 1.2s ease-out;
+}
 /* --- feedback loop banner --- */
 .feedback-loop {
   margin-top: 0.5rem;
@@ -954,7 +989,10 @@ body {
         <h2>Pipeline stages flow top to bottom. Modules sit side by side within each stage.</h2>
       </div>
       <div class="flowchart-actions">
-        <p class="flowchart-copy">The map shows only the architecture decisions that matter in conversation. Click a module to jump to the full option library below.</p>
+        <div class="flowchart-filter-bar">
+          <div class="filters" id="flowchartFilters"></div>
+          <div class="flowchart-filter-hint" id="flowchartFilterHint"></div>
+        </div>
       </div>
     </div>
     <div class="flowchart" id="flowchart"></div>
@@ -1812,15 +1850,41 @@ function matchesCardFilter(verticalId) {
 }
 
 function renderFilterControls() {
-  const container = document.getElementById('filterControls');
   const options = [
     { id: 'v0', label: 'Show V0' },
     { id: 'v1', label: 'Show V1' },
     { id: 'all', label: 'Show All' }
   ];
-  container.innerHTML = options.map(option => `
+  const chipHtml = options.map(option => `
     <button class="filter-chip ${uiState.phaseFilter === option.id ? 'active' : ''}" data-filter="${option.id}" onclick="setPhaseFilter('${option.id}')">${option.label}</button>
   `).join('');
+
+  // render into both filter locations
+  document.getElementById('filterControls').innerHTML = chipHtml;
+  const flowchartFilters = document.getElementById('flowchartFilters');
+  if (flowchartFilters) flowchartFilters.innerHTML = chipHtml;
+
+  // update flowchart filter hint
+  const hint = document.getElementById('flowchartFilterHint');
+  if (hint) {
+    const labels = { v0: 'Showing near-term (V0) selections', v1: 'Showing roadmap (V1) selections', all: 'Showing all phases' };
+    hint.textContent = labels[uiState.phaseFilter];
+    hint.classList.toggle('active', uiState.phaseFilter !== 'all');
+  }
+}
+
+function updateModuleDimming() {
+  if (uiState.phaseFilter === 'all') {
+    document.querySelectorAll('.module-node.dimmed').forEach(n => n.classList.remove('dimmed'));
+    return;
+  }
+  MODULES.forEach(module => {
+    const counts = getModuleCounts(module);
+    const node = document.getElementById(`flow-node-${module.id}`);
+    if (!node) return;
+    const matchCount = uiState.phaseFilter === 'v0' ? counts.v0 : counts.v1;
+    node.classList.toggle('dimmed', matchCount === 0);
+  });
 }
 
 function renderFlowchart() {
@@ -1878,14 +1942,11 @@ function renderFlowchart() {
         sections.forEach((section) => {
           if (!section.items.length) return;
           html += `<div class="flow-drop-group">`;
-          if (uiState.phaseFilter === 'all') {
-            html += `<div class="flow-drop-group-label">${section.label} <span style="font-weight:400;opacity:0.7">(${section.total})</span></div>`;
-          } else {
-            html += `<div class="flow-drop-group-label">${section.label} <span style="font-weight:400;opacity:0.7">(${section.total})</span></div>`;
-          }
+          const groupFilter = section.label.toLowerCase().includes('v0') ? 'v0' : 'v1';
+          html += `<div class="flow-drop-group-label" onclick="event.stopPropagation();setPhaseFilter('${groupFilter}')">${section.label} <span style="font-weight:400;opacity:0.7">(${section.total})</span></div>`;
           section.items.forEach(item => {
             const label = getFlowLabel(item.name);
-            html += `<div class="flow-pill ${state[item.id]}">${label}</div>`;
+            html += `<div class="flow-pill ${state[item.id]}" onclick="event.stopPropagation();scrollToVertical('${item.id}')">${label}</div>`;
           });
           if (section.hidden > 0) html += `<div class="flow-pill more">+ ${section.hidden} more</div>`;
           html += `</div>`;
@@ -1905,7 +1966,14 @@ function renderFlowchart() {
   </div>`;
 
   document.getElementById('flowchart').innerHTML = html;
-  observeFlowchartEntrance();
+
+  if (!uiState.flowchartRendered) {
+    uiState.flowchartRendered = true;
+    observeFlowchartEntrance();
+  } else {
+    // skip entrance animation on re-renders (filter changes, etc.)
+    document.querySelectorAll('.stage-band, .stage-connector, .feedback-loop').forEach(el => el.classList.add('visible'));
+  }
 }
 
 function toggleFlowNode(moduleId) {
@@ -2037,6 +2105,7 @@ function cycleSelection(id) {
   updateSummary();
   applyFilter();
   renderFlowchart();
+  updateModuleDimming();
 }
 
 function updateVerticalCard(id) {
@@ -2054,12 +2123,37 @@ function scrollToModule(id) {
   card.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+function scrollToVertical(verticalId) {
+  // find which module contains this vertical and open it
+  for (const module of MODULES) {
+    for (const axis of module.axes) {
+      const match = axis.verticals.find(v => v.id === verticalId);
+      if (match) {
+        const moduleCard = document.getElementById(`card-${module.id}`);
+        if (!moduleCard.classList.contains('open')) moduleCard.classList.add('open');
+        // small delay to let the card expand before scrolling
+        setTimeout(() => {
+          const vertCard = document.getElementById(`vc-${verticalId}`);
+          if (vertCard) {
+            vertCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            vertCard.classList.remove('flash');
+            void vertCard.offsetWidth; // force reflow
+            vertCard.classList.add('flash');
+          }
+        }, 80);
+        return;
+      }
+    }
+  }
+}
+
 function setPhaseFilter(filterId) {
   uiState.phaseFilter = filterId;
   renderFilterControls();
   updateSummary();
   applyFilter();
   renderFlowchart();
+  updateModuleDimming();
 }
 
 function applyFilter() {
