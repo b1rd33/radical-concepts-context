@@ -633,8 +633,8 @@ html[data-theme='light'] ::-webkit-scrollbar-thumb { background: rgba(148,163,18
 // ── 4-Week Build Plan grouped by phase ──
 const WEEKS = [
   {
-    id: 1, label: 'Week 1', phase: 'Input', color: 'input', icon: 'IN',
-    summary: 'Content ingestion + AI curation pipeline',
+    id: 1, label: 'Week 1', phase: 'Foundation', color: 'input', icon: '1',
+    summary: 'Set up content ingestion, AI curation, and start script engine',
     modules: [
       {
         name: 'Content Sources', icon: 'SRC',
@@ -659,26 +659,31 @@ const WEEKS = [
             { v: 'V11', title: 'Morning Batch', desc: 'One curation session per day at 7am' }
           ]}
         ]
-      }
-    ]
-  },
-  {
-    id: 2, label: 'Week 2', phase: 'Creation', color: 'creation', icon: 'CR',
-    summary: 'AI script generation + recording workflow',
-    modules: [
+      },
       {
-        name: 'Script Writing', icon: 'SCR',
+        name: 'Script Writing', icon: 'SCR', tag: 'Kickoff',
         axes: [
           { name: 'Generation Method', items: [
             { v: 'V1', title: "Full AI Draft in Brett's Voice", desc: "AI writes complete script in Brett's tone" },
             { v: 'V5', title: 'Template-Based Generation', desc: 'Same episode structure, only content changes' }
           ]},
-          { name: 'Script Depth', items: [
-            { v: 'V7', title: 'Word-for-Word Read-Ready', desc: 'Every sentence written out, Brett reads like a news anchor' }
-          ]},
           { name: 'Voice/Tone Calibration', items: [
             { v: 'V11', title: 'Persona Lite (Prompt-Based)', desc: 'Voice captured in prompt rules' },
             { v: 'V13', title: 'Reference Library / Style Guide', desc: "Style guide from Brett's existing content" }
+          ]}
+        ]
+      }
+    ]
+  },
+  {
+    id: 2, label: 'Week 2', phase: 'Creation', color: 'creation', icon: '2',
+    summary: 'Finish script engine, build recording workflow + Brett voice setup',
+    modules: [
+      {
+        name: 'Script Writing', icon: 'SCR', tag: 'Finish',
+        axes: [
+          { name: 'Script Depth', items: [
+            { v: 'V7', title: 'Word-for-Word Read-Ready', desc: 'Every sentence written out, Brett reads like a news anchor' }
           ]},
           { name: 'Approval Flow', items: [
             { v: 'V16', title: 'One-Tap Approve with Exceptions', desc: 'Approve or Flag, one tap default' }
@@ -707,8 +712,8 @@ const WEEKS = [
     ]
   },
   {
-    id: 3, label: 'Week 3', phase: 'Output', color: 'output', icon: 'OUT',
-    summary: 'Post-production + multi-platform distribution',
+    id: 3, label: 'Week 3', phase: 'Pipeline', color: 'output', icon: '3',
+    summary: 'Post-production automation + distribution channels setup',
     modules: [
       {
         name: 'Processing', icon: 'PRC',
@@ -731,19 +736,12 @@ const WEEKS = [
         ]
       },
       {
-        name: 'Distribution', icon: 'DST',
+        name: 'Distribution', icon: 'DST', tag: 'Setup',
         axes: [
           { name: 'Platform Selection', items: [
             { v: 'V1', title: 'Podcast RSS (Spotify + Apple)', desc: 'Fully passive after setup' },
             { v: 'V2', title: 'YouTube (Long-Form + Shorts)', desc: '#1 discovery platform + monetization' },
             { v: 'V4', title: 'TikTok + Instagram Reels', desc: 'Short clips for discovery' }
-          ]},
-          { name: 'Publishing Strategy', items: [
-            { v: 'V9', title: 'Automated Scheduling', desc: "Week's content scheduled in advance" },
-            { v: 'V10', title: 'Platform-Optimized Timing', desc: 'LinkedIn 8am, TikTok 7pm' }
-          ]},
-          { name: 'Platform Adaptation', items: [
-            { v: 'V14', title: 'One-Size-Fits-All', desc: 'Same clip to all platforms, simple' }
           ]},
           { name: 'Publishing Infrastructure', items: [
             { v: 'V19', title: 'Existing Automation Tools', desc: "Podbean, TubeBuddy, Buffer \u2014 don't rebuild what exists" }
@@ -753,9 +751,21 @@ const WEEKS = [
     ]
   },
   {
-    id: 4, label: 'Week 4', phase: 'Growth', color: 'growth', icon: 'GRW',
-    summary: 'Analytics, feedback loops + first live episode',
+    id: 4, label: 'Week 4', phase: 'Launch', color: 'growth', icon: '4',
+    summary: 'Go live \u2014 scheduling, analytics, first published episode',
     modules: [
+      {
+        name: 'Distribution', icon: 'DST', tag: 'Go Live',
+        axes: [
+          { name: 'Publishing Strategy', items: [
+            { v: 'V9', title: 'Automated Scheduling', desc: "Week's content scheduled in advance" },
+            { v: 'V10', title: 'Platform-Optimized Timing', desc: 'LinkedIn 8am, TikTok 7pm' }
+          ]},
+          { name: 'Platform Adaptation', items: [
+            { v: 'V14', title: 'One-Size-Fits-All', desc: 'Same clip to all platforms, simple' }
+          ]}
+        ]
+      },
       {
         name: 'Growth Loop', icon: 'GRW',
         axes: [
@@ -839,6 +849,7 @@ function renderDesktopTimeline() {
         <div class="module-header">
           <span class="module-icon module-icon-${week.color}">${mod.icon}</span>
           <span class="module-name">${mod.name}</span>
+          ${mod.tag ? `<span style="font-size:0.62rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;padding:0.15rem 0.5rem;border-radius:5px;background:var(--surface-strong);color:var(--text-light);border:1px solid var(--border);margin-left:auto;">${mod.tag}</span>` : ''}
         </div>`;
 
       if (mod.axes) {
@@ -908,6 +919,7 @@ function renderMobileTimeline() {
         <div style="display:flex;align-items:center;gap:0.35rem;margin-bottom:0.4rem;">
           <span class="module-icon module-icon-${week.color}" style="font-size:0.55rem;padding:0.1rem 0.35rem;">${mod.icon}</span>
           <span style="font-size:0.82rem;font-weight:600;color:var(--text);">${mod.name}</span>
+          ${mod.tag ? `<span style="font-size:0.55rem;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;padding:0.1rem 0.35rem;border-radius:4px;background:var(--surface-strong);color:var(--text-light);border:1px solid var(--border);margin-left:auto;">${mod.tag}</span>` : ''}
         </div>`;
 
       if (mod.axes) {
