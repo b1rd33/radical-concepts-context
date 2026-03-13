@@ -207,90 +207,66 @@ html[data-theme='light'] .theme-toggle .icon-moon { opacity: 0.4; }
   padding: 2rem clamp(1rem, 2vw, 2rem) 4rem;
 }
 
-/* ── Timeline (Desktop) ── */
+/* ── Timeline (Desktop) — Arrow Flow ── */
 .timeline-track {
-  position: relative;
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 0 3rem;
-  margin-bottom: 2.5rem;
+  align-items: stretch;
+  gap: 0;
+  margin-bottom: 2rem;
 }
-.timeline-line {
-  position: absolute;
-  top: 30px;
-  left: 3rem;
-  right: 3rem;
-  height: 4px;
-  border-radius: 2px;
-  z-index: 0;
-}
-.timeline-line-segment {
-  position: absolute;
-  top: 0;
-  height: 100%;
-  border-radius: 2px;
-}
+.timeline-line { display: none; }
 .timeline-node {
-  position: relative;
-  z-index: 1;
+  flex: 1;
   display: flex;
-  flex-direction: column;
   align-items: center;
   cursor: pointer;
-  flex: 1;
+  position: relative;
   transition: all 0.25s ease;
 }
-.timeline-node:hover { transform: translateY(-3px); }
-.node-circle {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.75rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  color: #fff;
-  border: none;
+.timeline-node:hover { transform: translateY(-2px); }
+.step-card {
+  flex: 1;
+  padding: 1rem 1.2rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
   transition: all 0.3s ease;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  position: relative;
 }
-.timeline-node.active .node-circle {
-  transform: scale(1.12);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+.timeline-node.active .step-card {
+  border-color: transparent;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.18);
 }
-.timeline-node:not(.active) .node-circle {
-  opacity: 0.55;
-  filter: saturate(0.6);
+.timeline-node:not(.active) .step-card { opacity: 0.55; }
+.timeline-node:hover:not(.active) .step-card { opacity: 0.8; }
+.step-week {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.15rem;
 }
-.timeline-node:hover:not(.active) .node-circle {
-  opacity: 0.8;
-  filter: saturate(0.85);
-}
-.node-label {
-  margin-top: 0.75rem;
+.step-phase {
   font-family: 'DM Serif Display', serif;
-  font-size: 0.95rem;
+  font-size: 1.15rem;
   font-weight: 400;
-  text-align: center;
-  color: var(--text-dim);
-  max-width: 140px;
-  line-height: 1.2;
-  transition: color 0.25s ease;
-}
-.timeline-node.active .node-label {
   color: var(--text);
 }
-.node-number {
+.step-modules {
   font-size: 0.68rem;
-  font-weight: 600;
   color: var(--text-muted);
-  margin-top: 0.2rem;
-  letter-spacing: 0.03em;
+  margin-top: 0.3rem;
+  line-height: 1.3;
 }
-.timeline-node.active .node-number { color: var(--text-light); }
+.step-arrow {
+  display: flex;
+  align-items: center;
+  padding: 0 0.5rem;
+  flex-shrink: 0;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+}
+.step-arrow svg { width: 20px; height: 20px; }
 
 /* ── Stage Card (Desktop) ── */
 .stage-cards-container {
@@ -342,24 +318,62 @@ html[data-theme='light'] .theme-toggle .icon-moon { opacity: 0.4; }
   margin-left: auto;
 }
 
+/* ── Module Section ── */
+.module-section {
+  margin-bottom: 1.5rem;
+  padding: 1.2rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.module-section:last-child { margin-bottom: 0; }
+.module-header {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+.module-icon {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  color: #fff;
+}
+.module-icon-input { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+.module-icon-creation { background: linear-gradient(135deg, #a855f7, #7c3aed); }
+.module-icon-output { background: linear-gradient(135deg, #22c55e, #16a34a); }
+.module-icon-growth { background: linear-gradient(135deg, #eab308, #ca8a04); }
+.module-name {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.05rem;
+  font-weight: 400;
+  color: var(--text);
+}
+
 /* ── Axis Group ── */
 .axis-group {
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
+  padding-left: 0.75rem;
+  border-left: 3px solid var(--border-light);
 }
 .axis-group:last-child { margin-bottom: 0; }
 .axis-label {
-  font-size: 0.7rem;
-  font-weight: 600;
+  font-size: 0.72rem;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-light);
-  padding: 0.3rem 0.65rem;
-  background: var(--axis-label-bg);
-  border: 1px solid var(--axis-label-border);
-  border-radius: 6px;
-  display: inline-block;
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.5rem;
+  display: block;
 }
+.axis-group-input { border-left-color: rgba(59,130,246,0.4); }
+.axis-group-creation { border-left-color: rgba(168,85,247,0.4); }
+.axis-group-output { border-left-color: rgba(34,197,94,0.4); }
+.axis-group-growth { border-left-color: rgba(234,179,8,0.4); }
 .v-items {
   display: flex;
   flex-wrap: wrap;
@@ -409,14 +423,14 @@ html[data-theme='light'] .theme-toggle .icon-moon { opacity: 0.4; }
 }
 
 /* ── Color classes ── */
-.color-input .node-circle { background: linear-gradient(135deg, #3b82f6, #2563eb); }
-.color-input.active .node-circle { box-shadow: 0 8px 32px rgba(59,130,246,0.4); }
-.color-creation .node-circle { background: linear-gradient(135deg, #a855f7, #7c3aed); }
-.color-creation.active .node-circle { box-shadow: 0 8px 32px rgba(168,85,247,0.4); }
-.color-output .node-circle { background: linear-gradient(135deg, #22c55e, #16a34a); }
-.color-output.active .node-circle { box-shadow: 0 8px 32px rgba(34,197,94,0.4); }
-.color-growth .node-circle { background: linear-gradient(135deg, #eab308, #ca8a04); }
-.color-growth.active .node-circle { box-shadow: 0 8px 32px rgba(234,179,8,0.4); }
+.color-input .step-week { color: var(--stage-input); }
+.color-input.active .step-card { background: rgba(59,130,246,0.08); border-color: rgba(59,130,246,0.3); box-shadow: 0 8px 28px rgba(59,130,246,0.15); }
+.color-creation .step-week { color: var(--stage-creation); }
+.color-creation.active .step-card { background: rgba(168,85,247,0.08); border-color: rgba(168,85,247,0.3); box-shadow: 0 8px 28px rgba(168,85,247,0.15); }
+.color-output .step-week { color: var(--stage-output); }
+.color-output.active .step-card { background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.3); box-shadow: 0 8px 28px rgba(34,197,94,0.15); }
+.color-growth .step-week { color: var(--stage-growth); }
+.color-growth.active .step-card { background: rgba(234,179,8,0.08); border-color: rgba(234,179,8,0.3); box-shadow: 0 8px 28px rgba(234,179,8,0.15); }
 
 .phase-input { background: rgba(59,130,246,0.1); color: var(--stage-input); }
 .phase-creation { background: rgba(168,85,247,0.1); color: var(--stage-creation); }
@@ -484,9 +498,8 @@ html[data-theme='light'] .theme-toggle .icon-moon { opacity: 0.4; }
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.6rem;
-  font-weight: 800;
-  letter-spacing: 0.02em;
+  font-size: 0.85rem;
+  font-weight: 700;
   border: 2.5px solid;
   background: var(--bg);
   z-index: 1;
@@ -782,13 +795,25 @@ function renderDesktopTimeline() {
     node.className = `timeline-node color-${week.color}`;
     if (idx === 0) node.classList.add('active');
     node.dataset.index = idx;
+
+    const moduleNames = week.modules.map(m => m.name).join(' + ');
     node.innerHTML = `
-      <div class="node-circle">${week.icon}</div>
-      <span class="node-label">${week.phase}</span>
-      <span class="node-number">${week.label}</span>
+      <div class="step-card">
+        <div class="step-week">${week.label}</div>
+        <div class="step-phase">${week.phase}</div>
+        <div class="step-modules">${moduleNames}</div>
+      </div>
     `;
     node.addEventListener('click', () => activateWeek(idx));
     track.appendChild(node);
+
+    // Add arrow between nodes (not after last)
+    if (idx < WEEKS.length - 1) {
+      const arrow = document.createElement('div');
+      arrow.className = 'step-arrow';
+      arrow.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>';
+      track.appendChild(arrow);
+    }
   });
 
   WEEKS.forEach((week, idx) => {
@@ -803,23 +828,22 @@ function renderDesktopTimeline() {
 
     let inner = `
       <div class="stage-card-header">
-        <div class="stage-card-icon icon-bg-${week.color}">${week.icon}</div>
         <span class="stage-card-title">${week.label}: ${week.phase}</span>
-        <span class="stage-card-phase phase-${week.color}">${totalItems} items</span>
+        <span class="stage-card-phase phase-${week.color}">${totalItems} verticals</span>
       </div>
       <div style="font-size:0.82rem;color:var(--text-dim);margin-bottom:1.2rem;">${week.summary}</div>
     `;
 
     week.modules.forEach(mod => {
-      inner += `<div style="margin-bottom:1rem;">
-        <div style="font-size:0.85rem;font-weight:700;color:var(--text);margin-bottom:0.5rem;display:flex;align-items:center;gap:0.4rem;">
-          <span style="font-size:0.65rem;font-weight:800;padding:0.15rem 0.4rem;border-radius:4px;background:rgba(255,255,255,0.06);border:1px solid var(--border);">${mod.icon}</span>
-          ${mod.name}
+      inner += `<div class="module-section">
+        <div class="module-header">
+          <span class="module-icon module-icon-${week.color}">${mod.icon}</span>
+          <span class="module-name">${mod.name}</span>
         </div>`;
 
       if (mod.axes) {
         mod.axes.forEach(axis => {
-          inner += `<div class="axis-group">
+          inner += `<div class="axis-group axis-group-${week.color}">
             <div class="axis-label">${axis.name}</div>
             <div class="v-items">
               ${axis.items.map(it => `
@@ -863,12 +887,12 @@ function renderMobileTimeline() {
     section.className = `mobile-stage color-${week.color}`;
 
     let inner = `
-      <div class="mobile-node">${week.icon}</div>
+      <div class="mobile-node">${week.id}</div>
       <div class="mobile-stage-header">
         <span class="mobile-stage-title">${week.phase}</span>
         <span class="mobile-stage-num">${week.label}</span>
       </div>
-      <div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:0.5rem;">${week.summary}</div>
+      <div style="font-size:0.72rem;color:var(--text-dim);margin-bottom:0.4rem;">${week.summary}</div>
     `;
 
     const renderMobilePill = (it, color) => `
@@ -880,15 +904,15 @@ function renderMobileTimeline() {
       </div>`;
 
     week.modules.forEach(mod => {
-      inner += `<div style="margin-bottom:0.5rem;">
-        <div style="font-size:0.75rem;font-weight:700;color:var(--text);margin-bottom:0.3rem;display:flex;align-items:center;gap:0.35rem;">
-          <span style="font-size:0.58rem;font-weight:800;padding:0.1rem 0.3rem;border-radius:4px;background:rgba(255,255,255,0.06);border:1px solid var(--border);">${mod.icon}</span>
-          ${mod.name}
+      inner += `<div style="margin-bottom:0.6rem;">
+        <div style="display:flex;align-items:center;gap:0.35rem;margin-bottom:0.4rem;">
+          <span class="module-icon module-icon-${week.color}" style="font-size:0.55rem;padding:0.1rem 0.35rem;">${mod.icon}</span>
+          <span style="font-size:0.82rem;font-weight:600;color:var(--text);">${mod.name}</span>
         </div>`;
 
       if (mod.axes) {
         mod.axes.forEach(axis => {
-          inner += `<div class="mobile-axis-group">
+          inner += `<div class="mobile-axis-group" style="padding-left:0.6rem;border-left:2px solid rgba(255,255,255,0.1);margin-bottom:0.4rem;">
             <div class="axis-label">${axis.name}</div>
             <div class="mobile-v-items">
               ${axis.items.map(it => renderMobilePill(it, week.color)).join('')}
