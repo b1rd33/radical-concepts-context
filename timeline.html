@@ -646,7 +646,7 @@ const WEEKS = [
     summary: 'Set up content ingestion, AI curation, and start script engine',
     modules: [
       {
-        name: 'Content Sources', icon: 'SRC',
+        name: 'Content Sources', icon: 'SRC', color: 'input',
         axes: null,
         items: [
           { v: 'V1', title: 'Passive/Automated Ingestion', desc: '928 RSS feeds + news APIs, zero Brett effort' },
@@ -655,7 +655,7 @@ const WEEKS = [
         ]
       },
       {
-        name: 'Curation', icon: 'CUR',
+        name: 'Curation', icon: 'CUR', color: 'input',
         axes: [
           { name: 'Filtering', items: [
             { v: 'V2', title: 'Persona-Based Scoring', desc: 'AI scores articles against Brett\u2019s editorial style and preferences' },
@@ -671,7 +671,7 @@ const WEEKS = [
         ]
       },
       {
-        name: 'Script Writing', icon: 'SCR', tag: 'Kickoff',
+        name: 'Script Writing', icon: 'SCR', color: 'creation', tag: 'Kickoff',
         axes: [
           { name: 'Generation Method', items: [
             { v: 'V1', title: "Full AI Draft in Brett's Voice", desc: "AI writes complete script in Brett's tone" },
@@ -691,7 +691,7 @@ const WEEKS = [
     summary: 'Finish script engine, build recording workflow + Brett voice setup',
     modules: [
       {
-        name: 'Script Writing', icon: 'SCR', tag: 'Finish',
+        name: 'Script Writing', icon: 'SCR', color: 'creation', tag: 'Finish',
         axes: [
           { name: 'Script Depth', items: [
             { v: 'V7', title: 'Word-for-Word Read-Ready', desc: 'Every sentence written out, Brett reads like a news anchor' }
@@ -702,7 +702,7 @@ const WEEKS = [
         ]
       },
       {
-        name: 'Production & Recording', icon: 'REC',
+        name: 'Production & Recording', icon: 'REC', color: 'creation',
         axes: [
           { name: 'Voice Source', items: [
             { v: 'V1', title: "100% Brett's Real Voice", desc: 'Maximum authenticity' },
@@ -728,7 +728,7 @@ const WEEKS = [
     summary: 'Post-production automation + distribution channels setup',
     modules: [
       {
-        name: 'Processing', icon: 'PRC',
+        name: 'Processing', icon: 'PRC', color: 'output',
         axes: [
           { name: 'Audio Processing', items: [
             { v: 'V1', title: 'Basic Cleanup (Automated)', desc: 'Noise removal, filler words, volume levelling' }
@@ -748,7 +748,7 @@ const WEEKS = [
         ]
       },
       {
-        name: 'Distribution', icon: 'DST', tag: 'Setup',
+        name: 'Distribution', icon: 'DST', color: 'output', tag: 'Setup',
         axes: [
           { name: 'Platform Selection', items: [
             { v: 'V1', title: 'Podcast RSS (Spotify + Apple)', desc: 'Fully passive after setup' },
@@ -768,7 +768,7 @@ const WEEKS = [
     summary: 'Go live \u2014 scheduling, analytics, first published episode',
     modules: [
       {
-        name: 'Distribution', icon: 'DST', tag: 'Go Live',
+        name: 'Distribution', icon: 'DST', color: 'output', tag: 'Go Live',
         axes: [
           { name: 'Publishing Strategy', items: [
             { v: 'V9', title: 'Automated Scheduling', desc: "Week's content scheduled in advance" },
@@ -780,7 +780,7 @@ const WEEKS = [
         ]
       },
       {
-        name: 'Growth Loop', icon: 'GRW',
+        name: 'Growth Loop', icon: 'GRW', color: 'growth',
         axes: [
           { name: 'Analytics', items: [
             { v: 'V1', title: 'Content Performance Metrics', desc: 'Plays, completion rate, shares, conversions' }
@@ -864,19 +864,19 @@ function renderDesktopTimeline() {
     week.modules.forEach(mod => {
       inner += `<div class="module-section">
         <div class="module-header">
-          <span class="module-icon module-icon-${week.color}">${mod.icon}</span>
+          <span class="module-icon module-icon-${mod.color}">${mod.icon}</span>
           <span class="module-name">${mod.name}</span>
           ${mod.tag ? `<span style="font-size:0.62rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;padding:0.15rem 0.5rem;border-radius:5px;background:var(--surface-strong);color:var(--text-light);border:1px solid var(--border);margin-left:auto;">${mod.tag}</span>` : ''}
         </div>`;
 
       if (mod.axes) {
         mod.axes.forEach(axis => {
-          inner += `<div class="axis-group axis-group-${week.color}">
+          inner += `<div class="axis-group axis-group-${mod.color}">
             <div class="axis-label">${axis.name}</div>
             <div class="v-items">
               ${axis.items.map(it => `
                 <div class="v-pill">
-                  <span class="v-id vid-${week.color}">${it.v}</span>
+                  <span class="v-id vid-${mod.color}">${it.v}</span>
                   <span class="v-desc"><strong>${it.title}</strong> &mdash; ${it.desc}</span>
                 </div>
               `).join('')}
@@ -887,7 +887,7 @@ function renderDesktopTimeline() {
         inner += `<div class="direct-items v-items">
           ${mod.items.map(it => `
             <div class="v-pill">
-              <span class="v-id vid-${week.color}">${it.v}</span>
+              <span class="v-id vid-${mod.color}">${it.v}</span>
               <span class="v-desc"><strong>${it.title}</strong> &mdash; ${it.desc}</span>
             </div>
           `).join('')}
@@ -938,7 +938,7 @@ function renderMobileTimeline() {
     week.modules.forEach(mod => {
       inner += `<div style="margin-bottom:0.6rem;">
         <div style="display:flex;align-items:center;gap:0.35rem;margin-bottom:0.4rem;">
-          <span class="module-icon module-icon-${week.color}" style="font-size:0.55rem;padding:0.1rem 0.35rem;">${mod.icon}</span>
+          <span class="module-icon module-icon-${mod.color}" style="font-size:0.55rem;padding:0.1rem 0.35rem;">${mod.icon}</span>
           <span style="font-size:0.82rem;font-weight:600;color:var(--text);">${mod.name}</span>
           ${mod.tag ? `<span style="font-size:0.55rem;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;padding:0.1rem 0.35rem;border-radius:4px;background:var(--surface-strong);color:var(--text-light);border:1px solid var(--border);margin-left:auto;">${mod.tag}</span>` : ''}
         </div>`;
@@ -948,13 +948,13 @@ function renderMobileTimeline() {
           inner += `<div class="mobile-axis-group" style="padding-left:0.6rem;border-left:2px solid rgba(255,255,255,0.1);margin-bottom:0.4rem;">
             <div class="axis-label">${axis.name}</div>
             <div class="mobile-v-items">
-              ${axis.items.map(it => renderMobilePill(it, week.color)).join('')}
+              ${axis.items.map(it => renderMobilePill(it, mod.color)).join('')}
             </div>
           </div>`;
         });
       } else {
         inner += `<div class="mobile-v-items">
-          ${mod.items.map(it => renderMobilePill(it, week.color)).join('')}
+          ${mod.items.map(it => renderMobilePill(it, mod.color)).join('')}
         </div>`;
       }
       inner += `</div>`;
