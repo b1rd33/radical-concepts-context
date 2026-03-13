@@ -1545,7 +1545,7 @@ const MODULES = [
           id: "cs-v2", name: "V2: Brett\u2019s Active Sharing (WhatsApp Bot)",
           description: "Brett reads something interesting on his phone, forwards it to a WhatsApp bot. The bot ingests it into the system. This captures Brett\u2019s serendipitous discoveries \u2014 the articles he finds through his own browsing that no RSS feed would catch. This is especially important for the \u201cquirky\u201d show where stories come from unexpected places.",
           feasibilityNote: "High feasibility \u2014 low friction (just forward a link), uses a tool Brett already has open constantly. The danger: if Brett forgets the bot exists, this input dies. The bot needs to occasionally ping Brett: \u201cHaven\u2019t heard from you in 3 days \u2014 find anything interesting?\u201d",
-          feasibilityScore: 4, defaultPhase: "archive"
+          feasibilityScore: 4, defaultPhase: "v0"
         },
         {
           id: "cs-v3", name: "V3: Social Listening / Twitter-X Lists",
@@ -1632,14 +1632,14 @@ const MODULES = [
           description: "Instead of one ranked list, content is grouped: \u201c2 geopolitics stories, 1 science, 1 quirky.\u201d Brett picks one from each bucket. Ensures topic diversity \u2014 the ranked list might give 5 geopolitics stories and nothing quirky.",
           feasibilityNote: "Moderate \u2014 more structure helps, but more groups = more decisions = more friction.",
           reasoning: { rationale: "Deprioritized from V0 because it adds decision complexity. While it ensures topic diversity (prevents 5 geopolitics stories), it forces Brett to make multiple pick-from-bucket decisions instead of one linear scan. Better as a V1 enhancement once Brett\u2019s preferences are clearer.", effort: "Moderate setup \u2014 requires topic classification/clustering on top of basic scoring. More UI complexity than a simple ranked list. The grouping logic also needs editorial rules (how many per bucket?).", dependencies: "Topic classification/clustering system. Working scoring mechanism. Editorial rules for bucket sizes." },
-          feasibilityScore: 3, defaultPhase: "archive"
+          feasibilityScore: 3, defaultPhase: "skip"
         },
         {
           id: "cu-v8", name: "V8: Story Bundles (Pre-Packaged Episodes)",
           description: "The AI doesn\u2019t just rank individual articles \u2014 it proposes a complete episode bundle: \u201cToday\u2019s episode: Story A (geopolitics, 8 min) + Story B (science, 7 min) + Story C (quirky, 5 min) = 20 min episode.\u201d Brett approves or swaps one out. A level above individual curation \u2014 the AI does editorial planning.",
           feasibilityNote: "Excellent. Lowest-friction option \u2014 Brett makes ONE decision (\u201cyes\u201d or \u201cswap story C\u201d) instead of building the episode himself.",
           reasoning: { rationale: "V1 because it requires the AI to understand episode structure, timing, and topic balance \u2014 a layer above simple filtering. But it\u2019s the ultimate goal: Brett sees a pre-built episode and just says yes/no. Depends on V0 curation + script writing working first.", effort: "High setup \u2014 needs episode structure templates, per-story timing estimates, topic balancing logic, and integration with script generation. This is editorial AI, not just filtering. Worth the investment once V0 proves the concept.", dependencies: "Working V0 curation + persona scoring. Episode format decisions (Module 4). Script generation templates (Module 3). Timing estimates per story." },
-          feasibilityScore: 5, defaultPhase: "archive"
+          feasibilityScore: 5, defaultPhase: "skip"
         },
         {
           id: "cu-v9", name: "V9: Binary Swipe (Tinder-Style)",
