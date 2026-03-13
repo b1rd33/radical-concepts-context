@@ -154,7 +154,7 @@ body {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: var(--amber);
+  color: #60a5fa;
   margin-bottom: 0.4rem;
 }
 .hero-note p { font-size: 0.88rem; color: var(--text-dim); }
@@ -768,6 +768,8 @@ body {
 .phase-tag.v1 { background: var(--amber-bg); border-color: var(--amber-border); color: rgba(254,243,199,0.95); }
 .phase-tag.v2 { background: rgba(59,130,246,0.12); border-color: rgba(59,130,246,0.28); color: rgba(191,219,254,0.95); }
 .phase-tag.future { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.12); color: rgba(255,255,255,0.8); }
+.phase-tag.archive { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.22); color: rgba(252,165,165,0.9); }
+.phase-tag.skip { background: rgba(107,114,128,0.08); border-color: rgba(107,114,128,0.22); color: rgba(209,213,219,0.9); }
 .vert-desc { font-size: 0.8rem; color: var(--text-dim); line-height: 1.6; margin-bottom: 0.5rem; }
 .vert-desc.collapsed {
   display: -webkit-box;
@@ -935,8 +937,27 @@ body {
   .flowchart-actions { width: 100%; flex-wrap: wrap; }
   .stage-modules { grid-template-columns: 1fr !important; }
   .stage-modules.single { max-width: 100% !important; }
-  .stage-modules-arrow { display: block; transform: rotate(90deg); }
+  .stage-modules-arrow {
+    display: flex;
+    width: 28px;
+    height: 28px;
+    margin: 0 auto;
+    transform: rotate(90deg);
+    font-size: 0.75rem;
+    align-items: center;
+    justify-content: center;
+  }
   .axis-body-inner { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 2rem; }
+  .module-header .mod-title { font-size: 1.15rem; }
+  .module-header { padding: 0.8rem; gap: 0.65rem; }
+  .module-header .mod-icon { width: 36px; height: 36px; }
+  .vertical-card { padding: 0.75rem; }
+  .vert-name { font-size: 0.88rem; }
+  .module-box { padding: 0.65rem; }
+  .mod-name { font-size: 0.82rem; }
+  .mod-subtitle { font-size: 0.7rem; }
+  .flow-pill { font-size: 0.62rem; padding: 0.22rem 0.45rem; }
 }
 /* --- entrance animations --- */
 @keyframes fadeSlideUp {
@@ -997,6 +1018,53 @@ body {
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 999px; }
+.meeting-toggle-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.6rem;
+  padding: 0.7rem 1rem;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, rgba(59,130,246,0.06), rgba(168,85,247,0.04));
+  border: 1px solid rgba(59,130,246,0.18);
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+}
+.toggle-pill {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 0.82rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 38px;
+}
+.toggle-pill:hover { background: var(--surface-hover); color: var(--text); }
+.toggle-pill.active {
+  background: rgba(59,130,246,0.18);
+  border-color: rgba(59,130,246,0.4);
+  color: #93c5fd;
+  font-weight: 600;
+  box-shadow: 0 0 12px rgba(59,130,246,0.12);
+}
+.change-summary {
+  font-size: 0.72rem;
+  color: var(--text-light);
+  margin-left: auto;
+  line-height: 1.4;
+}
+@media (max-width: 720px) {
+  .change-summary {
+    margin-left: 0;
+    flex-basis: 100%;
+    padding-top: 0.25rem;
+    border-top: 1px solid var(--border);
+  }
+}
 </style>
 </head>
 <body>
@@ -1019,8 +1087,8 @@ body {
       <p class="subtitle">Seven modules across four stages. The map below shows the active recommendation layer, while the module cards further down keep the full 117-option detail accessible.</p>
     </div>
     <aside class="hero-note">
-      <div class="note-label">Farid Focus</div>
-      <p>The centerpiece is the modular pipeline map. Use the filter to switch between <strong>V0</strong> and <strong>V1</strong> views, then open any module for the full rationale, feasibility note, and phase logic.</p>
+      <div class="note-label">Meeting #14 Update</div>
+      <p>Updated after our Mar 12 session. Use the <strong>toggle above the map</strong> to compare the original plan vs. post-meeting decisions. Tap any module to see what changed and why.</p>
     </aside>
   </section>
 
@@ -1028,6 +1096,13 @@ body {
     <div class="legend-item"><div class="legend-swatch v0"></div> Selected for V0</div>
     <div class="legend-item"><div class="legend-swatch v1"></div> Selected for V1 / Future</div>
     <div class="legend-item"><div class="legend-swatch skip"></div> Marked as not recommended</div>
+  </div>
+
+  <div class="meeting-toggle-bar">
+    <span style="font-size:0.78rem;color:var(--text-dim);white-space:nowrap">View:</span>
+    <button class="toggle-pill active" onclick="switchView('figjam')" id="tog-figjam">Post-Meeting #14 <span style="opacity:0.6;font-size:0.68rem">Mar 12</span></button>
+    <button class="toggle-pill" onclick="switchView('original')" id="tog-original">Original Plan</button>
+    <span class="change-summary" id="change-summary"></span>
   </div>
 
   <section class="flowchart-wrap">
@@ -1100,13 +1175,13 @@ const MODULES = [
           id: "cs-v2", name: "V2: Brett\u2019s Active Sharing (WhatsApp Bot)",
           description: "Brett reads something interesting on his phone, forwards it to a WhatsApp bot. The bot ingests it into the system. This captures Brett\u2019s serendipitous discoveries \u2014 the articles he finds through his own browsing that no RSS feed would catch. This is especially important for the \u201cquirky\u201d show where stories come from unexpected places.",
           feasibilityNote: "High feasibility \u2014 low friction (just forward a link), uses a tool Brett already has open constantly. The danger: if Brett forgets the bot exists, this input dies. The bot needs to occasionally ping Brett: \u201cHaven\u2019t heard from you in 3 days \u2014 find anything interesting?\u201d",
-          feasibilityScore: 4, defaultPhase: "v0"
+          feasibilityScore: 4, defaultPhase: "archive"
         },
         {
           id: "cs-v3", name: "V3: Social Listening / Twitter-X Lists",
           description: "Automated monitoring of specific Twitter/X lists, Reddit threads, or niche forums. Catches emerging stories before they hit mainstream news. Useful for the science and quirky shows where stories often surface on social media first.",
           feasibilityNote: "Fully passive \u2014 good. But the lists need to be curated initially, which is a setup task Brett might never complete. Have the team set this up FOR Brett.",
-          feasibilityScore: 4, defaultPhase: "v1"
+          feasibilityScore: 4, defaultPhase: "archive"
         },
         {
           id: "cs-v4", name: "V4: Community/Audience Submitted",
@@ -1140,35 +1215,35 @@ const MODULES = [
           description: "Simplest approach. Brett defines topics: \u201cgeopolitics,\u201d \u201cAI regulation,\u201d \u201cquantum physics,\u201d \u201cweird science.\u201d System matches articles against those keywords. Pros: transparent, easy to explain to Brett, easy to build. Cons: dumb \u2014 misses nuance, catches too much noise, can\u2019t understand context.",
           feasibilityNote: "Brett has to maintain his topic list, which he\u2019ll forget to update. Low recommendation.",
           reasoning: { rationale: "V0 as baseline only. Easiest to build but limited long-term value \u2014 keyword matching misses nuance and catches too much noise. Serves as a fallback while Persona-Based Scoring (cu-v2) is being trained.", effort: "Low setup effort, but high ongoing maintenance \u2014 Brett has to manually curate and update his topic list. If the list goes stale, filtering quality degrades silently.", dependencies: "Brett\u2019s initial topic list. Hamid\u2019s 928 RSS feeds as input source." },
-          feasibilityScore: 2, defaultPhase: "v0"
+          feasibilityScore: 2, defaultPhase: "archive"
         },
         {
           id: "cu-v2", name: "V2: Persona-Based Scoring",
           description: "This connects to the Persona Engine from the Modular Architecture doc. The system doesn\u2019t just match topics \u2014 it scores each article against Brett\u2019s editorial style, interests, and past preferences. \u201cWould Brett find this interesting?\u201d not just \u201cIs this about geopolitics?\u201d The Persona Engine was flagged as CRITICAL in the gap analysis. For V0, this could be a lightweight version: a set of rules and prompt blocks that define Brett\u2019s taste.",
           feasibilityNote: "Better, because Brett doesn\u2019t have to manage anything \u2014 the system learns him. But it needs training data to start.",
           reasoning: { rationale: "Core V0 pick. The Persona Engine was flagged as CRITICAL in the gap analysis \u2014 it\u2019s \u2018hidden everywhere, owned nowhere.\u2019 A lightweight V0 version (prompt-based rules defining Brett\u2019s taste) is achievable without a full ML system. This is the foundation every downstream module depends on.", effort: "Moderate setup (need to define Brett\u2019s editorial preferences as prompt rules), but near-zero maintenance once running. The system learns from usage, so it improves without manual intervention.", dependencies: "Initial training data from Brett\u2019s past selections. Persona Engine architecture (even lightweight prompt-based version). Hamid\u2019s RSS feed infrastructure." },
-          feasibilityScore: 4, defaultPhase: "v0"
+          feasibilityScore: 4, defaultPhase: "v1"
         },
         {
           id: "cu-v3", name: "V3: Trend/Novelty Detection",
           description: "The system doesn\u2019t just ask \u201cis this relevant to Brett?\u201d but \u201cis this new and trending?\u201d Detects when a story is gaining momentum across multiple sources before it peaks. Brett wants to be the guy who catches things early \u2014 this is his differentiator per the competitor analysis (the \u201csynthesis gap\u201d).",
           feasibilityNote: "Novelty is great for Brett \u2014 new/surprising content is more engaging than routine topics.",
           reasoning: { rationale: "V1 because it requires cross-source frequency analysis that\u2019s more complex than V0 persona scoring. But it\u2019s strategically important \u2014 the competitor analysis identified early trend-catching as Brett\u2019s key differentiator (the \u2018synthesis gap\u2019). Worth building once V0 pipeline is stable.", effort: "High setup complexity \u2014 needs cross-source frequency analysis, story deduplication, and momentum tracking across 928 feeds. Not a first-build feature, but adds significant editorial value once the foundation works.", dependencies: "Working V0 curation pipeline. Multiple source feeds tracking the same topics for cross-referencing. Frequency analysis logic." },
-          feasibilityScore: 4, defaultPhase: "v1"
+          feasibilityScore: 4, defaultPhase: "v0"
         },
         {
           id: "cu-v4", name: "V4: Cross-Domain Synthesis Detection",
           description: "Most sophisticated and most aligned with Brett\u2019s unique value. The AI detects when stories from different domains connect. A geopolitics story + a science breakthrough + an economic trend that together tell a bigger story. Brett\u2019s differentiator is connecting dots across domains nobody else connects.",
           feasibilityNote: "Excellent \u2014 this leans into Brett\u2019s pattern-matching strengths. The system does the gathering, Brett does the connecting.",
           reasoning: { rationale: "Future/V2 because it\u2019s the most computationally sophisticated filtering approach. Requires semantic understanding across domains, not just topic matching. However, it\u2019s the most aligned with Brett\u2019s unique value proposition \u2014 he\u2019s the person who connects geopolitics + science + economics into one narrative.", effort: "Very high setup complexity \u2014 requires semantic embeddings or LLM-based cross-domain analysis, plus sufficient article volume across multiple domains. This is advanced AI work, not a first-sprint deliverable. But it\u2019s the long-term vision.", dependencies: "Mature V0+V1 curation pipeline. Semantic embeddings or LLM-based cross-domain analysis. Sufficient article volume across multiple domains." },
-          feasibilityScore: 4, defaultPhase: "v2"
+          feasibilityScore: 4, defaultPhase: "v0"
         },
         {
           id: "cu-v5", name: "V5: Audience-Informed Curation (Future)",
           description: "Once there\u2019s an audience, the system factors in what listeners engage with, what quiz questions get answered, what clips get shared. Content that resonates with the audience gets weighted higher. Creates the feedback loop flagged as missing in the gap analysis.",
           feasibilityNote: "Zero effort from Brett. The system gets smarter without him managing it.",
           reasoning: { rationale: "Future because it requires an existing audience generating engagement data. The gap analysis flagged the missing feedback loop as a critical gap \u2014 this closes it. But you need listeners first, so it\u2019s sequentially dependent on a working V0 pipeline + distribution.", effort: "Low incremental effort once analytics infrastructure exists \u2014 it\u2019s mostly piping engagement signals back into curation weights. But the prerequisites (audience, analytics, gamification) are themselves multi-sprint deliverables.", dependencies: "Active listener base generating data. Quiz/gamification system (Module 7). Analytics tracking (Module 7). Working distribution pipeline (Module 6)." },
-          feasibilityScore: 5, defaultPhase: "future"
+          feasibilityScore: 5, defaultPhase: "archive"
         }
       ]
     },
@@ -1180,21 +1255,21 @@ const MODULES = [
           description: "System shows Brett a numbered list: \u201cHere are your top 5 stories today, ranked.\u201d Brett sees the #1 pick and works down. Simple, decisive.",
           feasibilityNote: "Good \u2014 clear hierarchy, no decision paralysis. Brett knows #1 is the AI\u2019s best pick.",
           reasoning: { rationale: "V0 because it\u2019s the simplest presentation layer to build and pairs naturally with Persona-Based Scoring. A numbered list is transparent \u2014 Brett can see exactly what the AI thinks is most relevant and work down.", effort: "Very low setup \u2014 essentially a sorted output of the scoring mechanism. Minimal UI needed. Can be delivered via WhatsApp message or a simple web view.", dependencies: "Working scoring/filtering mechanism (cu-v1 or cu-v2). Delivery channel (WhatsApp or web dashboard)." },
-          feasibilityScore: 4, defaultPhase: "v0"
+          feasibilityScore: 4, defaultPhase: "archive"
         },
         {
           id: "cu-v7", name: "V7: Grouped by Theme/Domain",
           description: "Instead of one ranked list, content is grouped: \u201c2 geopolitics stories, 1 science, 1 quirky.\u201d Brett picks one from each bucket. Ensures topic diversity \u2014 the ranked list might give 5 geopolitics stories and nothing quirky.",
           feasibilityNote: "Moderate \u2014 more structure helps, but more groups = more decisions = more friction.",
           reasoning: { rationale: "Deprioritized from V0 because it adds decision complexity. While it ensures topic diversity (prevents 5 geopolitics stories), it forces Brett to make multiple pick-from-bucket decisions instead of one linear scan. Better as a V1 enhancement once Brett\u2019s preferences are clearer.", effort: "Moderate setup \u2014 requires topic classification/clustering on top of basic scoring. More UI complexity than a simple ranked list. The grouping logic also needs editorial rules (how many per bucket?).", dependencies: "Topic classification/clustering system. Working scoring mechanism. Editorial rules for bucket sizes." },
-          feasibilityScore: 3, defaultPhase: "v0"
+          feasibilityScore: 3, defaultPhase: "archive"
         },
         {
           id: "cu-v8", name: "V8: Story Bundles (Pre-Packaged Episodes)",
           description: "The AI doesn\u2019t just rank individual articles \u2014 it proposes a complete episode bundle: \u201cToday\u2019s episode: Story A (geopolitics, 8 min) + Story B (science, 7 min) + Story C (quirky, 5 min) = 20 min episode.\u201d Brett approves or swaps one out. A level above individual curation \u2014 the AI does editorial planning.",
           feasibilityNote: "Excellent. Lowest-friction option \u2014 Brett makes ONE decision (\u201cyes\u201d or \u201cswap story C\u201d) instead of building the episode himself.",
           reasoning: { rationale: "V1 because it requires the AI to understand episode structure, timing, and topic balance \u2014 a layer above simple filtering. But it\u2019s the ultimate goal: Brett sees a pre-built episode and just says yes/no. Depends on V0 curation + script writing working first.", effort: "High setup \u2014 needs episode structure templates, per-story timing estimates, topic balancing logic, and integration with script generation. This is editorial AI, not just filtering. Worth the investment once V0 proves the concept.", dependencies: "Working V0 curation + persona scoring. Episode format decisions (Module 4). Script generation templates (Module 3). Timing estimates per story." },
-          feasibilityScore: 5, defaultPhase: "v1"
+          feasibilityScore: 5, defaultPhase: "archive"
         },
         {
           id: "cu-v9", name: "V9: Binary Swipe (Tinder-Style)",
@@ -1234,7 +1309,7 @@ const MODULES = [
           description: "Structured windows: morning curation (pick stories), afternoon script review, evening final approval. Each step has a time slot. Pros: distributes cognitive load. The Strategic Options doc suggests 45\u201375 minutes total daily \u2014 spreading across 3 windows keeps each one short.",
           feasibilityNote: "Good if Brett can stick to it, but three daily touchpoints might be too many.",
           reasoning: { rationale: "V2/Future because three daily touchpoints is a significant commitment. The Strategic Options doc suggests 45\u201375 minutes total daily \u2014 achievable in theory, but three separate scheduled interactions per day is hard to sustain. Better to start with one touchpoint (V0) and expand only if Brett asks for it.", effort: "Moderate setup per window, but 3x the notification/reminder infrastructure. Also requires Brett to maintain three separate daily routines, which is the real maintenance cost \u2014 not technical, but behavioral.", dependencies: "All three pipeline stages operational (curation, scripting, approval). Scheduling/reminder system. Brett\u2019s sustained commitment to the routine." },
-          feasibilityScore: 3, defaultPhase: "v2"
+          feasibilityScore: 3, defaultPhase: "archive"
         }
       ]
     }
@@ -1285,7 +1360,7 @@ const MODULES = [
           id: "sw-v6", name: "V6: Collaborative/Iterative",
           description: "The AI generates a first draft. Brett gives feedback via voice note or text. The AI revises. Maybe one more round. Then Brett approves. Highest quality output because it\u2019s genuinely co-created. Cons: multiple rounds of back-and-forth require sustained engagement.",
           feasibilityNote: "Dangerous. Each iteration is a point where Brett might lose interest, get distracted, or forget to respond. Two rounds maximum. Must happen in WhatsApp, not a dashboard.",
-          feasibilityScore: 2, defaultPhase: "v2"
+          feasibilityScore: 2, defaultPhase: "archive"
         }
       ]
     },
@@ -1302,7 +1377,7 @@ const MODULES = [
           id: "sw-v8", name: "V8: Annotated Script (Script + Stage Directions)",
           description: "Full script plus annotations: \u201c[pause here],\u201d \u201c[emphasize this],\u201d \u201c[speed up \u2014 this is the punchline],\u201d \u201c[personal anecdote \u2014 tell the one about the Berlin conference].\u201d Guides Brett\u2019s performance, not just his words.",
           feasibilityNote: "Annotations act as attention anchors \u2014 they re-engage Brett\u2019s focus at key moments. When his attention drifts, \u201c[YOUR TAKE \u2014 30 seconds]\u201d snaps him back. External executive function support embedded in the script.",
-          feasibilityScore: 4, defaultPhase: "v0"
+          feasibilityScore: 4, defaultPhase: "archive"
         },
         {
           id: "sw-v9", name: "V9: Key Points with Data Cards",
@@ -1343,7 +1418,7 @@ const MODULES = [
           id: "sw-v14", name: "V14: Multiple Voice Registers",
           description: "The AI can produce scripts in different registers depending on content type. Politics: sharper, more assertive. Science: curious, wonder-driven. Quirky: playful, lighter. Brett\u2019s actual speaking style likely shifts across topics naturally \u2014 the script should match.",
           feasibilityNote: "Variety prevents boredom. If every script sounds the same, Brett will zone out reading it. Different registers keep the script engaging for Brett himself, not just the audience.",
-          feasibilityScore: 4, defaultPhase: "v1"
+          feasibilityScore: 4, defaultPhase: "v0"
         }
       ]
     },
@@ -1354,7 +1429,7 @@ const MODULES = [
           id: "sw-v15", name: "V15: WhatsApp Review",
           description: "Script is sent as a WhatsApp message or PDF link. Brett reads on his phone, replies \u201cgood\u201d or sends voice note with changes. Meets Brett where he is. Hard to make detailed edits in WhatsApp \u2014 works best if the script is already 90%+ right.",
           feasibilityNote: "Great for the \u201cyes\u201d case. Terrible for the \u201cneeds major changes\u201d case. If script generation is strong, WhatsApp review is sufficient.",
-          feasibilityScore: 4, defaultPhase: "v0"
+          feasibilityScore: 4, defaultPhase: "v1"
         },
         {
           id: "sw-v16", name: "V16: One-Tap Approve with Exceptions",
@@ -1372,7 +1447,7 @@ const MODULES = [
           id: "sw-v18", name: "V18: Side-by-Side Comparison",
           description: "For each story, Brett sees: original article summary (left) and generated script section (right). He can quickly check: \u201cDid the AI get my angle right?\u201d Without this, Brett has to hold the original story in his head while reading the script.",
           feasibilityNote: "Reduces working memory load. Everything Brett needs is visible at once.",
-          feasibilityScore: 4, defaultPhase: "v1"
+          feasibilityScore: 4, defaultPhase: "skip"
         }
       ]
     }
@@ -1399,13 +1474,13 @@ const MODULES = [
           id: "pr-v2", name: "V2: Content-Type Split (Brett for politics, AI for rest)",
           description: "Came directly from Brett in Meeting #8. He\u2019d consider voice synthesis for science and quirky content but NOT for politics. Natural modular split: politics = always Brett (2\u20133x/week), science = AI voice (1x/week), quirky = AI voice (1x/week).",
           feasibilityNote: "Significantly reduces recording load. Brett only records the content he\u2019s most passionate about. Passion content is easier for Brett \u2014 energizing, not draining.",
-          feasibilityScore: 4, defaultPhase: "v1"
+          feasibilityScore: 4, defaultPhase: "v0"
         },
         {
           id: "pr-v3", name: "V3: AI Voice Clone for Everything",
           description: "Brett records a 2\u20133 hour voice corpus once. Everything is AI-generated from then on. 50% of users skip content when AI voice is detected. Adults 50\u201365 show 45% AI distrust. Washington Post\u2019s fully automated podcast failed with 68\u201384% script failure rate. EU AI Act Article 50 requires disclosure.",
           feasibilityNote: "Highest feasibility in terms of recording effort, but weak on trust, authenticity, and audience perception. Low recommendation.",
-          feasibilityScore: 5, defaultPhase: "future"
+          feasibilityScore: 5, defaultPhase: "v0"
         },
         {
           id: "pr-v4", name: "V4: Hybrid \u2014 Brett does core commentary, AI fills structure",
@@ -1423,7 +1498,7 @@ const MODULES = [
           id: "pr-v6", name: "V6: Hybrid (Brett + AI Co-Host)",
           description: "Brett and an AI \u201cco-host\u201d have a conversation format. The AI asks questions, sets up topics, and Brett responds naturally. Creates a dialogue feel that\u2019s engaging for listeners. Like having a producer in the room guiding the conversation.",
           feasibilityNote: "The dialogue format keeps Brett engaged \u2014 responding to questions is easier than monologuing. V2 feature.",
-          feasibilityScore: 4, defaultPhase: "v2"
+          feasibilityScore: 4, defaultPhase: "v1"
         }
       ]
     },
@@ -1463,7 +1538,7 @@ const MODULES = [
           id: "pr-v11", name: "V11: AI Co-Pilot During Recording",
           description: "Real-time prompts during recording \u2014 like a producer in his ear. \u201cYou\u2019ve been on this point for 3 minutes, time to wrap up.\u201d \u201cDon\u2019t forget the China angle.\u201d \u201cTransition to topic 2.\u201d Provides executive function support that the workflow otherwise lacks.",
           feasibilityNote: "Highly supportive. It helps with time management, task switching, and staying on track. Probably a V1/V2 feature.",
-          feasibilityScore: 5, defaultPhase: "v1"
+          feasibilityScore: 5, defaultPhase: "skip"
         },
         {
           id: "pr-v12", name: "V12: One-Tap Recording Trigger",
@@ -1475,7 +1550,7 @@ const MODULES = [
           id: "pr-v13", name: "V13: Scheduled Reminders with Flexible Windows",
           description: "System actively pings Brett at chosen times. \u201cRecording window open: 9am\u201311am. Your script is ready.\u201d If Brett doesn\u2019t record by 10:30, gentle nudge. If he misses, rolls to backup window.",
           feasibilityNote: "External accountability and time structure. Brett responds well to deadlines and reminders, but less well to open-ended flexibility. The window keeps some flexibility for \u201cI can\u2019t right now\u201d moments.",
-          feasibilityScore: 4, defaultPhase: "v0"
+          feasibilityScore: 4, defaultPhase: "skip"
         },
         {
           id: "pr-v14", name: "V14: Fallback Content if Brett Doesn\u2019t Record",
@@ -1508,19 +1583,19 @@ const MODULES = [
           id: "pc-v2", name: "V2: Smart Editing (AI-Assisted)",
           description: "Beyond cleanup \u2014 the AI restructures the recording. If Brett rambled for 2 minutes before his point, AI tightens to 30 seconds. If he repeated himself, picks the best take. If he went off on a tangent, flags for removal. More aggressive than basic cleanup \u2014 it\u2019s editorial.",
           feasibilityNote: "This is the core safety net. Brett\u2019s recordings will inevitably have tangents, restarts, and stream-of-consciousness moments. Smart editing catches all of that. The rougher the recording day, the more this module matters. Critical for consistency.",
-          feasibilityScore: 5, defaultPhase: "v0"
+          feasibilityScore: 5, defaultPhase: "v1"
         },
         {
           id: "pc-v3", name: "V3: Chapter Marking / Segmentation",
           description: "AI detects topic transitions and adds chapter markers. A 25-minute episode gets split into chapters. These appear in podcast players and YouTube, letting listeners jump to topics. Research recommended 3 topics with chapter markers for 20\u201325 min format.",
           feasibilityNote: "No extra work from Brett. The system detects transitions he naturally made during recording.",
-          feasibilityScore: 5, defaultPhase: "v0"
+          feasibilityScore: 5, defaultPhase: "v1"
         },
         {
           id: "pc-v4", name: "V4: Audio Enhancement / Production Polish",
           description: "Intro/outro music, transition sounds between segments, audio branding (consistent opening jingle, closing phrase). Makes it sound professional. Can be fully templated \u2014 same intro, same transitions, same outro every episode.",
           feasibilityNote: "Brett never touches this. Template applied automatically. Once designed, runs the same every time.",
-          feasibilityScore: 5, defaultPhase: "v0"
+          feasibilityScore: 5, defaultPhase: "v1"
         }
       ]
     },
@@ -1537,13 +1612,13 @@ const MODULES = [
           id: "pc-v6", name: "V6: Format Adaptation (Audio \u2192 Multiple Formats)",
           description: "Same recording adapted into: podcast episode (audio RSS), YouTube video (audio + visual), 3\u20134 short clips (Shorts/Reels/TikTok), newsletter/blog post (AI transcribes and rewrites), social media posts (key quotes), and quiz questions. One recording, six+ output types.",
           feasibilityNote: "Massive leverage for Brett. He does one thing (records), and the system turns it into six outputs. Core value proposition: maximum output from minimum input.",
-          feasibilityScore: 5, defaultPhase: "v0"
+          feasibilityScore: 5, defaultPhase: "v1"
         },
         {
           id: "pc-v7", name: "V7: Transcript Generation",
           description: "Every recording gets a full, clean transcript. Feeds: newsletter/blog, SEO, accessibility captions, quiz generation, analytics/feedback loop. Also useful for Brett to review what he said without re-listening.",
           feasibilityNote: "No effort from Brett. Reading is faster than listening for review purposes.",
-          feasibilityScore: 5, defaultPhase: "v0"
+          feasibilityScore: 5, defaultPhase: "archive"
         },
         {
           id: "pc-v8", name: "V8: Snippet Cards (from Concept C3)",
@@ -1555,7 +1630,7 @@ const MODULES = [
           id: "pc-v9", name: "V9: Compilation/Best-Of Assembly",
           description: "System automatically creates weekly or monthly compilation episodes from best clips across multiple recordings. \u201cThis Week\u2019s Top Takes.\u201d Additional content without new recording, and entry point for new listeners.",
           feasibilityNote: "Fully automated. Fills gaps if Brett has a low-output week. Also serves as fallback content.",
-          feasibilityScore: 5, defaultPhase: "v1"
+          feasibilityScore: 5, defaultPhase: "v0"
         }
       ]
     },
@@ -1566,7 +1641,7 @@ const MODULES = [
           id: "pc-v10", name: "V10: Static Visual + Audio (Audiogram)",
           description: "Simplest video option. Brett\u2019s audio plays over a static branded image, maybe with waveform animation or text overlay showing current topic. Looks like a podcast on YouTube. Zero video production needed.",
           feasibilityNote: "Fully automated from audio recording. No camera, no setup, no visual production from Brett.",
-          feasibilityScore: 5, defaultPhase: "v0"
+          feasibilityScore: 5, defaultPhase: "v1"
         },
         {
           id: "pc-v11", name: "V11: Dynamic Text/Visual Overlays",
@@ -1578,13 +1653,13 @@ const MODULES = [
           id: "pc-v12", name: "V12: Avatar/AI Video",
           description: "Using tools like Artflow or HeyGen, Brett\u2019s likeness becomes an AI-generated avatar that \u201cspeaks\u201d the content. Pros: looks like real video without camera. Cons: uncanny valley, trust issues \u2014 especially for politics. 50% skip rate for AI voice would compound with AI video.",
           feasibilityNote: "Great for Brett (zero effort), risky for audience perception. Probably V1/V2 experiment.",
-          feasibilityScore: 5, defaultPhase: "v2"
+          feasibilityScore: 5, defaultPhase: "archive"
         },
         {
           id: "pc-v13", name: "V13: Brett on Camera (Future)",
           description: "Eventually Brett records video. Requires setup \u2014 camera, lighting, background, appearance. Content quality matters more than format initially. When the habit is locked in and the audience exists, adding video becomes the next growth lever.",
           feasibilityNote: "Highest friction, so save it for later. Every additional setup step makes follow-through less likely.",
-          feasibilityScore: 1, defaultPhase: "future"
+          feasibilityScore: 1, defaultPhase: "v0"
         }
       ]
     },
@@ -1607,7 +1682,7 @@ const MODULES = [
           id: "pc-v16", name: "V16: No Approval (Full Auto)",
           description: "Everything that passes automated quality scoring goes straight to distribution. Brett already approved the script and did the recording \u2014 processing is just technical transformation. Something weird could slip through.",
           feasibilityNote: "Best for daily consistency. Brett needs to trust the system first. Start with V15 for first 2 weeks, then transition to V16.",
-          feasibilityScore: 5, defaultPhase: "v1"
+          feasibilityScore: 5, defaultPhase: "v0"
         }
       ]
     },
@@ -1618,13 +1693,13 @@ const MODULES = [
           id: "pc-v17", name: "V17: Quiz/Gamification Feed (C2)",
           description: "Processing generates quiz material from each episode: 5 questions per episode, prediction prompts, streak-compatible content. Brett\u2019s most-excited-about concept from Meeting #8. Modular Architecture places this in \u201cEngagement \u2014 Plug In Later\u201d phase, but quiz generation starts here.",
           feasibilityNote: "Fully automated. AI generates quiz questions from transcript. No effort from Brett.",
-          feasibilityScore: 5, defaultPhase: "v0"
+          feasibilityScore: 5, defaultPhase: "archive"
         },
         {
           id: "pc-v18", name: "V18: Analytics Metadata Tagging",
           description: "Each processed piece tagged with: topic category, sentiment, key entities, estimated engagement score, content type. Feeds the Intelligence & Growth module. Without this, analytics has nothing to analyze.",
           feasibilityNote: "Invisible to Brett. Pure backend operation.",
-          feasibilityScore: 5, defaultPhase: "v0"
+          feasibilityScore: 5, defaultPhase: "archive"
         }
       ]
     }
@@ -1643,11 +1718,11 @@ const MODULES = [
       verticals: [
         { id: "di-v1", name: "V1: Podcast RSS (Spotify + Apple)", description: "The anchor. Every full episode published as audio via RSS feed. Simplest: generate RSS, host audio, platforms pull automatically. Zero manual work after setup. YouTube is #1 for discovery (33%), but Spotify/Apple are where the habit lives.", feasibilityNote: "Fully passive after setup. Brett never touches this.", feasibilityScore: 5, defaultPhase: "v0" },
         { id: "di-v2", name: "V2: YouTube (Long-Form + Shorts)", description: "Full episode as video podcast + 60\u201390 sec clips as Shorts. #1 discovery platform AND has monetization (YouTube Partner Program at 1,000 subs). Tier 1 alongside podcast RSS. Needs consistent branding, thumbnails, titles, descriptions \u2014 all AI-generated.", feasibilityNote: "Automated upload. Brett doesn\u2019t touch YouTube.", feasibilityScore: 5, defaultPhase: "v0" },
-        { id: "di-v3", name: "V3: LinkedIn (Newsletter + Posts)", description: "Primary audience is 35\u201354 professionals. LinkedIn is where they are. Newsletter (weekly digest) and daily posts (quotes, hot takes, clips). LinkedIn newsletters have high open rates because LinkedIn pushes them to inboxes. Tier 1.", feasibilityNote: "Fully automated. Newsletter assembled from transcripts, daily posts are extracted quotes and clip links.", feasibilityScore: 5, defaultPhase: "v0" },
-        { id: "di-v4", name: "V4: TikTok + Instagram Reels", description: "Short clips from Processing V5 published to TikTok and Instagram Reels. Discovery platforms \u2014 attract new listeners who then subscribe on podcast platforms. Tier 2. Algorithm does the work if content is good.", feasibilityNote: "Fully automated. Platforms reward daily posting and trend-awareness. Trend-riding might need occasional human input \u2014 probably not Brett\u2019s job.", feasibilityScore: 4, defaultPhase: "v1" },
-        { id: "di-v5", name: "V5: Email/Owned List", description: "Brett\u2019s own email list \u2014 the only channel he fully owns. Every other platform can change its algorithm. Tier 1. Content from transcript/summary in Processing. System should auto-insert CTA into every piece of content.", feasibilityNote: "Automated send. Building the list requires CTA in every episode and platform.", feasibilityScore: 5, defaultPhase: "v0" },
-        { id: "di-v6", name: "V6: WhatsApp Broadcast/Channel", description: "Flagged as genuine competitive gap \u2014 no competitor delivers AI-curated podcasts via WhatsApp. Daily summaries, clips, or quiz questions sent directly. WhatsApp has 98% open rates vs 20% for email. Also doubles as feedback channel.", feasibilityNote: "Automated broadcast. Interesting because it\u2019s also a feedback channel \u2014 listeners reply, suggest topics, react.", feasibilityScore: 5, defaultPhase: "v0" },
-        { id: "di-v7", name: "V7: Own Website/App (Future)", description: "Brett\u2019s own platform. Blog posts, episode archive, quiz features, community. Long-term home base. For V0, a simple landing page with episode links and email signup is enough.", feasibilityNote: "Brett never maintains this. System auto-publishes. Website is a destination other channels drive traffic to.", feasibilityScore: 5, defaultPhase: "v1" },
+        { id: "di-v3", name: "V3: LinkedIn (Newsletter + Posts)", description: "Primary audience is 35\u201354 professionals. LinkedIn is where they are. Newsletter (weekly digest) and daily posts (quotes, hot takes, clips). LinkedIn newsletters have high open rates because LinkedIn pushes them to inboxes. Tier 1.", feasibilityNote: "Fully automated. Newsletter assembled from transcripts, daily posts are extracted quotes and clip links.", feasibilityScore: 5, defaultPhase: "v1" },
+        { id: "di-v4", name: "V4: TikTok + Instagram Reels", description: "Short clips from Processing V5 published to TikTok and Instagram Reels. Discovery platforms \u2014 attract new listeners who then subscribe on podcast platforms. Tier 2. Algorithm does the work if content is good.", feasibilityNote: "Fully automated. Platforms reward daily posting and trend-awareness. Trend-riding might need occasional human input \u2014 probably not Brett\u2019s job.", feasibilityScore: 4, defaultPhase: "v0" },
+        { id: "di-v5", name: "V5: Email/Owned List", description: "Brett\u2019s own email list \u2014 the only channel he fully owns. Every other platform can change its algorithm. Tier 1. Content from transcript/summary in Processing. System should auto-insert CTA into every piece of content.", feasibilityNote: "Automated send. Building the list requires CTA in every episode and platform.", feasibilityScore: 5, defaultPhase: "v1" },
+        { id: "di-v6", name: "V6: WhatsApp Broadcast/Channel", description: "Flagged as genuine competitive gap \u2014 no competitor delivers AI-curated podcasts via WhatsApp. Daily summaries, clips, or quiz questions sent directly. WhatsApp has 98% open rates vs 20% for email. Also doubles as feedback channel.", feasibilityNote: "Automated broadcast. Interesting because it\u2019s also a feedback channel \u2014 listeners reply, suggest topics, react.", feasibilityScore: 5, defaultPhase: "v1" },
+        { id: "di-v7", name: "V7: Own Website/App (Future)", description: "Brett\u2019s own platform. Blog posts, episode archive, quiz features, community. Long-term home base. For V0, a simple landing page with episode links and email signup is enough.", feasibilityNote: "Brett never maintains this. System auto-publishes. Website is a destination other channels drive traffic to.", feasibilityScore: 5, defaultPhase: "archive" },
         { id: "di-v8", name: "V8: Newsletter Platforms (Substack/Beehiiv)", description: "Dedicated newsletter platform with built-in discovery, paid subscriptions, and podcast hosting. Substack or Beehiiv with referral programs. These platforms have their own audiences. Substack/Patreon paid tier at EUR 8/month as month 6\u201312 goal.", feasibilityNote: "Automated publishing. Platforms handle payment processing for paid tiers, removing admin burden.", feasibilityScore: 5, defaultPhase: "v1" }
       ]
     },
@@ -1655,9 +1730,9 @@ const MODULES = [
       name: "Axis 2: Publishing Strategy \u2014 HOW and WHEN does content go out?",
       verticals: [
         { id: "di-v9", name: "V9: Automated Scheduling (Set and Forget)", description: "All content scheduled in advance. Processing produces a week\u2019s worth from Brett\u2019s 3 batch sessions. Distribution schedules: episode at 6am, LinkedIn post at 8am, first clip at 12pm, second at 6pm. Every day, every platform.", feasibilityNote: "Core of the friction-resistant strategy. Brett\u2019s inconsistent recording schedule gets smoothed into consistent publishing. Audience sees daily content even when Brett had a bad week. Critical.", feasibilityScore: 5, defaultPhase: "v0" },
-        { id: "di-v10", name: "V10: Platform-Optimized Timing", description: "Smart-scheduled: LinkedIn 8\u20139am weekdays, TikTok 7\u20139pm, YouTube Shorts midday. Over time learns Brett\u2019s specific audience patterns.", feasibilityNote: "Invisible to Brett. Just smarter automation.", feasibilityScore: 5, defaultPhase: "v1" },
-        { id: "di-v11", name: "V11: Content Calendar with Thematic Days", description: "Structure the week: \u201cMacro Monday\u201d (geopolitics), \u201cScience Wednesday,\u201d \u201cQuirky Friday.\u201d Gives audience predictability and Brett a framework. Pipeline knows which stories map to which day.", feasibilityNote: "Routine and structure help feasibility. Brett knows Monday = politics, mental prep is easier.", feasibilityScore: 4, defaultPhase: "v0" },
-        { id: "di-v12", name: "V12: Drip Distribution (Staggered Release)", description: "Instead of dumping everything at once, stagger: episode at 6am, first clip at noon, quote card at 3pm, quiz at 6pm. Keeps Brett visible in feeds all day. Maximizes algorithm engagement.", feasibilityNote: "Fully automated. Builds the parasocial bond critical for first 90 days.", feasibilityScore: 5, defaultPhase: "v0" },
+        { id: "di-v10", name: "V10: Platform-Optimized Timing", description: "Smart-scheduled: LinkedIn 8\u20139am weekdays, TikTok 7\u20139pm, YouTube Shorts midday. Over time learns Brett\u2019s specific audience patterns.", feasibilityNote: "Invisible to Brett. Just smarter automation.", feasibilityScore: 5, defaultPhase: "v0" },
+        { id: "di-v11", name: "V11: Content Calendar with Thematic Days", description: "Structure the week: \u201cMacro Monday\u201d (geopolitics), \u201cScience Wednesday,\u201d \u201cQuirky Friday.\u201d Gives audience predictability and Brett a framework. Pipeline knows which stories map to which day.", feasibilityNote: "Routine and structure help feasibility. Brett knows Monday = politics, mental prep is easier.", feasibilityScore: 4, defaultPhase: "v1" },
+        { id: "di-v12", name: "V12: Drip Distribution (Staggered Release)", description: "Instead of dumping everything at once, stagger: episode at 6am, first clip at noon, quote card at 3pm, quiz at 6pm. Keeps Brett visible in feeds all day. Maximizes algorithm engagement.", feasibilityNote: "Fully automated. Builds the parasocial bond critical for first 90 days.", feasibilityScore: 5, defaultPhase: "v1" },
         { id: "di-v13", name: "V13: Evergreen Recycling", description: "System identifies evergreen clips and recycles them \u2014 re-posting during slow weeks or mixing with new content. Creates \u201cbest of\u201d content without new recording.", feasibilityNote: "Safety net for low-output weeks. Audience doesn\u2019t notice if Brett records 2 sessions instead of 3.", feasibilityScore: 5, defaultPhase: "v1" }
       ]
     },
@@ -1665,27 +1740,27 @@ const MODULES = [
       name: "Axis 3: Platform Adaptation \u2014 HOW does content change per platform?",
       verticals: [
         { id: "di-v14", name: "V14: One-Size-Fits-All", description: "Same clip goes to YouTube Shorts, TikTok, Instagram, LinkedIn. Simple, fast, zero extra work. Each platform has different norms, but fine for V0.", feasibilityNote: "Simplest to automate. Fine for V0.", feasibilityScore: 5, defaultPhase: "v0" },
-        { id: "di-v15", name: "V15: Platform-Native Formatting", description: "Each piece adapted to platform conventions. YouTube gets SEO titles. LinkedIn gets professional hooks. TikTok gets trending hashtags. Templates built once and applied to every piece.", feasibilityNote: "Still fully automated, just smarter. V1 feature \u2014 meaningful quality upgrade.", feasibilityScore: 5, defaultPhase: "v1" },
-        { id: "di-v16", name: "V16: Aspect Ratio / Visual Adaptation", description: "Full episodes 16:9 (YouTube), clips 9:16 (Shorts/Reels/TikTok), LinkedIn 1:1 (square). Processing outputs multiple ratios, Distribution delivers the right one.", feasibilityNote: "Fully automated. Part of the template system.", feasibilityScore: 5, defaultPhase: "v0" },
-        { id: "di-v17", name: "V17: Caption/Subtitle Variants", description: "Some platforms auto-play without sound (LinkedIn, Instagram). Content MUST have burned-in captions or gets scrolled past. System generates from transcript and burns into video for platforms that need it.", feasibilityNote: "Automated from transcript. Critical for engagement, invisible to Brett.", feasibilityScore: 5, defaultPhase: "v0" }
+        { id: "di-v15", name: "V15: Platform-Native Formatting", description: "Each piece adapted to platform conventions. YouTube gets SEO titles. LinkedIn gets professional hooks. TikTok gets trending hashtags. Templates built once and applied to every piece.", feasibilityNote: "Still fully automated, just smarter. V1 feature \u2014 meaningful quality upgrade.", feasibilityScore: 5, defaultPhase: "archive" },
+        { id: "di-v16", name: "V16: Aspect Ratio / Visual Adaptation", description: "Full episodes 16:9 (YouTube), clips 9:16 (Shorts/Reels/TikTok), LinkedIn 1:1 (square). Processing outputs multiple ratios, Distribution delivers the right one.", feasibilityNote: "Fully automated. Part of the template system.", feasibilityScore: 5, defaultPhase: "v1" },
+        { id: "di-v17", name: "V17: Caption/Subtitle Variants", description: "Some platforms auto-play without sound (LinkedIn, Instagram). Content MUST have burned-in captions or gets scrolled past. System generates from transcript and burns into video for platforms that need it.", feasibilityNote: "Automated from transcript. Critical for engagement, invisible to Brett.", feasibilityScore: 5, defaultPhase: "v1" }
       ]
     },
     {
       name: "Axis 4: Publishing Infrastructure \u2014 WHAT tools handle the upload?",
       verticals: [
-        { id: "di-v18", name: "V18: Manual Upload (Baseline)", description: "Someone on the team uploads to each platform manually. Not scalable, not sustainable, and exactly what the pipeline is supposed to eliminate. Only acceptable for V0 as temporary.", feasibilityNote: "If it depends on Brett, it won\u2019t happen. If it depends on a team member, it\u2019s fragile.", feasibilityScore: 1, defaultPhase: "v0" },
+        { id: "di-v18", name: "V18: Manual Upload (Baseline)", description: "Someone on the team uploads to each platform manually. Not scalable, not sustainable, and exactly what the pipeline is supposed to eliminate. Only acceptable for V0 as temporary.", feasibilityNote: "If it depends on Brett, it won\u2019t happen. If it depends on a team member, it\u2019s fragile.", feasibilityScore: 1, defaultPhase: "skip" },
         { id: "di-v19", name: "V19: Existing Automation Tools", description: "Use existing tools: Podbean/Anchor for podcast RSS, TubeBuddy/vidIQ for YouTube, Buffer/Hootsuite for social scheduling. Farid\u2019s directive: don\u2019t rebuild what exists.", feasibilityNote: "Proven, reliable, maintained by someone else. Lower risk than custom builds.", feasibilityScore: 4, defaultPhase: "v0" },
-        { id: "di-v20", name: "V20: Custom Pipeline Integration", description: "Direct API integrations to each platform. YouTube Data API, Spotify API, LinkedIn API, TikTok API. More control but more dev work. Maybe one or two platforms get direct integration for V0.", feasibilityNote: "Same as V19 from Brett\u2019s perspective. Choice matters for team\u2019s build effort.", feasibilityScore: 4, defaultPhase: "v1" },
-        { id: "di-v21", name: "V21: RSS-First Architecture", description: "Build around RSS as central distribution mechanism. Every piece gets an RSS entry. Platforms that support RSS pull automatically. Others get pushed via V19/V20. Architecturally clean.", feasibilityNote: "No impact on Brett. Makes system more maintainable for whoever runs it after I2P.", feasibilityScore: 5, defaultPhase: "v1" }
+        { id: "di-v20", name: "V20: Custom Pipeline Integration", description: "Direct API integrations to each platform. YouTube Data API, Spotify API, LinkedIn API, TikTok API. More control but more dev work. Maybe one or two platforms get direct integration for V0.", feasibilityNote: "Same as V19 from Brett\u2019s perspective. Choice matters for team\u2019s build effort.", feasibilityScore: 4, defaultPhase: "skip" },
+        { id: "di-v21", name: "V21: RSS-First Architecture", description: "Build around RSS as central distribution mechanism. Every piece gets an RSS entry. Platforms that support RSS pull automatically. Others get pushed via V19/V20. Architecturally clean.", feasibilityNote: "No impact on Brett. Makes system more maintainable for whoever runs it after I2P.", feasibilityScore: 5, defaultPhase: "skip" }
       ]
     },
     {
       name: "Axis 5: Monetization Integration \u2014 HOW does distribution connect to revenue?",
       verticals: [
-        { id: "di-v22", name: "V22: Free Everywhere (Months 1\u20136)", description: "Strategic Options recommends months 1\u20136 free only. Build habit, collect emails, set up tip jar. No paywalls. Everything to all platforms maximizes reach.", feasibilityNote: "Simplest option. No decisions about what\u2019s free vs. paid.", feasibilityScore: 5, defaultPhase: "v0" },
-        { id: "di-v23", name: "V23: Freemium Split (Months 6\u201312)", description: "Daily episodes free, weekly deep dives paid (Patreon/Substack EUR 8/month). Distribution splits: free everywhere, premium to subscribers only. Pipeline needs \u201cfree/premium\u201d tag.", feasibilityNote: "Brett doesn\u2019t manage subscriptions \u2014 platform handles payments and access.", feasibilityScore: 4, defaultPhase: "v1" },
-        { id: "di-v24", name: "V24: Sponsorship/Ad Insertion (Month 12+)", description: "Pre-roll or mid-roll ads once audience is large enough. Podcorn for micro-sponsorships, YouTube Partner Program. News CPM at $29\u201331 per episode at scale. System auto-inserts ad slots at natural breaks.", feasibilityNote: "Zero effort from Brett once sponsors are secured. Ad insertion is processing/distribution function.", feasibilityScore: 5, defaultPhase: "future" },
-        { id: "di-v25", name: "V25: Multi-Tier Access", description: "Free tier: clips/summaries. Standard (EUR 8/month): full episodes. Premium (EUR 20/month): full episodes + behind-the-scenes + community + quiz leaderboard. Complex but maximizes revenue per listener.", feasibilityNote: "Complex to set up, simple to run once automated. Probably V2 territory.", feasibilityScore: 3, defaultPhase: "v2" }
+        { id: "di-v22", name: "V22: Free Everywhere (Months 1\u20136)", description: "Strategic Options recommends months 1\u20136 free only. Build habit, collect emails, set up tip jar. No paywalls. Everything to all platforms maximizes reach.", feasibilityNote: "Simplest option. No decisions about what\u2019s free vs. paid.", feasibilityScore: 5, defaultPhase: "v1" },
+        { id: "di-v23", name: "V23: Freemium Split (Months 6\u201312)", description: "Daily episodes free, weekly deep dives paid (Patreon/Substack EUR 8/month). Distribution splits: free everywhere, premium to subscribers only. Pipeline needs \u201cfree/premium\u201d tag.", feasibilityNote: "Brett doesn\u2019t manage subscriptions \u2014 platform handles payments and access.", feasibilityScore: 4, defaultPhase: "archive" },
+        { id: "di-v24", name: "V24: Sponsorship/Ad Insertion (Month 12+)", description: "Pre-roll or mid-roll ads once audience is large enough. Podcorn for micro-sponsorships, YouTube Partner Program. News CPM at $29\u201331 per episode at scale. System auto-inserts ad slots at natural breaks.", feasibilityNote: "Zero effort from Brett once sponsors are secured. Ad insertion is processing/distribution function.", feasibilityScore: 5, defaultPhase: "archive" },
+        { id: "di-v25", name: "V25: Multi-Tier Access", description: "Free tier: clips/summaries. Standard (EUR 8/month): full episodes. Premium (EUR 20/month): full episodes + behind-the-scenes + community + quiz leaderboard. Complex but maximizes revenue per listener.", feasibilityNote: "Complex to set up, simple to run once automated. Probably V2 territory.", feasibilityScore: 3, defaultPhase: "archive" }
       ]
     }
   ]
@@ -1703,7 +1778,7 @@ const MODULES = [
       verticals: [
         { id: "gl-v1", name: "V1: Content Performance Metrics", description: "Basic numbers per piece: plays/views, completion rate, drop-off points, shares, likes, comments, subscriber conversions. Which episodes perform best? Which clips go viral? Table stakes for any content operation.", feasibilityNote: "Brett should NOT check dashboards daily. System surfaces a weekly summary: \u201cBest episode was Tuesday\u2019s China take (2,400 plays). Worst was Thursday\u2019s quantum piece (380).\u201d One weekly message.", feasibilityScore: 4, defaultPhase: "v0" },
         { id: "gl-v2", name: "V2: Audience Demographics & Behavior", description: "Who\u2019s listening? Age, location, device, time of day, listening patterns. Are the 35\u201354 professionals showing up? Validates or challenges target audience assumptions.", feasibilityNote: "Completely invisible to Brett in daily workflow. Surfaces as monthly insight, not daily noise.", feasibilityScore: 5, defaultPhase: "v1" },
-        { id: "gl-v3", name: "V3: Pipeline Efficiency Metrics", description: "Not audience-facing \u2014 measures the pipeline itself. Time from curation to published? Script rejection rate? AI persona accuracy trending? Success criteria: end-to-end under 90 minutes, Brett review under 15 minutes.", feasibilityNote: "For the team, not Brett. Indirectly improves Brett\u2019s experience.", feasibilityScore: 5, defaultPhase: "v0" },
+        { id: "gl-v3", name: "V3: Pipeline Efficiency Metrics", description: "Not audience-facing \u2014 measures the pipeline itself. Time from curation to published? Script rejection rate? AI persona accuracy trending? Success criteria: end-to-end under 90 minutes, Brett review under 15 minutes.", feasibilityNote: "For the team, not Brett. Indirectly improves Brett\u2019s experience.", feasibilityScore: 5, defaultPhase: "v1" },
         { id: "gl-v4", name: "V4: Content Attribution Tracking", description: "Which source feeds produce the best content? If Reuters stories consistently become top episodes while a particular RSS feed always gets cut, the system deprioritizes low-value sources. Feeds back into Module 1 and Module 2.", feasibilityNote: "Invisible to Brett. System gets smarter about what to show him without him managing his source list.", feasibilityScore: 5, defaultPhase: "v1" },
         { id: "gl-v5", name: "V5: Engagement Depth (Beyond Plays)", description: "Not just \u201cdid they listen\u201d but \u201cdid they act.\u201d Clicks, quiz participation, shares, WhatsApp replies, paid tier conversions. Conversion metrics vs. vanity metrics.", feasibilityNote: "Only surfaces when meaningful: \u201c12 listeners signed up for paid tier this week after your Wednesday episode.\u201d", feasibilityScore: 5, defaultPhase: "v1" }
       ]
@@ -1712,39 +1787,45 @@ const MODULES = [
       name: "Axis 2: Feedback Loops \u2014 HOW does data flow back into the pipeline?",
       verticals: [
         { id: "gl-v6", name: "V6: Curation Feedback Loop", description: "Performance data feeds back into Curation. If China trade episodes outperform EU regulation, AI weights China higher. If quirky science gets 3x shares, AI serves more quirky. Curation gets smarter without manual adjustment.", feasibilityNote: "This is the operational payoff. Instead of Brett analyzing what works himself, the system self-optimizes.", feasibilityScore: 5, defaultPhase: "v1" },
-        { id: "gl-v7", name: "V7: Persona Refinement Loop", description: "Every time Brett edits a script, rejects a pick, or re-records, that\u2019s signal about preferences. System captures corrections and feeds them back into the Persona Engine. Gap analysis marked this as CRITICAL.", feasibilityNote: "Brett improves the system just by using it. No extra work, no training sessions, no preference forms. Natural behavior IS the training data.", feasibilityScore: 5, defaultPhase: "v1" },
+        { id: "gl-v7", name: "V7: Persona Refinement Loop", description: "Every time Brett edits a script, rejects a pick, or re-records, that\u2019s signal about preferences. System captures corrections and feeds them back into the Persona Engine. Gap analysis marked this as CRITICAL.", feasibilityNote: "Brett improves the system just by using it. No extra work, no training sessions, no preference forms. Natural behavior IS the training data.", feasibilityScore: 5, defaultPhase: "archive" },
         { id: "gl-v8", name: "V8: Audience Topic Request Loop", description: "Listeners suggest topics via WhatsApp, comments, quiz responses, email, social media. Suggestions ingested into Content Sources as new input. System surfaces: \u201c15 listeners asked about the Fed rate decision.\u201d", feasibilityNote: "Low friction if it\u2019s a summary. Brett says yes or no. System aggregates \u2014 don\u2019t want Brett reading 50 individual comments.", feasibilityScore: 4, defaultPhase: "v1" },
-        { id: "gl-v9", name: "V9: Format Optimization Loop", description: "System learns which formats perform best on which platforms. Maybe 90-sec clips beat 60-sec on TikTok. Maybe question hooks get 3x engagement on LinkedIn. Processing and distribution modules adjust automatically.", feasibilityNote: "Fully automated. System A/B tests and converges on what works. Brett doesn\u2019t know or care.", feasibilityScore: 5, defaultPhase: "v2" },
-        { id: "gl-v10", name: "V10: Predictive Content Planning", description: "Most advanced loop. Based on news cycles, audience patterns, seasonal trends, and historical performance, system predicts which topics will perform well. \u201cUS-China tensions escalating \u2014 recommend leading with geopolitics.\u201d", feasibilityNote: "System becomes Brett\u2019s editorial strategist. Instead of Brett sensing the news cycle and planning content himself, the AI handles the strategic layer.", feasibilityScore: 5, defaultPhase: "v2" }
+        { id: "gl-v9", name: "V9: Format Optimization Loop", description: "System learns which formats perform best on which platforms. Maybe 90-sec clips beat 60-sec on TikTok. Maybe question hooks get 3x engagement on LinkedIn. Processing and distribution modules adjust automatically.", feasibilityNote: "Fully automated. System A/B tests and converges on what works. Brett doesn\u2019t know or care.", feasibilityScore: 5, defaultPhase: "archive" },
+        { id: "gl-v10", name: "V10: Predictive Content Planning", description: "Most advanced loop. Based on news cycles, audience patterns, seasonal trends, and historical performance, system predicts which topics will perform well. \u201cUS-China tensions escalating \u2014 recommend leading with geopolitics.\u201d", feasibilityNote: "System becomes Brett\u2019s editorial strategist. Instead of Brett sensing the news cycle and planning content himself, the AI handles the strategic layer.", feasibilityScore: 5, defaultPhase: "archive" }
       ]
     },
     {
       name: "Axis 3: Gamification & Engagement (C2) \u2014 HOW do we make the audience come back?",
       verticals: [
-        { id: "gl-v11", name: "V11: Daily Quiz", description: "5 questions per episode, generated from transcript. Tests comprehension and opinion. Published daily alongside episode. Brett was most excited about gamification in Meeting #8. This is the differentiator module.", feasibilityNote: "Zero effort for Brett, fully generated. For audience: gamification creates dopamine loops. Quizzes provide immediate feedback. The hook that makes Brett\u2019s podcast stickier.", feasibilityScore: 5, defaultPhase: "v0" },
-        { id: "gl-v12", name: "V12: Streak System", description: "Track consecutive days of quiz completion. Inspired by Duolingo. Streaks create habit and FOMO. For V0, a basic streak counter \u2014 no rewards, no leaderboard, just \u201cDay 14.\u201d", feasibilityNote: "Streaks create a simple reward loop and can be extremely effective. Keep it simple and positive.", feasibilityScore: 5, defaultPhase: "v0" },
-        { id: "gl-v13", name: "V13: Prediction Tracker", description: "Brett makes predictions in episodes. System tracks them and revisits: \u201cBrett predicted X. Here\u2019s what happened.\u201d Listeners make their own predictions and compare. Creates long-term narrative arcs.", feasibilityNote: "Brett makes predictions naturally during recording. System catches them in transcript. Zero extra effort. For audience: predictions create open loops (brain wants closure).", feasibilityScore: 5, defaultPhase: "v1" },
+        { id: "gl-v11", name: "V11: Daily Quiz", description: "5 questions per episode, generated from transcript. Tests comprehension and opinion. Published daily alongside episode. Brett was most excited about gamification in Meeting #8. This is the differentiator module.", feasibilityNote: "Zero effort for Brett, fully generated. For audience: gamification creates dopamine loops. Quizzes provide immediate feedback. The hook that makes Brett\u2019s podcast stickier.", feasibilityScore: 5, defaultPhase: "v1" },
+        { id: "gl-v12", name: "V12: Streak System", description: "Track consecutive days of quiz completion. Inspired by Duolingo. Streaks create habit and FOMO. For V0, a basic streak counter \u2014 no rewards, no leaderboard, just \u201cDay 14.\u201d", feasibilityNote: "Streaks create a simple reward loop and can be extremely effective. Keep it simple and positive.", feasibilityScore: 5, defaultPhase: "v1" },
+        { id: "gl-v13", name: "V13: Prediction Tracker", description: "Brett makes predictions in episodes. System tracks them and revisits: \u201cBrett predicted X. Here\u2019s what happened.\u201d Listeners make their own predictions and compare. Creates long-term narrative arcs.", feasibilityNote: "Brett makes predictions naturally during recording. System catches them in transcript. Zero extra effort. For audience: predictions create open loops (brain wants closure).", feasibilityScore: 5, defaultPhase: "archive" },
         { id: "gl-v14", name: "V14: Shareable Result Cards (from C3)", description: "After taking the quiz, listeners get a visual card: \u201cYou scored 4/5 on today\u2019s Geopolitics Quiz!\u201d They share on social media. Organic marketing \u2014 every shared card is a free ad.", feasibilityNote: "Instant gratification. Take quiz \u2192 see score \u2192 share \u2192 feel smart. 30-second dopamine cycle.", feasibilityScore: 5, defaultPhase: "v1" },
-        { id: "gl-v15", name: "V15: Leaderboard / Community Ranking", description: "Weekly/monthly leaderboards showing top quiz performers. Creates competition and community. Pairs with streak system. Needs an audience first \u2014 pointless with 10 listeners.", feasibilityNote: "Competitive element keeps engagement high. V1/V2.", feasibilityScore: 4, defaultPhase: "v2" },
-        { id: "gl-v16", name: "V16: Spaced Repetition Learning", description: "If Brett covers a science topic in week 1, system resurfaces a question in week 3 and week 6. Most effective learning technique known. Turns podcast from entertainment into education.", feasibilityNote: "Long-term vision. V2 territory \u2014 requires large content library and user profiles.", feasibilityScore: 4, defaultPhase: "v2" }
+        { id: "gl-v15", name: "V15: Leaderboard / Community Ranking", description: "Weekly/monthly leaderboards showing top quiz performers. Creates competition and community. Pairs with streak system. Needs an audience first \u2014 pointless with 10 listeners.", feasibilityNote: "Competitive element keeps engagement high. V1/V2.", feasibilityScore: 4, defaultPhase: "v1" },
+        { id: "gl-v16", name: "V16: Spaced Repetition Learning", description: "If Brett covers a science topic in week 1, system resurfaces a question in week 3 and week 6. Most effective learning technique known. Turns podcast from entertainment into education.", feasibilityNote: "Long-term vision. V2 territory \u2014 requires large content library and user profiles.", feasibilityScore: 4, defaultPhase: "archive" }
       ]
     },
     {
       name: "Axis 4: Community & Relationship \u2014 HOW does Brett connect with the audience?",
       verticals: [
-        { id: "gl-v17", name: "V17: Comment/Reply Management", description: "Aggregates comments from YouTube, LinkedIn, podcast platforms into one view. AI drafts replies for Brett to approve. Brett doesn\u2019t visit 5 platforms to engage.", feasibilityNote: "Without aggregation, Brett will never manage comments. One feed with AI-drafted replies: 10 minutes approving vs 60 minutes across platforms.", feasibilityScore: 4, defaultPhase: "v1" },
+        { id: "gl-v17", name: "V17: Comment/Reply Management", description: "Aggregates comments from YouTube, LinkedIn, podcast platforms into one view. AI drafts replies for Brett to approve. Brett doesn\u2019t visit 5 platforms to engage.", feasibilityNote: "Without aggregation, Brett will never manage comments. One feed with AI-drafted replies: 10 minutes approving vs 60 minutes across platforms.", feasibilityScore: 4, defaultPhase: "v0" },
         { id: "gl-v18", name: "V18: WhatsApp Community Channel", description: "Beyond broadcast \u2014 two-way. Listeners reply with questions, reactions, topic suggestions. Brett drops voice note responses when he feels like it. Builds parasocial bond.", feasibilityNote: "WhatsApp is casual and low-pressure. Brett engages when energy is up, ignores when it\u2019s not. Unlike a forum that feels like obligation, WhatsApp feels like chatting.", feasibilityScore: 4, defaultPhase: "v1" },
-        { id: "gl-v19", name: "V19: Listener Spotlight / UGC", description: "Feature listener predictions, quiz scores, or comments in episodes. Creates investment \u2014 listeners who might be featured pay more attention.", feasibilityNote: "System surfaces interesting contributions automatically. Brett doesn\u2019t dig through comments.", feasibilityScore: 4, defaultPhase: "v2" },
-        { id: "gl-v20", name: "V20: Email/Newsletter Community", description: "Dedicated newsletter section for community content: reader responses, best predictions, featured questions. AI compiles automatically from engagement data.", feasibilityNote: "Fully automated compilation. Brett approves the draft, which already includes community section.", feasibilityScore: 5, defaultPhase: "v1" }
+        { id: "gl-v19", name: "V19: Listener Spotlight / UGC", description: "Feature listener predictions, quiz scores, or comments in episodes. Creates investment \u2014 listeners who might be featured pay more attention.", feasibilityNote: "System surfaces interesting contributions automatically. Brett doesn\u2019t dig through comments.", feasibilityScore: 4, defaultPhase: "archive" },
+        { id: "gl-v20", name: "V20: Email/Newsletter Community", description: "Dedicated newsletter section for community content: reader responses, best predictions, featured questions. AI compiles automatically from engagement data.", feasibilityNote: "Fully automated compilation. Brett approves the draft, which already includes community section.", feasibilityScore: 5, defaultPhase: "archive" }
       ]
     },
     {
       name: "Axis 5: Monetization Mechanics \u2014 HOW does the growth loop generate revenue?",
       verticals: [
-        { id: "gl-v21", name: "V21: Free-to-Paid Conversion Funnel", description: "Track listener journey: discovers via clip \u2192 subscribes free \u2192 takes quiz \u2192 builds streak \u2192 converts to paid. Each stage has a metric. System identifies drop-off points.", feasibilityNote: "Completely automated tracking. Surfaces as: \u201c47 listeners converted this month. Main trigger: quiz streak over 14 days.\u201d", feasibilityScore: 5, defaultPhase: "v1" },
-        { id: "gl-v22", name: "V22: Sponsorship Performance Dashboard", description: "When sponsorships start (month 12+), track ad performance: listeners, click-throughs, CPM. News CPM at $29\u201331. Clean data makes sponsor conversations easy.", feasibilityNote: "Brett doesn\u2019t manage day-to-day. Clean data = \u201chere are the numbers\u201d instead of guessing.", feasibilityScore: 5, defaultPhase: "future" },
-        { id: "gl-v23", name: "V23: Content Licensing Metrics", description: "If pipeline becomes a Creator Toolkit (Direction 3), track licensing metrics: how many creators use it, their performance, revenue. V3/18-month territory. Shows platform scaling potential.", feasibilityNote: "Not Brett\u2019s concern. Business-level measurement for platform operator.", feasibilityScore: 5, defaultPhase: "future" },
-        { id: "gl-v24", name: "V24: Tip Jar / Micro-Patronage", description: "Simple \u201cbuy me a coffee\u201d integration for months 1\u20136. Low commitment from listeners, low setup from Brett. System tracks tips and triggers thank-you messages.", feasibilityNote: "One-time setup, then fully automated. Every tip notification gives Brett a dopamine hit that reinforces the recording habit.", feasibilityScore: 5, defaultPhase: "v0" }
+        { id: "gl-v21", name: "V21: Free-to-Paid Conversion Funnel", description: "Track listener journey: discovers via clip \u2192 subscribes free \u2192 takes quiz \u2192 builds streak \u2192 converts to paid. Each stage has a metric. System identifies drop-off points.", feasibilityNote: "Completely automated tracking. Surfaces as: \u201c47 listeners converted this month. Main trigger: quiz streak over 14 days.\u201d", feasibilityScore: 5, defaultPhase: "archive" },
+        { id: "gl-v22", name: "V22: Sponsorship Performance Dashboard", description: "When sponsorships start (month 12+), track ad performance: listeners, click-throughs, CPM. News CPM at $29\u201331. Clean data makes sponsor conversations easy.", feasibilityNote: "Brett doesn\u2019t manage day-to-day. Clean data = \u201chere are the numbers\u201d instead of guessing.", feasibilityScore: 5, defaultPhase: "archive" },
+        { id: "gl-v23", name: "V23: Content Licensing Metrics", description: "If pipeline becomes a Creator Toolkit (Direction 3), track licensing metrics: how many creators use it, their performance, revenue. V3/18-month territory. Shows platform scaling potential.", feasibilityNote: "Not Brett\u2019s concern. Business-level measurement for platform operator.", feasibilityScore: 5, defaultPhase: "skip" },
+        { id: "gl-v24", name: "V24: Tip Jar / Micro-Patronage", description: "Simple \u201cbuy me a coffee\u201d integration for months 1\u20136. Low commitment from listeners, low setup from Brett. System tracks tips and triggers thank-you messages.", feasibilityNote: "One-time setup, then fully automated. Every tip notification gives Brett a dopamine hit that reinforces the recording habit.", feasibilityScore: 5, defaultPhase: "archive" },
+        {
+          id: "gl-v25", name: "V25: Prediction Betting / Takes Tracker",
+          description: "Brett makes predictions or hot takes on stories. Listeners can agree/disagree. The system tracks accuracy over time, creating a scorecard of Brett\u2019s prediction record. Turns passive consumption into active engagement.",
+          feasibilityNote: "Relatively simple to implement \u2014 just a binary agree/disagree on each take, tracked over time. High engagement potential.",
+          feasibilityScore: 4, defaultPhase: "v1"
+        }
       ]
     }
   ]
@@ -1770,48 +1851,137 @@ function getModuleIconSvg(id) {
   return icons[id] || '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/></svg>';
 }
 
-const FLOW_PRESENTATION = {
-  'content-sources': {
-    v0: ['cs-v1', 'cs-v2', 'cs-v5'],
-    v1: ['cs-v3', 'cs-v4']
-  },
-  'curation': {
-    v0: ['cu-v2', 'cu-v9', 'cu-v11', 'cu-v6'],
-    v1: ['cu-v8', 'cu-v10', 'cu-v3', 'cu-v12']
-  },
-  'script-writing': {
-    v0: ['sw-v1', 'sw-v3', 'sw-v5', 'sw-v8', 'sw-v11', 'sw-v13'],
-    v1: ['sw-v10', 'sw-v12', 'sw-v16', 'sw-v18', 'sw-v9']
-  },
-  'production-recording': {
-    v0: ['pr-v1', 'pr-v7', 'pr-v10', 'pr-v12', 'pr-v13'],
-    v1: ['pr-v2', 'pr-v4', 'pr-v5', 'pr-v11', 'pr-v14']
-  },
-  'processing': {
-    v0: ['pc-v1', 'pc-v2', 'pc-v5', 'pc-v7', 'pc-v14', 'pc-v15'],
-    v1: ['pc-v4', 'pc-v6', 'pc-v10', 'pc-v11', 'pc-v18']
-  },
-  'distribution': {
-    v0: ['di-v1', 'di-v2', 'di-v3', 'di-v5', 'di-v6', 'di-v9'],
-    v1: ['di-v4', 'di-v7', 'di-v8', 'di-v10', 'di-v15', 'di-v23']
-  },
-  'growth-loop': {
-    v0: ['gl-v1', 'gl-v3', 'gl-v11', 'gl-v12', 'gl-v24'],
-    v1: ['gl-v2', 'gl-v6', 'gl-v7', 'gl-v8', 'gl-v14', 'gl-v21']
-  }
+const ORIGINAL_PHASES = {
+  'cs-v1':'v0','cs-v2':'v0','cs-v3':'v1','cs-v4':'v1','cs-v5':'v0',
+  'cu-v1':'v0','cu-v2':'v0','cu-v3':'v1','cu-v4':'v2','cu-v5':'future',
+  'cu-v6':'v0','cu-v7':'v0','cu-v8':'v1','cu-v9':'v0','cu-v10':'v1','cu-v11':'v0','cu-v12':'v1','cu-v13':'v2',
+  'sw-v1':'v0','sw-v2':'v1','sw-v3':'v0','sw-v4':'v1','sw-v5':'v0','sw-v6':'v2','sw-v7':'v0','sw-v8':'v0',
+  'sw-v9':'v1','sw-v10':'v1','sw-v11':'v0','sw-v12':'v1','sw-v13':'v0','sw-v14':'v1','sw-v15':'v0','sw-v16':'v0','sw-v17':'v1','sw-v18':'v1',
+  'pr-v1':'v0','pr-v2':'v1','pr-v3':'future','pr-v4':'v1','pr-v5':'v1','pr-v6':'v2','pr-v7':'v0','pr-v8':'v0',
+  'pr-v9':'v0','pr-v10':'v0','pr-v11':'v1','pr-v12':'v0','pr-v13':'v0','pr-v14':'v0',
+  'pc-v1':'v0','pc-v2':'v0','pc-v3':'v0','pc-v4':'v0','pc-v5':'v0','pc-v6':'v0','pc-v7':'v0',
+  'pc-v8':'v1','pc-v9':'v1','pc-v10':'v0','pc-v11':'v1','pc-v12':'v2','pc-v13':'future','pc-v14':'v0','pc-v15':'v0','pc-v16':'v1','pc-v17':'v0','pc-v18':'v0',
+  'di-v1':'v0','di-v2':'v0','di-v3':'v0','di-v4':'v1','di-v5':'v0','di-v6':'v0','di-v7':'v1','di-v8':'v1',
+  'di-v9':'v0','di-v10':'v1','di-v11':'v0','di-v12':'v0','di-v13':'v1','di-v14':'v0','di-v15':'v1','di-v16':'v0','di-v17':'v0','di-v18':'v0',
+  'di-v19':'v0','di-v20':'v1','di-v21':'v1','di-v22':'v0','di-v23':'v1','di-v24':'future','di-v25':'v2',
+  'gl-v1':'v0','gl-v2':'v1','gl-v3':'v0','gl-v4':'v1','gl-v5':'v1','gl-v6':'v1','gl-v7':'v1','gl-v8':'v1',
+  'gl-v9':'v2','gl-v10':'v2','gl-v11':'v0','gl-v12':'v0','gl-v13':'v1','gl-v14':'v1','gl-v15':'v2','gl-v16':'v2',
+  'gl-v17':'v1','gl-v18':'v1','gl-v19':'v2','gl-v20':'v1','gl-v21':'v1','gl-v22':'future','gl-v23':'future','gl-v24':'v0'
 };
+
+const FIGJAM_PHASES = {
+  'cs-v1':'v0','cs-v2':'archive','cs-v3':'archive','cs-v4':'v1','cs-v5':'v0',
+  'cu-v1':'archive','cu-v2':'v1','cu-v3':'v0','cu-v4':'v0','cu-v5':'archive',
+  'cu-v6':'archive','cu-v7':'archive','cu-v8':'archive','cu-v9':'v0','cu-v10':'v1','cu-v11':'v0','cu-v12':'v1','cu-v13':'archive',
+  'sw-v1':'v0','sw-v2':'v1','sw-v3':'v0','sw-v4':'v1','sw-v5':'v0','sw-v6':'archive','sw-v7':'v0','sw-v8':'archive',
+  'sw-v9':'v1','sw-v10':'v1','sw-v11':'v0','sw-v12':'v1','sw-v13':'v0','sw-v14':'v0','sw-v15':'v1','sw-v16':'v0','sw-v17':'v1','sw-v18':'skip',
+  'pr-v1':'v0','pr-v2':'v0','pr-v3':'v0','pr-v4':'v1','pr-v5':'v1','pr-v6':'v1','pr-v7':'v0','pr-v8':'v0',
+  'pr-v9':'v0','pr-v10':'v0','pr-v11':'skip','pr-v12':'v0','pr-v13':'skip','pr-v14':'v0',
+  'pc-v1':'v0','pc-v2':'v1','pc-v3':'v1','pc-v4':'v1','pc-v5':'v0','pc-v6':'v1','pc-v7':'archive',
+  'pc-v8':'v1','pc-v9':'v0','pc-v10':'v1','pc-v11':'v1','pc-v12':'archive','pc-v13':'v0','pc-v14':'v0','pc-v15':'v0','pc-v16':'v0','pc-v17':'archive','pc-v18':'archive',
+  'di-v1':'v0','di-v2':'v0','di-v3':'v1','di-v4':'v0','di-v5':'v1','di-v6':'v1','di-v7':'archive','di-v8':'v1',
+  'di-v9':'v0','di-v10':'v0','di-v11':'v1','di-v12':'v1','di-v13':'v1','di-v14':'v0','di-v15':'archive','di-v16':'v1','di-v17':'v1','di-v18':'skip',
+  'di-v19':'v0','di-v20':'skip','di-v21':'skip','di-v22':'v1','di-v23':'archive','di-v24':'archive','di-v25':'archive',
+  'gl-v1':'v0','gl-v2':'v1','gl-v3':'v1','gl-v4':'v1','gl-v5':'v1','gl-v6':'v1','gl-v7':'archive','gl-v8':'v1',
+  'gl-v9':'archive','gl-v10':'archive','gl-v11':'v1','gl-v12':'v1','gl-v13':'archive','gl-v14':'v1','gl-v15':'v1','gl-v16':'archive',
+  'gl-v17':'v0','gl-v18':'v1','gl-v19':'archive','gl-v20':'archive','gl-v21':'archive','gl-v22':'archive','gl-v23':'skip','gl-v24':'archive',
+  'gl-v25':'v1'
+};
+
+let FLOW_PRESENTATION = null; // set after FIGJAM_FLOW_PRESENTATION is defined
+
+const ORIGINAL_FLOW_PRESENTATION = {
+  'content-sources': { v0: ['cs-v1', 'cs-v2', 'cs-v5'], v1: ['cs-v3', 'cs-v4'] },
+  'curation': { v0: ['cu-v2', 'cu-v9', 'cu-v11', 'cu-v6'], v1: ['cu-v8', 'cu-v10', 'cu-v3', 'cu-v12'] },
+  'script-writing': { v0: ['sw-v1', 'sw-v3', 'sw-v5', 'sw-v8', 'sw-v11', 'sw-v13'], v1: ['sw-v10', 'sw-v12', 'sw-v16', 'sw-v18', 'sw-v9'] },
+  'production-recording': { v0: ['pr-v1', 'pr-v7', 'pr-v10', 'pr-v12', 'pr-v13'], v1: ['pr-v2', 'pr-v4', 'pr-v5', 'pr-v11', 'pr-v14'] },
+  'processing': { v0: ['pc-v1', 'pc-v2', 'pc-v5', 'pc-v7', 'pc-v14', 'pc-v15'], v1: ['pc-v4', 'pc-v6', 'pc-v10', 'pc-v11', 'pc-v18'] },
+  'distribution': { v0: ['di-v1', 'di-v2', 'di-v3', 'di-v5', 'di-v6', 'di-v9'], v1: ['di-v4', 'di-v7', 'di-v8', 'di-v10', 'di-v15', 'di-v23'] },
+  'growth-loop': { v0: ['gl-v1', 'gl-v3', 'gl-v11', 'gl-v12', 'gl-v24'], v1: ['gl-v2', 'gl-v6', 'gl-v7', 'gl-v8', 'gl-v14', 'gl-v21'] }
+};
+
+const FIGJAM_FLOW_PRESENTATION = {
+  'content-sources': { v0: ['cs-v1', 'cs-v5'], v1: ['cs-v4'] },
+  'curation': { v0: ['cu-v3', 'cu-v4', 'cu-v9', 'cu-v11'], v1: ['cu-v2', 'cu-v10', 'cu-v12'] },
+  'script-writing': { v0: ['sw-v1', 'sw-v3', 'sw-v5', 'sw-v7', 'sw-v11', 'sw-v14', 'sw-v16', 'sw-v13'], v1: ['sw-v2', 'sw-v4', 'sw-v9', 'sw-v10', 'sw-v12', 'sw-v15', 'sw-v17'] },
+  'production-recording': { v0: ['pr-v1', 'pr-v2', 'pr-v3', 'pr-v7', 'pr-v8', 'pr-v9', 'pr-v10', 'pr-v12', 'pr-v14'], v1: ['pr-v4', 'pr-v5', 'pr-v6'] },
+  'processing': { v0: ['pc-v1', 'pc-v5', 'pc-v9', 'pc-v13', 'pc-v14', 'pc-v15', 'pc-v16'], v1: ['pc-v2', 'pc-v3', 'pc-v4', 'pc-v6', 'pc-v8', 'pc-v10', 'pc-v11'] },
+  'distribution': { v0: ['di-v1', 'di-v2', 'di-v4', 'di-v9', 'di-v10', 'di-v14', 'di-v19'], v1: ['di-v3', 'di-v5', 'di-v6', 'di-v8', 'di-v11', 'di-v12', 'di-v13', 'di-v16', 'di-v17', 'di-v22'] },
+  'growth-loop': { v0: ['gl-v1', 'gl-v17'], v1: ['gl-v2', 'gl-v4', 'gl-v5', 'gl-v6', 'gl-v8', 'gl-v14', 'gl-v15', 'gl-v18', 'gl-v25'] }
+};
+
+// Initialize FLOW_PRESENTATION to FigJam (default view)
+FLOW_PRESENTATION = FIGJAM_FLOW_PRESENTATION;
 
 function initState() {
   MODULES.forEach(m => {
     m.axes.forEach(a => {
       a.verticals.forEach(v => {
-        state[v.id] = v.defaultPhase === 'v0' ? 'v0' : (v.defaultPhase === 'v1' ? 'v1' : 'none');
+        if (v.defaultPhase === 'v0') state[v.id] = 'v0';
+        else if (v.defaultPhase === 'v1') state[v.id] = 'v1';
+        else if (v.defaultPhase === 'skip' || v.defaultPhase === 'archive') state[v.id] = 'skip';
+        else state[v.id] = 'none';
       });
     });
   });
 }
 initState();
 loadSavedState();
+
+let currentView = 'figjam';
+
+function switchView(view) {
+  currentView = view;
+  const phases = view === 'original' ? ORIGINAL_PHASES : FIGJAM_PHASES;
+  FLOW_PRESENTATION = view === 'original' ? ORIGINAL_FLOW_PRESENTATION : FIGJAM_FLOW_PRESENTATION;
+
+  // Update defaultPhase on each vertical for display
+  MODULES.forEach(m => m.axes.forEach(a => a.verticals.forEach(v => {
+    if (phases[v.id]) v.defaultPhase = phases[v.id];
+  })));
+
+  // Apply phases to state
+  Object.keys(phases).forEach(id => {
+    const p = phases[id];
+    if (p === 'v0') state[id] = 'v0';
+    else if (p === 'v1') state[id] = 'v1';
+    else if (p === 'skip' || p === 'archive') state[id] = 'skip';
+    else state[id] = 'none';
+  });
+
+  // Update toggle UI
+  document.getElementById('tog-original').classList.toggle('active', view === 'original');
+  document.getElementById('tog-figjam').classList.toggle('active', view === 'figjam');
+
+  updateChangeSummary();
+  localStorage.removeItem('pipeline-state');
+  renderAll();
+}
+
+function updateChangeSummary() {
+  let promoted = 0, demoted = 0, archived = 0, skipped = 0;
+  const phaseOrder = { 'v0': 0, 'v1': 1, 'v2': 2, 'future': 3, 'archive': 4, 'skip': 5 };
+
+  Object.keys(ORIGINAL_PHASES).forEach(id => {
+    const orig = ORIGINAL_PHASES[id];
+    const fig = FIGJAM_PHASES[id];
+    if (!fig || orig === fig) return;
+    if (fig === 'archive') archived++;
+    else if (fig === 'skip') skipped++;
+    else if (phaseOrder[fig] < phaseOrder[orig]) promoted++;
+    else demoted++;
+  });
+
+  // Count new items in FIGJAM not in ORIGINAL
+  Object.keys(FIGJAM_PHASES).forEach(id => {
+    if (!ORIGINAL_PHASES[id]) promoted++;
+  });
+
+  const el = document.getElementById('change-summary');
+  if (el) {
+    el.textContent = `Meeting #14 changes: ${promoted} promoted · ${demoted} demoted · ${archived} archived · ${skipped} ruled out`;
+  }
+}
 
 const verticalLookup = new Map();
 MODULES.forEach(module => {
@@ -2193,7 +2363,10 @@ function resetState() {
   localStorage.removeItem('pipeline-state');
   Object.keys(state).forEach(k => { state[k] = 'none'; });
   MODULES.forEach(m => m.axes.forEach(a => a.verticals.forEach(v => {
-    state[v.id] = v.defaultPhase === 'v0' ? 'v0' : (v.defaultPhase === 'v1' ? 'v1' : 'none');
+    if (v.defaultPhase === 'v0') state[v.id] = 'v0';
+    else if (v.defaultPhase === 'v1') state[v.id] = 'v1';
+    else if (v.defaultPhase === 'skip' || v.defaultPhase === 'archive') state[v.id] = 'skip';
+    else state[v.id] = 'none';
   })));
   renderAll();
 }
@@ -2376,6 +2549,7 @@ function renderAll() {
   applyFilter();
 }
 renderAll();
+updateChangeSummary();
 </script>
 </body>
 </html>
