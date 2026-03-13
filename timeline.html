@@ -213,15 +213,15 @@ html[data-theme='light'] .theme-toggle .icon-moon { opacity: 0.4; }
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 0 2rem;
+  padding: 0 3rem;
   margin-bottom: 2.5rem;
 }
 .timeline-line {
   position: absolute;
-  top: 22px;
-  left: 2rem;
-  right: 2rem;
-  height: 3px;
+  top: 30px;
+  left: 3rem;
+  right: 3rem;
+  height: 4px;
   border-radius: 2px;
   z-index: 0;
 }
@@ -239,43 +239,58 @@ html[data-theme='light'] .theme-toggle .icon-moon { opacity: 0.4; }
   align-items: center;
   cursor: pointer;
   flex: 1;
-  transition: transform 0.2s ease;
+  transition: all 0.25s ease;
 }
-.timeline-node:hover { transform: translateY(-2px); }
+.timeline-node:hover { transform: translateY(-3px); }
 .node-circle {
-  width: 44px;
-  height: 44px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
-  border: 3px solid;
-  background: var(--bg);
-  transition: all 0.25s ease;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #fff;
+  border: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
 }
 .timeline-node.active .node-circle {
-  transform: scale(1.15);
-  box-shadow: 0 6px 24px rgba(0,0,0,0.25);
+  transform: scale(1.12);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+.timeline-node:not(.active) .node-circle {
+  opacity: 0.55;
+  filter: saturate(0.6);
+}
+.timeline-node:hover:not(.active) .node-circle {
+  opacity: 0.8;
+  filter: saturate(0.85);
 }
 .node-label {
-  margin-top: 0.6rem;
-  font-size: 0.72rem;
-  font-weight: 600;
+  margin-top: 0.75rem;
+  font-family: 'DM Serif Display', serif;
+  font-size: 0.95rem;
+  font-weight: 400;
   text-align: center;
   color: var(--text-dim);
-  max-width: 100px;
-  line-height: 1.3;
-  transition: color 0.2s ease;
+  max-width: 140px;
+  line-height: 1.2;
+  transition: color 0.25s ease;
 }
-.timeline-node.active .node-label { color: var(--text); }
+.timeline-node.active .node-label {
+  color: var(--text);
+}
 .node-number {
-  font-size: 0.6rem;
-  font-weight: 700;
+  font-size: 0.68rem;
+  font-weight: 600;
   color: var(--text-muted);
-  margin-top: 0.15rem;
+  margin-top: 0.2rem;
+  letter-spacing: 0.03em;
 }
+.timeline-node.active .node-number { color: var(--text-light); }
 
 /* ── Stage Card (Desktop) ── */
 .stage-cards-container {
@@ -394,14 +409,14 @@ html[data-theme='light'] .theme-toggle .icon-moon { opacity: 0.4; }
 }
 
 /* ── Color classes ── */
-.color-input .node-circle { border-color: var(--stage-input); color: var(--stage-input); }
-.color-input.active .node-circle { background: rgba(59,130,246,0.12); }
-.color-creation .node-circle { border-color: var(--stage-creation); color: var(--stage-creation); }
-.color-creation.active .node-circle { background: rgba(168,85,247,0.12); }
-.color-output .node-circle { border-color: var(--stage-output); color: var(--stage-output); }
-.color-output.active .node-circle { background: rgba(34,197,94,0.12); }
-.color-growth .node-circle { border-color: var(--stage-growth); color: var(--stage-growth); }
-.color-growth.active .node-circle { background: rgba(234,179,8,0.12); }
+.color-input .node-circle { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+.color-input.active .node-circle { box-shadow: 0 8px 32px rgba(59,130,246,0.4); }
+.color-creation .node-circle { background: linear-gradient(135deg, #a855f7, #7c3aed); }
+.color-creation.active .node-circle { box-shadow: 0 8px 32px rgba(168,85,247,0.4); }
+.color-output .node-circle { background: linear-gradient(135deg, #22c55e, #16a34a); }
+.color-output.active .node-circle { box-shadow: 0 8px 32px rgba(34,197,94,0.4); }
+.color-growth .node-circle { background: linear-gradient(135deg, #eab308, #ca8a04); }
+.color-growth.active .node-circle { box-shadow: 0 8px 32px rgba(234,179,8,0.4); }
 
 .phase-input { background: rgba(59,130,246,0.1); color: var(--stage-input); }
 .phase-creation { background: rgba(168,85,247,0.1); color: var(--stage-creation); }
@@ -423,7 +438,13 @@ html[data-theme='light'] .theme-toggle .icon-moon { opacity: 0.4; }
   .timeline-track { display: none; }
   .stage-cards-container { display: none; }
   .mobile-timeline { display: block; }
-  .header-title h1 { font-size: 1rem; }
+  .header-title h1 { font-size: 0.95rem; }
+  .header-subtitle { font-size: 0.65rem; }
+  .back-link { font-size: 0.75rem; padding: 0.3rem 0.55rem; }
+  .theme-toggle { width: 62px; height: 34px; }
+  .theme-toggle-thumb { width: 25px; height: 25px; }
+  html[data-theme='light'] .theme-toggle-thumb { transform: translateX(28px); }
+  .main-content { padding: 1.2rem 0.8rem 3rem; }
 }
 @media (min-width: 769px) {
   .mobile-timeline { display: none; }
@@ -435,15 +456,15 @@ html[data-theme='light'] .theme-toggle .icon-moon { opacity: 0.4; }
 }
 .mobile-stage {
   position: relative;
-  padding-left: 3rem;
-  padding-bottom: 2rem;
+  padding-left: 3.5rem;
+  padding-bottom: 1.2rem;
 }
 .mobile-stage:last-child { padding-bottom: 0; }
 .mobile-stage::before {
   content: '';
   position: absolute;
-  left: 19px;
-  top: 44px;
+  left: 20px;
+  top: 46px;
   bottom: 0;
   width: 2px;
 }
@@ -455,30 +476,32 @@ html[data-theme='light'] .theme-toggle .icon-moon { opacity: 0.4; }
 
 .mobile-node {
   position: absolute;
-  left: 4px;
+  left: 2px;
   top: 0;
-  width: 34px;
-  height: 34px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1rem;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
   border: 2.5px solid;
   background: var(--bg);
   z-index: 1;
 }
-.mobile-stage.color-input .mobile-node { border-color: var(--stage-input); }
-.mobile-stage.color-creation .mobile-node { border-color: var(--stage-creation); }
-.mobile-stage.color-output .mobile-node { border-color: var(--stage-output); }
-.mobile-stage.color-growth .mobile-node { border-color: var(--stage-growth); }
+.mobile-stage.color-input .mobile-node { border-color: var(--stage-input); color: var(--stage-input); }
+.mobile-stage.color-creation .mobile-node { border-color: var(--stage-creation); color: var(--stage-creation); }
+.mobile-stage.color-output .mobile-node { border-color: var(--stage-output); color: var(--stage-output); }
+.mobile-stage.color-growth .mobile-node { border-color: var(--stage-growth); color: var(--stage-growth); }
 
 .mobile-stage-header {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 0.5rem;
-  margin-bottom: 0.75rem;
-  padding-top: 0.25rem;
+  margin-bottom: 0.8rem;
+  padding-top: 0.35rem;
 }
 .mobile-stage-title {
   font-family: 'DM Serif Display', serif;
@@ -486,22 +509,52 @@ html[data-theme='light'] .theme-toggle .icon-moon { opacity: 0.4; }
   font-weight: 400;
 }
 .mobile-stage-num {
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   font-weight: 700;
   color: var(--text-muted);
 }
-.mobile-axis-group { margin-bottom: 0.75rem; }
+.mobile-axis-group { margin-bottom: 0.5rem; }
 .mobile-axis-group:last-child { margin-bottom: 0; }
-.mobile-v-items { display: flex; flex-direction: column; gap: 0.4rem; }
+.mobile-v-items { display: flex; flex-direction: column; gap: 0.3rem; }
 .mobile-v-pill {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.45rem;
-  padding: 0.55rem 0.75rem;
+  padding: 0.45rem 0.7rem;
   background: var(--pill-bg);
   border: 1px solid var(--pill-border);
-  border-radius: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s ease;
+  flex-wrap: wrap;
 }
+.mobile-v-pill:active { background: var(--surface-hover); }
+.mobile-v-pill .v-id { font-size: 0.68rem; padding: 0.12rem 0.4rem; }
+.mobile-v-pill .v-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+}
+.mobile-v-pill .v-detail {
+  display: none;
+  width: 100%;
+  font-size: 0.76rem;
+  color: var(--text-dim);
+  line-height: 1.4;
+  padding-top: 0.25rem;
+  padding-left: 0.05rem;
+}
+.mobile-v-pill.expanded .v-detail { display: block; }
+.mobile-v-pill .v-chevron {
+  margin-left: auto;
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+.mobile-v-pill.expanded .v-chevron { transform: rotate(90deg); }
 
 /* ── Footer ── */
 .footer-note {
@@ -529,7 +582,7 @@ html[data-theme='light'] ::-webkit-scrollbar-thumb { background: rgba(148,163,18
         Pipeline
       </a>
       <div class="header-title">
-        <h1>V0 Build Plan &mdash; 7 Weeks</h1>
+        <h1>V0 Build Plan &mdash; 4 Weeks</h1>
         <span class="header-subtitle">Fasten Your Seatbelt: Politics, Tech &amp; Interesting Stuff</span>
       </div>
     </div>
@@ -564,256 +617,291 @@ html[data-theme='light'] ::-webkit-scrollbar-thumb { background: rgba(148,163,18
 <div class="footer-note">Radical Concepts &mdash; Built for Brett Moore</div>
 
 <script>
-const STAGES = [
+// ── 4-Week Build Plan grouped by phase ──
+const WEEKS = [
   {
-    id: 1, name: 'Content Sources', icon: '\u{1F4E1}', phase: 'input', color: 'input',
-    axes: null,
-    items: [
-      { v: 'V1', title: 'Passive/Automated Ingestion', desc: '928 RSS feeds + news APIs, zero Brett effort' },
-      { v: 'V2', title: "Brett's Active Sharing", desc: 'Forward interesting links to a WhatsApp bot' },
-      { v: 'V5', title: 'Newsletter Forwarding', desc: 'Auto-forward subscribed newsletters (one-time setup)' }
+    id: 1, label: 'Week 1', phase: 'Input', color: 'input', icon: 'IN',
+    summary: 'Content ingestion + AI curation pipeline',
+    modules: [
+      {
+        name: 'Content Sources', icon: 'SRC',
+        axes: null,
+        items: [
+          { v: 'V1', title: 'Passive/Automated Ingestion', desc: '928 RSS feeds + news APIs, zero Brett effort' },
+          { v: 'V2', title: "Brett's Active Sharing", desc: 'Forward interesting links to a WhatsApp bot' },
+          { v: 'V5', title: 'Newsletter Forwarding', desc: 'Auto-forward subscribed newsletters (one-time setup)' }
+        ]
+      },
+      {
+        name: 'Curation', icon: 'CUR',
+        axes: [
+          { name: 'Filtering', items: [
+            { v: 'V3', title: 'Trend/Novelty Detection', desc: 'Detects stories gaining momentum before they peak' },
+            { v: 'V4', title: 'Cross-Domain Synthesis', desc: 'AI finds connections across geopolitics + science + economics' }
+          ]},
+          { name: 'Presentation', items: [
+            { v: 'V9', title: 'Binary Swipe (Tinder-Style)', desc: 'One story at a time, swipe right = include, left = skip' }
+          ]},
+          { name: 'Timing', items: [
+            { v: 'V11', title: 'Morning Batch', desc: 'One curation session per day at 7am' }
+          ]}
+        ]
+      }
     ]
   },
   {
-    id: 2, name: 'Curation', icon: '\u{1F9F9}', phase: 'input', color: 'input',
-    axes: [
-      { name: 'Filtering', items: [
-        { v: 'V3', title: 'Trend/Novelty Detection', desc: 'Detects stories gaining momentum before they peak' },
-        { v: 'V4', title: 'Cross-Domain Synthesis', desc: 'AI finds connections across geopolitics + science + economics' }
-      ]},
-      { name: 'Presentation', items: [
-        { v: 'V9', title: 'Binary Swipe (Tinder-Style)', desc: 'One story at a time, swipe right = include, left = skip' }
-      ]},
-      { name: 'Timing', items: [
-        { v: 'V11', title: 'Morning Batch', desc: 'One curation session per day at 7am' }
-      ]}
+    id: 2, label: 'Week 2', phase: 'Creation', color: 'creation', icon: 'CR',
+    summary: 'AI script generation + recording workflow',
+    modules: [
+      {
+        name: 'Script Writing', icon: 'SCR',
+        axes: [
+          { name: 'Generation Method', items: [
+            { v: 'V1', title: "Full AI Draft in Brett's Voice", desc: "AI writes complete script in Brett's tone" },
+            { v: 'V5', title: 'Template-Based Generation', desc: 'Same episode structure, only content changes' }
+          ]},
+          { name: 'Script Depth', items: [
+            { v: 'V7', title: 'Word-for-Word Read-Ready', desc: 'Every sentence written out, Brett reads like a news anchor' }
+          ]},
+          { name: 'Voice/Tone Calibration', items: [
+            { v: 'V11', title: 'Persona Lite (Prompt-Based)', desc: 'Voice captured in prompt rules' },
+            { v: 'V13', title: 'Reference Library / Style Guide', desc: "Style guide from Brett's existing content" }
+          ]},
+          { name: 'Approval Flow', items: [
+            { v: 'V16', title: 'One-Tap Approve with Exceptions', desc: 'Approve or Flag, one tap default' }
+          ]}
+        ]
+      },
+      {
+        name: 'Production & Recording', icon: 'REC',
+        axes: [
+          { name: 'Voice Source', items: [
+            { v: 'V1', title: "100% Brett's Real Voice", desc: 'Maximum authenticity' },
+            { v: 'V2', title: 'Content-Type Split', desc: 'Brett for politics, AI voice for science/quirky' },
+            { v: 'V3', title: 'AI Voice Clone for Everything', desc: '2-3 hour voice corpus, AI generates everything' }
+          ]},
+          { name: 'Recording Format', items: [
+            { v: 'V8', title: 'Short Standalone Clips (5\u20137 min)', desc: 'Individual segments, one per topic' },
+            { v: 'V9', title: 'Audio-Only vs. Video', desc: 'Audio-only first, no camera' }
+          ]},
+          { name: 'Recording Support', items: [
+            { v: 'V10', title: 'Teleprompter/Script Display', desc: 'Script on phone/tablet while recording' },
+            { v: 'V12', title: 'One-Tap Recording Trigger', desc: 'WhatsApp message \u2192 tap \u2192 recording starts' },
+            { v: 'V14', title: "Fallback Content if Brett Doesn't Record", desc: 'AI episode / best-of / newsletter' }
+          ]}
+        ]
+      }
     ]
   },
   {
-    id: 3, name: 'Script Writing', icon: '\u{270D}\u{FE0F}', phase: 'creation', color: 'creation',
-    axes: [
-      { name: 'Generation Method', items: [
-        { v: 'V1', title: "Full AI Draft in Brett's Voice", desc: "AI writes complete script in Brett's tone" },
-        { v: 'V5', title: 'Template-Based Generation', desc: 'Same episode structure, only content changes' }
-      ]},
-      { name: 'Script Depth', items: [
-        { v: 'V7', title: 'Word-for-Word Read-Ready', desc: 'Every sentence written out, Brett reads like a news anchor' }
-      ]},
-      { name: 'Voice/Tone Calibration', items: [
-        { v: 'V11', title: 'Persona Lite (Prompt-Based)', desc: 'Voice captured in prompt rules' },
-        { v: 'V13', title: 'Reference Library / Style Guide', desc: "Style guide from Brett's existing content" }
-      ]},
-      { name: 'Approval Flow', items: [
-        { v: 'V16', title: 'One-Tap Approve with Exceptions', desc: 'Approve or Flag, one tap default' }
-      ]}
+    id: 3, label: 'Week 3', phase: 'Output', color: 'output', icon: 'OUT',
+    summary: 'Post-production + multi-platform distribution',
+    modules: [
+      {
+        name: 'Processing', icon: 'PRC',
+        axes: [
+          { name: 'Audio Processing', items: [
+            { v: 'V1', title: 'Basic Cleanup (Automated)', desc: 'Noise removal, filler words, volume levelling' }
+          ]},
+          { name: 'Content Multiplication', items: [
+            { v: 'V5', title: 'Auto-Clipping (Long \u2192 Short)', desc: 'AI extracts 3-4 best 60-90 sec moments' },
+            { v: 'V9', title: 'Compilation/Best-Of Assembly', desc: 'Auto-created weekly compilations' }
+          ]},
+          { name: 'Visual Processing', items: [
+            { v: 'V13', title: 'Brett on Camera', desc: 'Eventually add video, higher friction' }
+          ]},
+          { name: 'Quality Control', items: [
+            { v: 'V14', title: 'Automated Quality Scoring', desc: 'System scores each piece before distribution' },
+            { v: 'V15', title: 'Brett Final Approval Gate', desc: 'Summary + one-tap approve' },
+            { v: 'V16', title: 'No Approval (Full Auto)', desc: 'Everything passing quality score goes straight out' }
+          ]}
+        ]
+      },
+      {
+        name: 'Distribution', icon: 'DST',
+        axes: [
+          { name: 'Platform Selection', items: [
+            { v: 'V1', title: 'Podcast RSS (Spotify + Apple)', desc: 'Fully passive after setup' },
+            { v: 'V2', title: 'YouTube (Long-Form + Shorts)', desc: '#1 discovery platform + monetization' },
+            { v: 'V4', title: 'TikTok + Instagram Reels', desc: 'Short clips for discovery' }
+          ]},
+          { name: 'Publishing Strategy', items: [
+            { v: 'V9', title: 'Automated Scheduling', desc: "Week's content scheduled in advance" },
+            { v: 'V10', title: 'Platform-Optimized Timing', desc: 'LinkedIn 8am, TikTok 7pm' }
+          ]},
+          { name: 'Platform Adaptation', items: [
+            { v: 'V14', title: 'One-Size-Fits-All', desc: 'Same clip to all platforms, simple' }
+          ]},
+          { name: 'Publishing Infrastructure', items: [
+            { v: 'V19', title: 'Existing Automation Tools', desc: "Podbean, TubeBuddy, Buffer \u2014 don't rebuild what exists" }
+          ]}
+        ]
+      }
     ]
   },
   {
-    id: 4, name: 'Production & Recording', icon: '\u{1F3A4}', phase: 'creation', color: 'creation',
-    axes: [
-      { name: 'Voice Source', items: [
-        { v: 'V1', title: "100% Brett's Real Voice", desc: 'Maximum authenticity' },
-        { v: 'V2', title: 'Content-Type Split', desc: 'Brett for politics, AI voice for science/quirky' },
-        { v: 'V3', title: 'AI Voice Clone for Everything', desc: '2-3 hour voice corpus, AI generates everything' }
-      ]},
-      { name: 'Recording Format', items: [
-        { v: 'V8', title: 'Short Standalone Clips (5\u20137 min)', desc: 'Individual segments, one per topic' },
-        { v: 'V9', title: 'Audio-Only vs. Video', desc: 'Audio-only first, no camera' }
-      ]},
-      { name: 'Recording Support', items: [
-        { v: 'V10', title: 'Teleprompter/Script Display', desc: 'Script on phone/tablet while recording' },
-        { v: 'V12', title: 'One-Tap Recording Trigger', desc: 'WhatsApp message \u2192 tap \u2192 recording starts' },
-        { v: 'V14', title: "Fallback Content if Brett Doesn't Record", desc: 'AI episode / best-of / newsletter' }
-      ]}
-    ]
-  },
-  {
-    id: 5, name: 'Processing', icon: '\u{2699}\u{FE0F}', phase: 'output', color: 'output',
-    axes: [
-      { name: 'Audio Processing', items: [
-        { v: 'V1', title: 'Basic Cleanup (Automated)', desc: 'Noise removal, filler words, volume levelling' }
-      ]},
-      { name: 'Content Multiplication', items: [
-        { v: 'V5', title: 'Auto-Clipping (Long \u2192 Short)', desc: 'AI extracts 3-4 best 60-90 sec moments' },
-        { v: 'V9', title: 'Compilation/Best-Of Assembly', desc: 'Auto-created weekly compilations' }
-      ]},
-      { name: 'Visual Processing', items: [
-        { v: 'V13', title: 'Brett on Camera', desc: 'Eventually add video, higher friction' }
-      ]},
-      { name: 'Quality Control', items: [
-        { v: 'V14', title: 'Automated Quality Scoring', desc: 'System scores each piece before distribution' },
-        { v: 'V15', title: 'Brett Final Approval Gate', desc: 'Summary + one-tap approve' },
-        { v: 'V16', title: 'No Approval (Full Auto)', desc: 'Everything passing quality score goes straight out' }
-      ]}
-    ]
-  },
-  {
-    id: 6, name: 'Distribution', icon: '\u{1F4E4}', phase: 'output', color: 'output',
-    axes: [
-      { name: 'Platform Selection', items: [
-        { v: 'V1', title: 'Podcast RSS (Spotify + Apple)', desc: 'Fully passive after setup' },
-        { v: 'V2', title: 'YouTube (Long-Form + Shorts)', desc: '#1 discovery platform + monetization' },
-        { v: 'V4', title: 'TikTok + Instagram Reels', desc: 'Short clips for discovery' }
-      ]},
-      { name: 'Publishing Strategy', items: [
-        { v: 'V9', title: 'Automated Scheduling', desc: "Week's content scheduled in advance" },
-        { v: 'V10', title: 'Platform-Optimized Timing', desc: 'LinkedIn 8am, TikTok 7pm' }
-      ]},
-      { name: 'Platform Adaptation', items: [
-        { v: 'V14', title: 'One-Size-Fits-All', desc: 'Same clip to all platforms, simple' }
-      ]},
-      { name: 'Publishing Infrastructure', items: [
-        { v: 'V19', title: 'Existing Automation Tools', desc: "Podbean, TubeBuddy, Buffer \u2014 don't rebuild what exists" }
-      ]}
-    ]
-  },
-  {
-    id: 7, name: 'Growth Loop', icon: '\u{1F504}', phase: 'growth', color: 'growth',
-    axes: [
-      { name: 'Analytics', items: [
-        { v: 'V1', title: 'Content Performance Metrics', desc: 'Plays, completion rate, shares, conversions' }
-      ]},
-      { name: 'Community', items: [
-        { v: 'V17', title: 'Comment/Reply Management', desc: 'Aggregate all platform comments, AI drafts replies' }
-      ]}
+    id: 4, label: 'Week 4', phase: 'Growth', color: 'growth', icon: 'GRW',
+    summary: 'Analytics, feedback loops + first live episode',
+    modules: [
+      {
+        name: 'Growth Loop', icon: 'GRW',
+        axes: [
+          { name: 'Analytics', items: [
+            { v: 'V1', title: 'Content Performance Metrics', desc: 'Plays, completion rate, shares, conversions' }
+          ]},
+          { name: 'Community', items: [
+            { v: 'V17', title: 'Comment/Reply Management', desc: 'Aggregate all platform comments, AI drafts replies' }
+          ]}
+        ]
+      }
     ]
   }
 ];
-
-const PHASE_LABELS = { input: 'Input', creation: 'Creation', output: 'Output', growth: 'Growth' };
 
 // ── Render Desktop Timeline ──
 function renderDesktopTimeline() {
   const track = document.getElementById('timelineTrack');
   const cardsEl = document.getElementById('stageCards');
-
-  // Build colored line segments
   const lineEl = document.getElementById('timelineLine');
   lineEl.style.background = 'var(--border)';
-  const segCount = STAGES.length - 1;
+
+  const colors = { input: 'var(--stage-input)', creation: 'var(--stage-creation)', output: 'var(--stage-output)', growth: 'var(--stage-growth)' };
+  const segCount = WEEKS.length - 1;
   for (let i = 0; i < segCount; i++) {
     const seg = document.createElement('div');
     seg.className = 'timeline-line-segment';
-    const colors = { input: 'var(--stage-input)', creation: 'var(--stage-creation)', output: 'var(--stage-output)', growth: 'var(--stage-growth)' };
     seg.style.left = `${(i / segCount) * 100}%`;
     seg.style.width = `${(1 / segCount) * 100}%`;
-    seg.style.background = colors[STAGES[i].color];
+    seg.style.background = colors[WEEKS[i].color];
     seg.style.opacity = '0.4';
     lineEl.appendChild(seg);
   }
 
-  // Build nodes
-  STAGES.forEach((stage, idx) => {
+  WEEKS.forEach((week, idx) => {
     const node = document.createElement('div');
-    node.className = `timeline-node color-${stage.color}`;
+    node.className = `timeline-node color-${week.color}`;
     if (idx === 0) node.classList.add('active');
     node.dataset.index = idx;
     node.innerHTML = `
-      <div class="node-circle">${stage.icon}</div>
-      <span class="node-label">${stage.name}</span>
-      <span class="node-number">Week ${stage.id}</span>
+      <div class="node-circle">${week.icon}</div>
+      <span class="node-label">${week.phase}</span>
+      <span class="node-number">${week.label}</span>
     `;
-    node.addEventListener('click', () => activateStage(idx));
+    node.addEventListener('click', () => activateWeek(idx));
     track.appendChild(node);
   });
 
-  // Build cards
-  STAGES.forEach((stage, idx) => {
+  WEEKS.forEach((week, idx) => {
     const card = document.createElement('div');
     card.className = `stage-card${idx === 0 ? ' active' : ''}`;
     card.dataset.index = idx;
 
-    const itemCount = stage.axes
-      ? stage.axes.reduce((sum, a) => sum + a.items.length, 0)
-      : stage.items.length;
+    let totalItems = 0;
+    week.modules.forEach(m => {
+      totalItems += m.axes ? m.axes.reduce((s, a) => s + a.items.length, 0) : m.items.length;
+    });
 
     let inner = `
       <div class="stage-card-header">
-        <div class="stage-card-icon icon-bg-${stage.color}">${stage.icon}</div>
-        <span class="stage-card-title">${stage.name}</span>
-        <span class="stage-card-phase phase-${stage.color}">${PHASE_LABELS[stage.color]} &middot; ${itemCount} items</span>
+        <div class="stage-card-icon icon-bg-${week.color}">${week.icon}</div>
+        <span class="stage-card-title">${week.label}: ${week.phase}</span>
+        <span class="stage-card-phase phase-${week.color}">${totalItems} items</span>
       </div>
+      <div style="font-size:0.82rem;color:var(--text-dim);margin-bottom:1.2rem;">${week.summary}</div>
     `;
 
-    if (stage.axes) {
-      stage.axes.forEach(axis => {
-        inner += `<div class="axis-group">
-          <div class="axis-label">${axis.name}</div>
-          <div class="v-items">
-            ${axis.items.map(it => `
-              <div class="v-pill">
-                <span class="v-id vid-${stage.color}">${it.v}</span>
-                <span class="v-desc"><strong>${it.title}</strong> &mdash; ${it.desc}</span>
-              </div>
-            `).join('')}
-          </div>
+    week.modules.forEach(mod => {
+      inner += `<div style="margin-bottom:1rem;">
+        <div style="font-size:0.85rem;font-weight:700;color:var(--text);margin-bottom:0.5rem;display:flex;align-items:center;gap:0.4rem;">
+          <span style="font-size:0.65rem;font-weight:800;padding:0.15rem 0.4rem;border-radius:4px;background:rgba(255,255,255,0.06);border:1px solid var(--border);">${mod.icon}</span>
+          ${mod.name}
         </div>`;
-      });
-    } else {
-      inner += `<div class="direct-items v-items">
-        ${stage.items.map(it => `
-          <div class="v-pill">
-            <span class="v-id vid-${stage.color}">${it.v}</span>
-            <span class="v-desc"><strong>${it.title}</strong> &mdash; ${it.desc}</span>
-          </div>
-        `).join('')}
-      </div>`;
-    }
+
+      if (mod.axes) {
+        mod.axes.forEach(axis => {
+          inner += `<div class="axis-group">
+            <div class="axis-label">${axis.name}</div>
+            <div class="v-items">
+              ${axis.items.map(it => `
+                <div class="v-pill">
+                  <span class="v-id vid-${week.color}">${it.v}</span>
+                  <span class="v-desc"><strong>${it.title}</strong> &mdash; ${it.desc}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>`;
+        });
+      } else {
+        inner += `<div class="direct-items v-items">
+          ${mod.items.map(it => `
+            <div class="v-pill">
+              <span class="v-id vid-${week.color}">${it.v}</span>
+              <span class="v-desc"><strong>${it.title}</strong> &mdash; ${it.desc}</span>
+            </div>
+          `).join('')}
+        </div>`;
+      }
+      inner += `</div>`;
+    });
 
     card.innerHTML = inner;
     cardsEl.appendChild(card);
   });
 }
 
-function activateStage(idx) {
-  document.querySelectorAll('.timeline-node').forEach((n, i) => {
-    n.classList.toggle('active', i === idx);
-  });
-  document.querySelectorAll('.stage-card').forEach((c, i) => {
-    c.classList.toggle('active', i === idx);
-  });
+function activateWeek(idx) {
+  document.querySelectorAll('.timeline-node').forEach((n, i) => n.classList.toggle('active', i === idx));
+  document.querySelectorAll('.stage-card').forEach((c, i) => c.classList.toggle('active', i === idx));
 }
 
 // ── Render Mobile Timeline ──
 function renderMobileTimeline() {
   const container = document.getElementById('mobileTimeline');
 
-  STAGES.forEach(stage => {
+  WEEKS.forEach(week => {
     const section = document.createElement('div');
-    section.className = `mobile-stage color-${stage.color}`;
+    section.className = `mobile-stage color-${week.color}`;
 
     let inner = `
-      <div class="mobile-node">${stage.icon}</div>
+      <div class="mobile-node">${week.icon}</div>
       <div class="mobile-stage-header">
-        <span class="mobile-stage-title">${stage.name}</span>
-        <span class="mobile-stage-num">Week ${stage.id}</span>
+        <span class="mobile-stage-title">${week.phase}</span>
+        <span class="mobile-stage-num">${week.label}</span>
       </div>
+      <div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:0.5rem;">${week.summary}</div>
     `;
 
-    if (stage.axes) {
-      stage.axes.forEach(axis => {
-        inner += `<div class="mobile-axis-group">
-          <div class="axis-label">${axis.name}</div>
-          <div class="mobile-v-items">
-            ${axis.items.map(it => `
-              <div class="mobile-v-pill v-pill">
-                <span class="v-id vid-${stage.color}">${it.v}</span>
-                <span class="v-desc"><strong>${it.title}</strong> &mdash; ${it.desc}</span>
-              </div>
-            `).join('')}
-          </div>
-        </div>`;
-      });
-    } else {
-      inner += `<div class="mobile-v-items">
-        ${stage.items.map(it => `
-          <div class="mobile-v-pill v-pill">
-            <span class="v-id vid-${stage.color}">${it.v}</span>
-            <span class="v-desc"><strong>${it.title}</strong> &mdash; ${it.desc}</span>
-          </div>
-        `).join('')}
+    const renderMobilePill = (it, color) => `
+      <div class="mobile-v-pill" onclick="this.classList.toggle('expanded')">
+        <span class="v-id vid-${color}">${it.v}</span>
+        <span class="v-title">${it.title}</span>
+        <span class="v-chevron">\u25B6</span>
+        <span class="v-detail">${it.desc}</span>
       </div>`;
-    }
+
+    week.modules.forEach(mod => {
+      inner += `<div style="margin-bottom:0.5rem;">
+        <div style="font-size:0.75rem;font-weight:700;color:var(--text);margin-bottom:0.3rem;display:flex;align-items:center;gap:0.35rem;">
+          <span style="font-size:0.58rem;font-weight:800;padding:0.1rem 0.3rem;border-radius:4px;background:rgba(255,255,255,0.06);border:1px solid var(--border);">${mod.icon}</span>
+          ${mod.name}
+        </div>`;
+
+      if (mod.axes) {
+        mod.axes.forEach(axis => {
+          inner += `<div class="mobile-axis-group">
+            <div class="axis-label">${axis.name}</div>
+            <div class="mobile-v-items">
+              ${axis.items.map(it => renderMobilePill(it, week.color)).join('')}
+            </div>
+          </div>`;
+        });
+      } else {
+        inner += `<div class="mobile-v-items">
+          ${mod.items.map(it => renderMobilePill(it, week.color)).join('')}
+        </div>`;
+      }
+      inner += `</div>`;
+    });
 
     section.innerHTML = inner;
     container.appendChild(section);
