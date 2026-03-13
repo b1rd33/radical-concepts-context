@@ -725,7 +725,7 @@ const WEEKS = [
   {
     id: 3, label: 'Week 3', phase: 'Output', color: 'output', icon: '3',
     phases: ['output'],
-    summary: 'Post-production automation + distribution channels setup',
+    summary: 'Post-production automation — audio cleanup, clipping, compilation',
     modules: [
       {
         name: 'Processing', icon: 'PRC', color: 'output',
@@ -739,24 +739,6 @@ const WEEKS = [
           ]},
           { name: 'Visual Processing', items: [
             { v: 'V13', title: 'Brett on Camera', desc: 'Eventually add video, higher friction' }
-          ]},
-          { name: 'Quality Control', items: [
-            { v: 'V14', title: 'Automated Quality Scoring', desc: 'System scores each piece before distribution' },
-            { v: 'V15', title: 'Brett Final Approval Gate', desc: 'Summary + one-tap approve' },
-            { v: 'V16', title: 'No Approval (Full Auto)', desc: 'Everything passing quality score goes straight out' }
-          ]}
-        ]
-      },
-      {
-        name: 'Distribution', icon: 'DST', color: 'output', tag: 'Setup',
-        axes: [
-          { name: 'Platform Selection', items: [
-            { v: 'V1', title: 'Podcast RSS (Spotify + Apple)', desc: 'Fully passive after setup' },
-            { v: 'V2', title: 'YouTube (Long-Form + Shorts)', desc: '#1 discovery platform + monetization' },
-            { v: 'V4', title: 'TikTok + Instagram Reels', desc: 'Short clips for discovery' }
-          ]},
-          { name: 'Publishing Infrastructure', items: [
-            { v: 'V19', title: 'Existing Automation Tools', desc: "Podbean, TubeBuddy, Buffer \u2014 don't rebuild what exists" }
           ]}
         ]
       }
@@ -765,17 +747,35 @@ const WEEKS = [
   {
     id: 4, label: 'Week 4', phase: 'Output + Growth', color: 'growth', icon: '4',
     phases: ['output', 'growth'],
-    summary: 'Go live \u2014 scheduling, analytics, first published episode',
+    summary: 'Quality gates, distribution setup + go live, analytics',
     modules: [
       {
-        name: 'Distribution', icon: 'DST', color: 'output', tag: 'Go Live',
+        name: 'Processing', icon: 'PRC', color: 'output', tag: 'QC',
         axes: [
+          { name: 'Quality Control', items: [
+            { v: 'V14', title: 'Automated Quality Scoring', desc: 'System scores each piece before distribution' },
+            { v: 'V15', title: 'Brett Final Approval Gate', desc: 'Summary + one-tap approve' },
+            { v: 'V16', title: 'No Approval (Full Auto)', desc: 'Everything passing quality score goes straight out' }
+          ]}
+        ]
+      },
+      {
+        name: 'Distribution', icon: 'DST', color: 'output',
+        axes: [
+          { name: 'Platform Selection', items: [
+            { v: 'V1', title: 'Podcast RSS (Spotify + Apple)', desc: 'Fully passive after setup' },
+            { v: 'V2', title: 'YouTube (Long-Form + Shorts)', desc: '#1 discovery platform + monetization' },
+            { v: 'V4', title: 'TikTok + Instagram Reels', desc: 'Short clips for discovery' }
+          ]},
           { name: 'Publishing Strategy', items: [
             { v: 'V9', title: 'Automated Scheduling', desc: "Week's content scheduled in advance" },
             { v: 'V10', title: 'Platform-Optimized Timing', desc: 'LinkedIn 8am, TikTok 7pm' }
           ]},
           { name: 'Platform Adaptation', items: [
             { v: 'V14', title: 'One-Size-Fits-All', desc: 'Same clip to all platforms, simple' }
+          ]},
+          { name: 'Publishing Infrastructure', items: [
+            { v: 'V19', title: 'Existing Automation Tools', desc: "Podbean, TubeBuddy, Buffer \u2014 don't rebuild what exists" }
           ]}
         ]
       },
