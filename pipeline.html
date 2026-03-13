@@ -1592,7 +1592,7 @@ const MODULES = [
           description: "This connects to the Persona Engine from the Modular Architecture doc. The system doesn\u2019t just match topics \u2014 it scores each article against Brett\u2019s editorial style, interests, and past preferences. \u201cWould Brett find this interesting?\u201d not just \u201cIs this about geopolitics?\u201d The Persona Engine was flagged as CRITICAL in the gap analysis. For V0, this could be a lightweight version: a set of rules and prompt blocks that define Brett\u2019s taste.",
           feasibilityNote: "Better, because Brett doesn\u2019t have to manage anything \u2014 the system learns him. But it needs training data to start.",
           reasoning: { rationale: "Core V0 pick. The Persona Engine was flagged as CRITICAL in the gap analysis \u2014 it\u2019s \u2018hidden everywhere, owned nowhere.\u2019 A lightweight V0 version (prompt-based rules defining Brett\u2019s taste) is achievable without a full ML system. This is the foundation every downstream module depends on.", effort: "Moderate setup (need to define Brett\u2019s editorial preferences as prompt rules), but near-zero maintenance once running. The system learns from usage, so it improves without manual intervention.", dependencies: "Initial training data from Brett\u2019s past selections. Persona Engine architecture (even lightweight prompt-based version). Hamid\u2019s RSS feed infrastructure." },
-          feasibilityScore: 4, defaultPhase: "v1"
+          feasibilityScore: 4, defaultPhase: "v0"
         },
         {
           id: "cu-v3", name: "V3: Trend/Novelty Detection",
