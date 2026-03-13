@@ -246,11 +246,19 @@ html[data-theme='light'] .theme-toggle .icon-moon { opacity: 0.4; }
   letter-spacing: 0.08em;
   margin-bottom: 0.15rem;
 }
-.step-phase {
-  font-family: 'DM Serif Display', serif;
-  font-size: 1.15rem;
-  font-weight: 400;
-  color: var(--text);
+.step-phases {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.1rem;
+}
+.step-phase-pill {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.18rem 0.55rem;
+  border-radius: 5px;
 }
 .step-modules {
   font-size: 0.68rem;
@@ -633,7 +641,8 @@ html[data-theme='light'] ::-webkit-scrollbar-thumb { background: rgba(148,163,18
 // ── 4-Week Build Plan grouped by phase ──
 const WEEKS = [
   {
-    id: 1, label: 'Week 1', phase: 'Foundation', color: 'input', icon: '1',
+    id: 1, label: 'Week 1', phase: 'Input + Creation', color: 'input', icon: '1',
+    phases: ['input', 'creation'],
     summary: 'Set up content ingestion, AI curation, and start script engine',
     modules: [
       {
@@ -677,6 +686,7 @@ const WEEKS = [
   },
   {
     id: 2, label: 'Week 2', phase: 'Creation', color: 'creation', icon: '2',
+    phases: ['creation'],
     summary: 'Finish script engine, build recording workflow + Brett voice setup',
     modules: [
       {
@@ -712,7 +722,8 @@ const WEEKS = [
     ]
   },
   {
-    id: 3, label: 'Week 3', phase: 'Pipeline', color: 'output', icon: '3',
+    id: 3, label: 'Week 3', phase: 'Output', color: 'output', icon: '3',
+    phases: ['output'],
     summary: 'Post-production automation + distribution channels setup',
     modules: [
       {
@@ -751,7 +762,8 @@ const WEEKS = [
     ]
   },
   {
-    id: 4, label: 'Week 4', phase: 'Launch', color: 'growth', icon: '4',
+    id: 4, label: 'Week 4', phase: 'Output + Growth', color: 'growth', icon: '4',
+    phases: ['output', 'growth'],
     summary: 'Go live \u2014 scheduling, analytics, first published episode',
     modules: [
       {
@@ -807,10 +819,14 @@ function renderDesktopTimeline() {
     node.dataset.index = idx;
 
     const moduleNames = week.modules.map(m => m.name).join(' + ');
+    const phaseLabels = { input: 'Input', creation: 'Creation', output: 'Output', growth: 'Growth' };
+    const phasePills = week.phases.map(p =>
+      `<span class="step-phase-pill phase-${p}">${phaseLabels[p]}</span>`
+    ).join('');
     node.innerHTML = `
       <div class="step-card">
         <div class="step-week">${week.label}</div>
-        <div class="step-phase">${week.phase}</div>
+        <div class="step-phases">${phasePills}</div>
         <div class="step-modules">${moduleNames}</div>
       </div>
     `;
@@ -897,11 +913,15 @@ function renderMobileTimeline() {
     const section = document.createElement('div');
     section.className = `mobile-stage color-${week.color}`;
 
+    const phaseLabels = { input: 'Input', creation: 'Creation', output: 'Output', growth: 'Growth' };
+    const mobilePhasePills = week.phases.map(p =>
+      `<span class="step-phase-pill phase-${p}" style="font-size:0.58rem;padding:0.12rem 0.4rem;">${phaseLabels[p]}</span>`
+    ).join('');
     let inner = `
       <div class="mobile-node">${week.id}</div>
       <div class="mobile-stage-header">
-        <span class="mobile-stage-title">${week.phase}</span>
-        <span class="mobile-stage-num">${week.label}</span>
+        <span class="mobile-stage-title">${week.label}</span>
+        <div style="display:flex;gap:0.25rem;">${mobilePhasePills}</div>
       </div>
       <div style="font-size:0.72rem;color:var(--text-dim);margin-bottom:0.4rem;">${week.summary}</div>
     `;
