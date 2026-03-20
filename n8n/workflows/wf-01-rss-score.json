@@ -11,7 +11,7 @@
     },
     {
       "parameters": {
-        "url": "https://feeds.bbci.co.uk/news/rss.xml ",
+        "url": "https://feeds.bbci.co.uk/news/rss.xml",
         "options": {}
       },
       "type": "n8n-nodes-base.rssFeedRead",
@@ -49,7 +49,8 @@
           "id": "k5u4E7DLyRpsGAB0",
           "name": "Supabase account"
         }
-      }
+      },
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -65,13 +66,13 @@
     },
     {
       "parameters": {
-        "batchSize": 3
+        "batchSize": 1
       },
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [-200, 96],
       "id": "a1b2c3d4-4444-4000-a000-000000000004",
-      "name": "Batch 3 at a Time"
+      "name": "Loop Articles"
     },
     {
       "parameters": {
@@ -84,8 +85,8 @@
               "value": "application/json"
             },
             {
-              "name": "Authorization",
-              "value": "Bearer jina_a811d82131fe4f10816452ae5b3db00dyMHYT-sknMYUF1OBl32x3ami5YLF"
+              "name": "X-Return-Format",
+              "value": "text"
             }
           ]
         },
@@ -95,12 +96,19 @@
       "typeVersion": 4.4,
       "position": [0, 96],
       "id": "245cf25a-3c20-480d-934c-af95be4dfb01",
-      "name": "HTTP Request"
+      "name": "Jina Extract",
+      "continueOnFail": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "JINA_CREDENTIAL_ID",
+          "name": "Jina API"
+        }
+      }
     },
     {
       "parameters": {
         "promptType": "define",
-        "text": "=Score this article on all 5 dimensions. Return this exact JSON structure:\n{\"relevance\": N, \"relevance_reason\": \"...\", \"novelty\": N, \"novelty_reason\": \"...\", \"cross_domain\": N, \"cross_domain_reason\": \"...\", \"storytelling\": N, \"storytelling_reason\": \"...\", \"controversy\": N, \"controversy_reason\": \"...\", \"composite\": N.NN, \"suggested_pillar\": \"geopolitics|science|tech|economics\", \"suggested_pair_with\": \"optional topic\"}\n\nArticle title: {{ $json.data.title }}\nArticle content: {{ $json.data.content }}",
+        "text": "=Score this article on all 5 dimensions. Return ONLY this exact JSON structure (no markdown, no code fences, no explanation):\n{\"relevance\": N, \"relevance_reason\": \"one sentence\", \"novelty\": N, \"novelty_reason\": \"one sentence\", \"cross_domain\": N, \"cross_domain_reason\": \"one sentence\", \"storytelling\": N, \"storytelling_reason\": \"one sentence\", \"controversy\": N, \"controversy_reason\": \"one sentence\", \"composite\": N.NN, \"suggested_pillar\": \"geopolitics|science|tech|economics|quirky\", \"suggested_pair_with\": \"optional topic\"}\n\nWhere N is an integer 1-10 and composite = (relevance*0.25)+(novelty*0.20)+(cross_domain*0.15)+(storytelling*0.20)+(controversy*0.20)\n\nArticle title: {{ $json.data ? $json.data.title : $('Loop Articles').item.json.title }}\nArticle content: {{ $json.data ? $json.data.content : ($json.description || 'No content extracted') }}",
         "messages": {
           "messageValues": [
             {
@@ -114,7 +122,7 @@
       "typeVersion": 1.9,
       "position": [200, 96],
       "id": "46d20961-0f4e-4e74-a172-b4101a3d0acb",
-      "name": "Basic LLM Chain"
+      "name": "Score with LLM"
     },
     {
       "parameters": {
@@ -135,33 +143,45 @@
     },
     {
       "parameters": {
+        "mode": "runOnceForEachItem",
+        "language": "javaScript",
+        "jsCode": "// Parse LLM JSON response and merge with article metadata\nconst llmOutput = $json.text || $json.response || '';\n\n// Strip markdown code fences if present\nconst cleaned = llmOutput.replace(/```json\\n?/g, '').replace(/```\\n?/g, '').trim();\n\nlet scores;\ntry {\n  scores = JSON.parse(cleaned);\n} catch (e) {\n  // If JSON parse fails, return item with error flag\n  return {\n    json: {\n      error: 'LLM returned invalid JSON',\n      raw_response: llmOutput,\n      article_url: $('Loop Articles').item.json.link || '',\n      article_title: $('Loop Articles').item.json.title || '',\n      composite_score: 0\n    }\n  };\n}\n\n// Get article metadata from the RSS item in the loop\nconst rssItem = $('Loop Articles').item.json;\n\n// Get Jina-extracted data if available\nconst jinaData = $('Jina Extract').item.json.data || {};\n\n// Build a clean merged object\nreturn {\n  json: {\n    // Article identity\n    article_url: jinaData.url || rssItem.link || rssItem.url || '',\n    article_title: jinaData.title || rssItem.title || '',\n    article_content: jinaData.content || rssItem.description || '',\n    published_at: rssItem.pubDate || rssItem.isoDate || '',\n    source_feed: rssItem.feedUrl || '',\n    // All 5 scores\n    relevance_score: scores.relevance || 0,\n    novelty_score: scores.novelty || 0,\n    cross_domain_score: scores.cross_domain || 0,\n    storytelling_score: scores.storytelling || 0,\n    controversy_score: scores.controversy || 0,\n    composite_score: scores.composite || 0,\n    // Reasons\n    relevance_reason: scores.relevance_reason || '',\n    novelty_reason: scores.novelty_reason || '',\n    cross_domain_reason: scores.cross_domain_reason || '',\n    storytelling_reason: scores.storytelling_reason || '',\n    controversy_reason: scores.controversy_reason || '',\n    // Classification\n    category: scores.suggested_pillar || 'general',\n    suggested_pair_with: scores.suggested_pair_with || ''\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [400, 96],
+      "id": "a1b2c3d4-8888-4000-a000-000000000008",
+      "name": "Parse Scores"
+    },
+    {
+      "parameters": {
         "operation": "create",
         "tableId": "articles",
         "fieldsUi": {
           "fieldValues": [
             {
               "fieldId": "url",
-              "fieldValue": "={{ $('HTTP Request').item.json.data.url }}"
+              "fieldValue": "={{ $json.article_url }}"
             },
             {
               "fieldId": "title",
-              "fieldValue": "={{ $('HTTP Request').item.json.data.title }}"
+              "fieldValue": "={{ $json.article_title }}"
             },
             {
               "fieldId": "full_text",
-              "fieldValue": "={{ $('HTTP Request').item.json.data.content }}"
+              "fieldValue": "={{ $json.article_content }}"
             },
             {
               "fieldId": "url_hash",
-              "fieldValue": "={{ $('HTTP Request').item.json.data.url.hashCode ? $('HTTP Request').item.json.data.url : $('HTTP Request').item.json.data.url }}"
+              "fieldValue": "={{ $json.article_url.split('').reduce((a,b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a; }, 0).toString(16) }}"
             },
             {
               "fieldId": "category",
-              "fieldValue": "={{ JSON.parse($json.text).suggested_pillar }}"
+              "fieldValue": "={{ $json.category }}"
             },
             {
               "fieldId": "published_at",
-              "fieldValue": "={{ $('Batch 3 at a Time').item.json.pubDate || $now.toISO() }}"
+              "fieldValue": "={{ $json.published_at || $now.toISO() }}"
             },
             {
               "fieldId": "status",
@@ -169,15 +189,15 @@
             },
             {
               "fieldId": "relevance_score",
-              "fieldValue": "={{ JSON.parse($json.text).relevance }}"
+              "fieldValue": "={{ $json.relevance_score }}"
             },
             {
               "fieldId": "novelty_score",
-              "fieldValue": "={{ JSON.parse($json.text).novelty }}"
+              "fieldValue": "={{ $json.novelty_score }}"
             },
             {
               "fieldId": "composite_score",
-              "fieldValue": "={{ JSON.parse($json.text).composite }}"
+              "fieldValue": "={{ $json.composite_score }}"
             },
             {
               "fieldId": "scored_at",
@@ -188,7 +208,7 @@
       },
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
-      "position": [400, 96],
+      "position": [600, 96],
       "id": "a1b2c3d4-5555-4000-a000-000000000005",
       "name": "Save Article",
       "credentials": {
@@ -197,18 +217,6 @@
           "name": "Supabase account"
         }
       }
-    },
-    {
-      "parameters": {
-        "amount": 2,
-        "unit": "seconds"
-      },
-      "type": "n8n-nodes-base.wait",
-      "typeVersion": 1.1,
-      "position": [600, 96],
-      "id": "a1b2c3d4-6666-4000-a000-000000000006",
-      "name": "Wait 2s",
-      "webhookId": "a1b2c3d4-wait-webhook-id"
     },
     {
       "parameters": {
@@ -222,7 +230,7 @@
           "conditions": [
             {
               "id": "d5328309-039f-4972-a39a-b2f63a7bf147",
-              "leftValue": "={{ JSON.parse($json.text).composite }}",
+              "leftValue": "={{ $('Parse Scores').item.json.composite_score }}",
               "rightValue": 6.5,
               "operator": {
                 "type": "number",
@@ -238,7 +246,7 @@
       "typeVersion": 2.3,
       "position": [800, 96],
       "id": "966e012b-0148-4bbb-8b05-bd6e85e2b9e9",
-      "name": "If"
+      "name": "Score >= 6.5?"
     },
     {
       "parameters": {
@@ -257,7 +265,7 @@
           ]
         },
         "filterType": "string",
-        "filterString": "url=eq.{{ $('HTTP Request').item.json.data.url }}"
+        "filterString": "url=eq.{{ $('Parse Scores').item.json.article_url }}"
       },
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
@@ -274,7 +282,7 @@
     {
       "parameters": {
         "chatId": "1240314255",
-        "text": "=\ud83d\udcca {{ JSON.parse($json.text).composite }}/10 \u2014 {{ JSON.parse($json.text).suggested_pillar }}\nR:{{ JSON.parse($json.text).relevance }} N:{{ JSON.parse($json.text).novelty }} X:{{ JSON.parse($json.text).cross_domain }} S:{{ JSON.parse($json.text).storytelling }} C:{{ JSON.parse($json.text).controversy }}\n{{ JSON.parse($json.text).relevance_reason }}",
+        "text": "=\ud83d\udcca *{{ $('Parse Scores').item.json.composite_score }}/10* \u2014 {{ $('Parse Scores').item.json.category }}\n\n*{{ $('Parse Scores').item.json.article_title }}*\n\nR:{{ $('Parse Scores').item.json.relevance_score }} N:{{ $('Parse Scores').item.json.novelty_score }} X:{{ $('Parse Scores').item.json.cross_domain_score }} S:{{ $('Parse Scores').item.json.storytelling_score }} C:{{ $('Parse Scores').item.json.controversy_score }}\n\n{{ $('Parse Scores').item.json.relevance_reason }}\n\n{{ $('Parse Scores').item.json.article_url }}",
         "replyMarkup": "inlineKeyboard",
         "inlineKeyboard": {
           "rows": [
@@ -284,13 +292,13 @@
                   {
                     "text": "\u2705 Include",
                     "additionalFields": {
-                      "callback_data": "=approve"
+                      "callback_data": "=approve:{{ $('Parse Scores').item.json.article_url }}"
                     }
                   },
                   {
                     "text": "\u274c Skip",
                     "additionalFields": {
-                      "callback_data": "skip"
+                      "callback_data": "=skip:{{ $('Parse Scores').item.json.article_url }}"
                     }
                   }
                 ]
@@ -298,13 +306,15 @@
             }
           ]
         },
-        "additionalFields": {}
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
       },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [1200, 0],
       "id": "7cc57a5d-e21a-473f-ad44-5d00338d4ca1",
-      "name": "Send a text message",
+      "name": "Telegram Notify",
       "webhookId": "0d8edac2-7f7a-4909-8793-f4064a1e0dee",
       "credentials": {
         "telegramApi": {
@@ -312,6 +322,18 @@
           "name": "Telegram account"
         }
       }
+    },
+    {
+      "parameters": {
+        "amount": 2,
+        "unit": "seconds"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [1000, 200],
+      "id": "a1b2c3d4-6666-4000-a000-000000000006",
+      "name": "Wait 2s",
+      "webhookId": "a1b2c3d4-wait-webhook-id"
     }
   ],
   "connections": {
@@ -363,36 +385,30 @@
       "main": [
         [
           {
-            "node": "Batch 3 at a Time",
+            "node": "Loop Articles",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Batch 3 at a Time": {
+    "Loop Articles": {
       "main": [
         [
           {
-            "node": "HTTP Request",
+            "node": "Jina Extract",
             "type": "main",
             "index": 0
           }
         ],
-        [
-          {
-            "node": "If",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
-    "HTTP Request": {
+    "Jina Extract": {
       "main": [
         [
           {
-            "node": "Basic LLM Chain",
+            "node": "Score with LLM",
             "type": "main",
             "index": 0
           }
@@ -403,14 +419,25 @@
       "ai_languageModel": [
         [
           {
-            "node": "Basic LLM Chain",
+            "node": "Score with LLM",
             "type": "ai_languageModel",
             "index": 0
           }
         ]
       ]
     },
-    "Basic LLM Chain": {
+    "Score with LLM": {
+      "main": [
+        [
+          {
+            "node": "Parse Scores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Scores": {
       "main": [
         [
           {
@@ -425,6 +452,46 @@
       "main": [
         [
           {
+            "node": "Score >= 6.5?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Score >= 6.5?": {
+      "main": [
+        [
+          {
+            "node": "Mark Presented",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait 2s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Presented": {
+      "main": [
+        [
+          {
+            "node": "Telegram Notify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Notify": {
+      "main": [
+        [
+          {
             "node": "Wait 2s",
             "type": "main",
             "index": 0
@@ -436,29 +503,7 @@
       "main": [
         [
           {
-            "node": "Batch 3 at a Time",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "If": {
-      "main": [
-        [
-          {
-            "node": "Mark Presented",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Mark Presented": {
-      "main": [
-        [
-          {
-            "node": "Send a text message",
+            "node": "Loop Articles",
             "type": "main",
             "index": 0
           }

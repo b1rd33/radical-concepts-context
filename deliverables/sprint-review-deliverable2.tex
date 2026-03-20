@@ -133,8 +133,8 @@
   }%
 }
 
-% ── Link ──
-\newcommand{\linkto}[2]{\href{#1}{#2}}
+% ── Link as footnote ──
+\newcommand{\linkto}[2]{#2\footnote{\url{#1}}}
 
 \begin{document}
 
@@ -148,7 +148,7 @@
   {\large Fasten Your Seatbelt: Politics, Tech \& Interesting Stuff}\\[0.3em]
   {\normalsize An end-to-end AI podcast pipeline for Brett Moore}\\[2em]
   \begin{tabular}{rl}
-    \textbf{Team:} & Radical Concepts --- Chris, Kalina, Roxy, Angelo, Hamid \\
+    \textbf{Team:} & Radical Concepts --- Christian, Kalina, Roxane, Angelo, Hamid \\
     \textbf{Client:} & Brett Moore, Barcelona \\
     \textbf{Sprint:} & 1 (Feb 24 -- Mar 14, 2026) \\
     \textbf{Course:} & Innovation to Practice (I2P), ESADE \\
@@ -161,80 +161,80 @@
 \hrule
 \vspace{1em}
 
+\begin{center}
+\fbox{\parbox{0.9\textwidth}{\centering\smallskip
+\textbf{Video Walkthrough (5 min):} A screen-recorded walkthrough of our deliverables, architecture, FigJam session with Brett, product backlog, and sprint plan.\\[0.3em]
+\url{https://www.youtube.com/watch?v=uIo9E96Zdtg}
+\smallskip}}
+\end{center}
+\vspace{0.5em}
+
 % ═══════════════════════════════════════
 \section{Product Increment}
 % ═══════════════════════════════════════
 
 \subsection{Direction}
 
-We presented 3 concept pitches to Brett (Deliverable \#1): \emph{Automated Political Podcast}, \emph{The Curiosity Game}, and \emph{The Dinner Table Drop}. Rather than picking one, Brett asked us to go deeper---to \textbf{refine his original podcast concept} using our research insights. This led us to modularize the entire podcast production workflow into stages and modules, and to explore what an end-to-end AI pipeline could look like for him.
+We presented three concept pitches to Brett (Deliverable \#1): \emph{Automated Political Podcast}, \emph{The Curiosity Game}, and \emph{The Dinner Table Drop}. From these three directions and our research, we realized the real value was not in picking one concept. It was in the underlying pipeline that all three would need. So we took the best elements from each and mapped out what an end-to-end AI podcast production system would actually look like for Brett.
 
 \subsection{What We Did}
 
 \subsubsection{System Architecture}
 
-We first identified the overall stages and modules of the pipeline. The architecture consists of 4 stages with 7 modules (\linkto{https://b1rd33.github.io/radical-concepts-context/pipeline.html}{Interactive Pipeline Builder}):
+We first identified the overall stages and modules of the pipeline. The architecture consists of four stages with seven modules:\footnote{See the interactive version at \url{https://b1rd33.github.io/radical-concepts-context/pipeline.html}}
 
 \vspace{0.8em}
 \begin{center}
 \begin{tikzpicture}[
-  stage/.style={draw,rounded corners=2pt,minimum height=1.8cm,minimum width=3.2cm,align=center,font=\small},
-  mod/.style={font=\scriptsize,align=center},
-  arr/.style={->,thick,>=stealth}
+  stage/.style={draw,thick,rounded corners=3pt,minimum height=2.2cm,minimum width=3.4cm,align=center,font=\normalsize},
+  modbox/.style={draw,thin,rounded corners=2pt,minimum width=3cm,minimum height=0.55cm,align=center,font=\scriptsize,fill=white},
+  arr/.style={->,very thick,>=stealth,shorten >=2pt,shorten <=2pt}
 ]
-  % Stages
-  \node[stage,fill=black!8] (input) at (0,0) {\textbf{INPUT}};
-  \node[stage,fill=black!8] (creation) at (4,0) {\textbf{CREATION}};
-  \node[stage,fill=black!8] (output) at (8,0) {\textbf{OUTPUT}};
-  \node[stage,fill=black!8] (growth) at (12,0) {\textbf{GROWTH}};
+  % Stage boxes
+  \node[stage,fill=black!6] (input) at (0,0) {\textbf{INPUT}};
+  \node[stage,fill=black!6] (creation) at (4.2,0) {\textbf{CREATION}};
+  \node[stage,fill=black!6] (output) at (8.4,0) {\textbf{OUTPUT}};
+  \node[stage,fill=black!6] (growth) at (12.6,0) {\textbf{GROWTH}};
 
   % Arrows
   \draw[arr] (input) -- (creation);
   \draw[arr] (creation) -- (output);
   \draw[arr] (output) -- (growth);
 
-  % Modules below
-  \node[mod] at (0,-1.4) {Content Sources\\Curation};
-  \node[mod] at (4,-1.4) {Script Writing\\Production \& Recording};
-  \node[mod] at (8,-1.4) {Processing\\Distribution};
-  \node[mod] at (12,-1.4) {Growth Loop};
+  % Module boxes below each stage
+  \node[modbox] at (0,-1.6) {Content Sources};
+  \node[modbox] at (0,-2.3) {Curation};
+
+  \node[modbox] at (4.2,-1.6) {Script Writing};
+  \node[modbox] at (4.2,-2.3) {Production \& Recording};
+
+  \node[modbox] at (8.4,-1.6) {Processing};
+  \node[modbox] at (8.4,-2.3) {Distribution};
+
+  \node[modbox] at (12.6,-1.6) {Growth Loop};
+
+  % Labels
+  \node[font=\tiny,text=black!50] at (0,-3) {2 modules};
+  \node[font=\tiny,text=black!50] at (4.2,-3) {2 modules};
+  \node[font=\tiny,text=black!50] at (8.4,-3) {2 modules};
+  \node[font=\tiny,text=black!50] at (12.6,-2.3) {1 module};
 \end{tikzpicture}
 \end{center}
 \vspace{0.5em}
 
-We then mapped out \textbf{117 different features} across these 7 modules. Each feature represents a possible capability of the pipeline---from RSS feed ingestion to auto-clipping to comment management.
+We then mapped out \textbf{117 different features} across these 7 modules. Each feature represents a possible capability of the pipeline, from RSS feed ingestion to voice cloning to auto-clipping to comment management.
 
 \subsubsection{FigJam Session with Brett (Meeting \#14)}
 
-We sat down with Brett and walked through all 117 features on a \href{https://www.figma.com/board/qn14Rb37na3RAdAAYPqv7E/Pipeline-Builder-Module-Board}{FigJam board}. For each feature, we discussed what it does and how Brett feels about it. He categorized them into:
-
-\begin{itemize}
-  \item \textbf{V0} --- build now (must have for launch)
-  \item \textbf{V1} --- build later (next phase)
-  \item \textbf{Skip for now} --- not relevant yet
-  \item \textbf{Archive} --- interesting but not a priority
-\end{itemize}
-
-This gave us a clear understanding of the scope and of what Brett values most. Based on the features he chose or spoke positively about, we defined our V0: \textbf{39 features selected for the first version.}
+We sat down with Brett and walked through all 117 features on a collaborative FigJam board.\footnote{\url{https://www.figma.com/board/qn14Rb37na3RAdAAYPqv7E/Pipeline-Builder-Module-Board}} This was an interactive session where we tried to understand where Brett's priorities lie, shared what we believe should be a priority from a technical and strategic perspective, and worked toward reaching consensus together. For each feature, Brett categorized it as V0 (build now), V1 (build later), Skip, or Archive. Based on the features he chose or spoke positively about, we defined our V0: \textbf{39 features selected for the first version.}
 
 \subsubsection{Product Backlog}
 
-From the V0 features, we built a structured Product Backlog following the MoSCoW principle:
-
-\begin{itemize}
-  \item 39 V0 features, each with Impact/Effort scoring and an owner
-  \item Each feature broken into actionable tasks ($\sim$100 total)
-  \item Tasks assigned to 4 weekly sprints (Sprint 2--5)
-  \item \linkto{https://www.notion.so/Product-Backlog-8304d347036283f7981b819cf684f990}{Product Backlog in Notion}
-\end{itemize}
+From the V0 features, we built a structured Product Backlog following the MoSCoW principle.\footnote{See \url{https://www.notion.so/Product-Backlog-8304d347036283f7981b819cf684f990}} It contains 39 features, each with Impact and Effort scoring and an assigned owner. Each feature is broken into actionable tasks (roughly 100 in total), distributed across four weekly sprints (Sprint 2 through 5).
 
 \subsubsection{4-Week Build Plan}
-\begin{itemize}
-  \item Week 1: Input + Creation start\enspace\textcolor{muted}{|}\enspace Week 2: Creation finish
-  \item Week 3: Output\enspace\textcolor{muted}{|}\enspace Week 4: Output + Growth
-  \item We are aware this is an ambitious timeline
-  \item \linkto{https://b1rd33.github.io/radical-concepts-context/timeline.html}{Interactive Timeline}
-\end{itemize}
+
+Week 1 covers Input and the start of Creation. Week 2 finishes Creation. Week 3 focuses on Output. Week 4 handles the remaining Output work and Growth. We are aware this is an ambitious timeline.\footnote{Interactive timeline at \url{https://b1rd33.github.io/radical-concepts-context/timeline.html}}
 
 \subsubsection{Roles}
 
@@ -244,74 +244,58 @@ From the V0 features, we built a structured Product Backlog following the MoSCoW
   \arrayrulecolor{border}\toprule
   \textbf{\small Person} & \textbf{\small Responsibility} & \textbf{\small \#} \\
   \midrule
-  Chris   & AI prompts, n8n orchestration, infrastructure & 9 \\
-  Angelo  & Voice cloning, recording, audio/video processing & 12 \\
-  Kalina  & Script review, distribution platforms, style guide & 10 \\
-  Roxy    & RSS feeds, curation UX, content source access & 5 \\
+  Christian & AI prompts, n8n orchestration, infrastructure & 9 \\
+  Angelo    & Voice cloning, recording, audio/video processing & 12 \\
+  Kalina    & Script review, distribution platforms, style guide & 10 \\
+  Roxane    & RSS feeds, curation UX, content source access & 5 \\
   \bottomrule
 \end{tabularx}
 \renewcommand{\arraystretch}{1}
 \arrayrulecolor{black}
 
+\smallskip
+\noindent{\small\textit{Note: Each feature carries a different number of tasks and varying complexity, so the current distribution is imbalanced. This is the initial allocation and will be iterated on as we move into the building stage. After each sprint we will re-evaluate the distribution of responsibilities based on workload, progress, and dependencies. The first re-evaluation will happen at the end of Sprint 2 (March 23).}}
+
 \subsubsection{Tools}
 
-We are currently researching tools for each module. These are our current directions---all need further testing before we commit:
+We are currently researching tools for each module. These are the directions we have converged toward so far, though all require further testing before we commit.
 
-\begin{itemize}
-  \item \textbf{Orchestration:} n8n as the workflow engine connecting all modules
-  \item \textbf{Voice cloning:} For the content-type split (Brett records politics, AI handles science/quirky), getting the emotional tone right is critical. We are looking at Hume AI (recommended by our mentor) for its expressiveness capabilities, alongside ElevenLabs and Fish Audio
-  \item \textbf{Auto-clipping:} Opus Pro for extracting the best 60--90\,sec moments from longer recordings
-  \item \textbf{Audio cleanup:} Auphonic and Cleanvoice for automated noise removal, filler word removal, and loudness leveling
-  \item \textbf{RSS ingestion:} n8n RSS nodes with Jina Reader for full-text extraction
-  \item \textbf{Distribution:} Podbean/Castopod for podcast RSS, TubeBuddy for YouTube, Buffer for social
-\end{itemize}
+For \textbf{orchestration}, we plan to use n8n as the workflow engine connecting all modules. For \textbf{voice cloning}, Brett would ideally record everything himself, but if that is not always possible, we want to prioritize his own voice for politics and use AI voice for science and quirky content as a fallback. Getting the emotional tone right is critical for authenticity, so we are focusing on Hume AI (recommended by our mentor for its expressiveness), alongside ElevenLabs as a closed-source alternative. Qwen is an interesting open-source option but requires self-hosting, which adds complexity. For \textbf{auto-clipping}, we are focusing on Opus Pro. For \textbf{audio cleanup}, we are evaluating Auphonic and Cleanvoice. For \textbf{RSS ingestion}, n8n RSS nodes with Jina Reader for full-text extraction. For \textbf{distribution}, Podbean or Castopod for podcast RSS, TubeBuddy for YouTube, and Buffer for social scheduling.
+
+It will be important that we try out several tools and conduct A/B testing where possible. For example, we plan to give Brett several voice samples from different providers and let him decide which sounds most authentic.
 
 \subsubsection{Sprint Workflow}
 
-The Product Backlog is created with 39 features, each containing its own set of tasks. We use a 1-week sprint cadence with 4 sprints remaining until the presentation on April 14. We believe we have finished the brainstorming, ideation, and modularization phase and can now \textbf{focus on building.}
+The backlog is created with 39 features, each containing its own set of tasks. We use a one-week sprint cadence with four sprints remaining until the presentation on April 14. We believe we have finished the brainstorming, ideation, and modularization phase and can now \textbf{focus on building.}
 
 \subsubsection{Research Completed}
 
-We conducted extensive research during Sprint 1, though we have not committed to specific tools yet. Key research includes: competitor landscape analysis (8 competitors), podcast distribution strategy, TTS/voice cloning comparison, Claude prompt templates for news curation and scoring, target audience definition, content format analysis, and monetisation path analysis.
+We conducted extensive research during Sprint 1, though we have not committed to final tool selections yet. The research focused less on competitors (since Brett's pipeline is unique to his needs) and more on what works best for Brett specifically: distribution strategy (when to post, how long clips should be, which platforms), prompt templates for script generation, how to digitally contextualize his editorial persona, and content format analysis. We also explored the Growth Loop as an additional module where analytics and audience feedback work recursively to improve curation over time, though this is more of a V1 feature.
 
 \subsubsection{Design Thinking}
-\begin{itemize}
-  \item Pain point mapping: 20 Brett + 28 Audience post-its
-  \item 6 intersections incl.\ Trust Crisis, Curation IS the Product, Authenticity vs.\ Scale
-  \item HMW questions $\rightarrow$ rapid ideation $\rightarrow$ 3 concept directions
-  \item \linkto{https://b1rd33.github.io/radical-concepts-context/i2p-brainstorming-board.html}{Interactive Brainstorming Board}
-\end{itemize}
+
+Our design thinking process included pain point mapping (20 post-its for Brett, 28 for his audience), six intersection analyses, and ``How Might We'' questions that led to rapid ideation and three concept directions.\footnote{See \url{https://b1rd33.github.io/radical-concepts-context/i2p-brainstorming-board.html}} This process directly led to the concept presentation in Meeting \#8 and shaped how we approached the modularization.
 
 % ═══════════════════════════════════════
 \section{Stakeholder Feedback}
 % ═══════════════════════════════════════
 
-\subsection{Meeting \#8 --- Concept Presentation\enspace\textcolor{muted}{\small Mar 4}}
+\subsection{Meeting \#8: Concept Presentation (Mar 4)}
 
 \begin{feedbackcard}
-\begin{itemize}
-  \item Appreciated three \textbf{distinct} concepts (not variations)
-  \item Strong preference for \textbf{authenticity}---own voice for politics, AI OK for science/quirky
-  \item Interested in gamification; skeptical of Dinner Table Drop
-  \item Asked to \textbf{refine original podcast concept} with our research
-  \item Willing to record 2--3\,min segments: politics 2--3x/week, science 1x/week, quirky 1x/week
-  \item Does not want hours rewriting AI scripts
-\end{itemize}
+Brett appreciated that we brought three distinct concepts rather than variations of the same idea. He expressed a strong preference for authenticity, wanting to use his own voice for politics while being open to AI voice for science and quirky content. He was interested in gamification as an engagement tool but skeptical of the Dinner Table Drop concept. Ultimately, he asked us to refine his original podcast concept using our research. He indicated he would be willing to record two-to-three-minute segments: politics two to three times per week, science once, quirky once. He does not want to spend hours rewriting AI-generated scripts.
 \end{feedbackcard}
 
-\subsection{Meeting \#14 --- Pipeline Review\enspace\textcolor{muted}{\small Mar 12}}
+\subsection{Meeting \#14: Pipeline Review with Brett (Mar 12)}
 
 \begin{feedbackcard}
-\begin{itemize}
-  \item Reviewed all 117 features on FigJam; made V0/V1/Archive/Skip decisions per module
-  \item Now \textbf{convinced to record himself on video} (initially we explored audio-only with AI avatars)
-  \item Wants to \textbf{read articles personally} before script generation---doesn't trust AI to avoid hallucinations
-  \item Preferred workflow: pr\'{e}cis $\rightarrow$ read full article $\rightarrow$ ``Generate Script''
-  \item \textbf{Hybrid script format}: structured sections with ``Your take here'' prompts for Brett's opinions
-  \item Record 3x/week, 25--30\,min; create enough content for the whole week---weekly consistency is key
-  \item Opus Pro for auto-clipping; gamification pushed to future community phase
-  \item Brett values engagement, confidence, and being upbeat when presenting
-\end{itemize}
+This was an interactive session on FigJam where we walked Brett through all 117 features across four stages and seven modules. We had already pre-assigned each feature to V0, V1, Archive, or Skip based on our own analysis, so the session was not about going through every single one from scratch. Instead, we presented our recommendations and discussed the ones where Brett's perspective differed from ours. The goal was to understand where his priorities lie, share what we think should be a priority, and reach consensus together.
+
+He is now convinced to record himself on video. His journey went from enthusiasm about AI avatars, to considering audio-only with image overlays, to now being willing to sit in front of a camera. We believe this is the best path for authenticity, which he values highly.
+
+Brett remains cautious about full automation. He wants to see how scripts are generated and wants to bring his own analysis and perspective into the content rather than trusting the AI to handle everything on its own. He wants to record enough content in his sessions to fill the entire week, so weekly consistency is maintained without requiring daily recording.
+
+He is a big fan of gamification for audience engagement but agreed it belongs in a future phase, not V0.
 \end{feedbackcard}
 
 % ═══════════════════════════════════════
@@ -319,27 +303,27 @@ We conducted extensive research during Sprint 1, though we have not committed to
 % ═══════════════════════════════════════
 
 \begin{pivotcard}{3 Concepts \textrightarrow\ 1 Modular Platform}
-Brett asked us to refine his original idea rather than pick a new concept. Our research (competitor analysis, audience definition) enriched his existing vision. Result: modular architecture with 7 modules and 117 features enabling incremental delivery.
+Brett asked us to refine his original idea rather than pick a new concept. Our research enriched his existing vision. The result is a modular architecture with seven modules and 117 features that enables incremental delivery.
 \end{pivotcard}
 
-\begin{pivotcard}{Audio-Only with AI Avatars \textrightarrow\ Brett on Video}
-Initially we explored audio-only content with AI-generated avatars. Through the discussions, Brett became convinced to record himself on video. Video grows audience faster and short-form clips drive discovery on YouTube, TikTok, and Instagram.
+\begin{pivotcard}{AI Avatars \textrightarrow\ Audio-Only \textrightarrow\ Brett on Video}
+Brett was initially enthusiastic about AI avatars, then shifted toward audio-only with picture overlays, and is now convinced to record himself on video. We believe this is the strongest path for authenticity, which Brett values highly. Video also grows audience faster, and short-form clips drive discovery on YouTube, TikTok, and Instagram.
 \end{pivotcard}
 
-\begin{pivotcard}{Persona-Based Scoring: V1 \textrightarrow\ V0}
-Simulating Brett's editorial persona is critical for curation quality. This was initially deprioritized but promoted to V0 after we realized it is the foundation every downstream module depends on. No competitor offers persona-based article scoring.
+\begin{pivotcard}{Persona-Based Scoring: Future Feature \textrightarrow\ Ground Zero}
+Simulating Brett's editorial persona is not just a nice-to-have. It is the foundation every downstream module depends on. It was initially treated as a future feature but we promoted it to V0 after realizing that without it, the curation module cannot function meaningfully. No competitor offers persona-based article scoring.
 \end{pivotcard}
 
-\begin{pivotcard}{Full Automation \textrightarrow\ Incremental Quality}
-Instead of automating everything and risking credibility, we show Brett individual pieces (script quality, then voice quality, then clip quality). This produces focused, module-level feedback rather than scattered comments on a full demo.
+\begin{pivotcard}{Full Automation \textrightarrow\ Brett Keeps Control}
+For Brett, authenticity and credibility matter more than convenience. Rather than automating everything and removing his involvement, we give him the ability to have a higher say at each step. He can choose to automate fully later, but for now he wants more access and oversight. This also means we show him individual pieces (script, then voice, then clips) rather than a fully automated end product.
 \end{pivotcard}
 
 \begin{pivotcard}{WhatsApp Interface \textrightarrow\ Open Question}
-This is not a pivot yet but a question mark. If we send Brett all approvals, scripts, and recording triggers via WhatsApp, it may not be sustainable---too many messages, no overview. We are exploring whether Brett should have a bigger-screen experience (Notion or a simple web dashboard) alongside WhatsApp for quick approvals only.
+This is not a pivot yet but a significant question mark. Brett uses WhatsApp constantly and likes it, but if we send him all approvals, scripts, videos, and recording triggers through WhatsApp, it becomes too many messages with no real overview. Brett himself mentioned he likes to review things on a bigger screen. We are exploring whether Notion or a simple web dashboard could serve as the main interface, with WhatsApp reserved for quick approvals only.
 \end{pivotcard}
 
 \begin{pivotcard}{Content Volume \textrightarrow\ Weekly Batch Recording}
-Our priority is that Brett invests the same amount of time he originally planned (about 1--1.5 hours per week) but creates enough content in those sessions to fill the whole week. Weekly consistency matters more than daily recording.
+Instead of increasing how much time Brett spends, our priority is that he invests roughly the same amount (about one to one-and-a-half hours per week) but creates enough content in those sessions to fill the entire week with consistent daily posts.
 \end{pivotcard}
 
 % ═══════════════════════════════════════
@@ -347,19 +331,17 @@ Our priority is that Brett invests the same amount of time he originally planned
 % ═══════════════════════════════════════
 
 \begin{insightcard}
-\begin{itemize}
-  \item \textbf{Don't jump to AI because it's easy.} This is a complex project. It was tempting to start building immediately---AI tools are so accessible that you can have something running in an hour. But following our mentor's advice, we sat down first to think, explore what's out there, and really understand Brett's pain points before writing a single line of automation.
+\textbf{Resist the temptation to jump straight into AI.} This is a complex project and it was tempting to start building right away because AI tools are so accessible that you can have something running within an hour. But following our mentor's advice, we sat down first to think, to explore what already exists, and to genuinely understand Brett's pain points before writing a single line of automation.
 
-  \item \textbf{Understanding Brett is the real work.} We need to understand his personality, his habits, how much time he's willing to invest, and what will make this feel easy and natural for him---not just technically functional. The design thinking process, the FigJam board, and the pipeline review in Meeting \#14 were invaluable for this.
+\textbf{Understanding Brett is the real work.} We need to understand his personality, his habits, how much time he is willing to invest, and what will make this feel easy and natural for him. The design thinking process, the FigJam board, and the pipeline review in Meeting \#14 were all useful for building this understanding.
 
-  \item \textbf{Brett is a filter mechanism himself.} He already has the ability to filter and evaluate news articles. He reads deeply, connects dots across domains, and has strong editorial instincts. The pipeline needs to incorporate and leverage this ability, not replace it. The curation module should amplify his judgment, not automate it away.
+\textbf{Brett is a filter mechanism himself.} He already has the ability to filter and evaluate news articles and other types of content. He reads deeply, connects dots across domains, and has strong editorial instincts. The pipeline needs to build on this ability, not replace it. The curation module should amplify his judgment, not automate it away.
 
-  \item \textbf{Fallback mechanisms are a key insight.} If Brett can't record one week, the system should still produce content---through AI-voiced episodes (science/quirky only, never politics), best-of compilations, or newsletter digests. One missed day shouldn't break the habit. This came directly from discussing his recording patterns and lifestyle.
+\textbf{Fallback mechanisms matter more than we expected.} If Brett cannot record one week, the system should still produce content through AI-voiced episodes (for science and quirky content only, never politics), best-of compilations, or newsletter digests. One missed day should not break the habit. This insight came directly from discussing his recording patterns and lifestyle.
 
-  \item \textbf{The FigJam session shaped our V0.} By walking Brett through 117 features and letting him react to each one, we learned which capabilities he values most. The features he spoke positively about became our V0 scope. This was more effective than us guessing what to prioritize.
+\textbf{The FigJam session shaped our V0.} By walking Brett through 117 features and letting him react to each one, we learned which capabilities he values most. The features he spoke positively about became our V0 scope. This worked better than guessing what to prioritize.
 
-  \item \textbf{Build habits, not just tools.} The pipeline needs to fit into Brett's daily routine so naturally that he builds a habit around it. Easy accessibility, minimal friction, predictable structure---these matter more than technical sophistication.
-\end{itemize}
+\textbf{Build habits, not just tools.} The pipeline needs to fit into Brett's daily routine so naturally that he builds a habit around it. Easy accessibility, minimal friction, and predictable structure matter more than technical sophistication.
 \end{insightcard}
 
 % ═══════════════════════════════════════
@@ -371,13 +353,13 @@ Our priority is that Brett invests the same amount of time he originally planned
   \arrayrulecolor{border}\toprule
   \textbf{Deliverable} & \textbf{Link} \\
   \midrule
-  Pipeline Builder    & \linkto{https://b1rd33.github.io/radical-concepts-context/pipeline.html}{b1rd33.github.io/.../pipeline.html} \\
-  V0 Build Timeline   & \linkto{https://b1rd33.github.io/radical-concepts-context/timeline.html}{b1rd33.github.io/.../timeline.html} \\
-  FigJam Board        & \linkto{https://www.figma.com/board/qn14Rb37na3RAdAAYPqv7E/Pipeline-Builder-Module-Board}{FigJam --- Pipeline Module Board} \\
-  Concept Pitches     & \linkto{https://b1rd33.github.io/radical-concepts-context/radical-concepts-all-pitches.html}{b1rd33.github.io/.../all-pitches.html} \\
-  Design Thinking     & \linkto{https://b1rd33.github.io/radical-concepts-context/i2p-brainstorming-board.html}{b1rd33.github.io/.../brainstorming-board.html} \\
-  Product Backlog     & \linkto{https://www.notion.so/Product-Backlog-8304d347036283f7981b819cf684f990}{Notion --- Product Backlog} \\
-  GitHub              & \linkto{https://github.com/b1rd33/radical-concepts-context}{github.com/b1rd33/radical-concepts-context} \\
+  Pipeline Builder    & \href{https://b1rd33.github.io/radical-concepts-context/pipeline.html}{\texttt{b1rd33.github.io/.../pipeline.html}} \\
+  V0 Build Timeline   & \href{https://b1rd33.github.io/radical-concepts-context/timeline.html}{\texttt{b1rd33.github.io/.../timeline.html}} \\
+  FigJam Board        & \href{https://www.figma.com/board/qn14Rb37na3RAdAAYPqv7E/Pipeline-Builder-Module-Board}{\texttt{figma.com/.../Pipeline-Builder-Module-Board}} \\
+  Concept Pitches     & \href{https://b1rd33.github.io/radical-concepts-context/radical-concepts-all-pitches.html}{\texttt{b1rd33.github.io/.../all-pitches.html}} \\
+  Design Thinking     & \href{https://b1rd33.github.io/radical-concepts-context/i2p-brainstorming-board.html}{\texttt{b1rd33.github.io/.../brainstorming-board.html}} \\
+  Product Backlog     & \href{https://www.notion.so/Product-Backlog-8304d347036283f7981b819cf684f990}{\texttt{notion.so/.../Product-Backlog}} \\
+  GitHub              & \href{https://github.com/b1rd33/radical-concepts-context}{\texttt{github.com/b1rd33/radical-concepts-context}} \\
   \bottomrule
 \end{tabularx}
 \renewcommand{\arraystretch}{1}
