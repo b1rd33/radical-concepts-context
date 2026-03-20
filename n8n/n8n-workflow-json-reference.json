@@ -1,0 +1,933 @@
+{
+  "_doc": "n8n Workflow JSON Reference — complete node structures for programmatic workflow creation via PUT /api/v1/workflows/{id}",
+
+  "workflow_skeleton": {
+    "name": "My Workflow",
+    "nodes": [],
+    "connections": {},
+    "settings": {
+      "executionOrder": "v1"
+    }
+  },
+
+  "connection_patterns": {
+
+    "_doc_linear": "A -> B: simple linear connection",
+    "linear": {
+      "Node A": {
+        "main": [
+          [
+            { "node": "Node B", "type": "main", "index": 0 }
+          ]
+        ]
+      }
+    },
+
+    "_doc_if_branch": "IF node: output[0]=true branch, output[1]=false branch",
+    "if_branch": {
+      "IF": {
+        "main": [
+          [
+            { "node": "True Handler", "type": "main", "index": 0 }
+          ],
+          [
+            { "node": "False Handler", "type": "main", "index": 0 }
+          ]
+        ]
+      }
+    },
+
+    "_doc_ai_sub_node": "LLM sub-node connects TO the root node via ai_languageModel",
+    "ai_sub_node": {
+      "OpenRouter Chat Model": {
+        "ai_languageModel": [
+          [
+            { "node": "Basic LLM Chain", "type": "ai_languageModel", "index": 0 }
+          ]
+        ]
+      }
+    },
+
+    "_doc_split_batches_loop": "Split In Batches has 2 outputs: [0]=batch items (loop body), [1]=done (all processed)",
+    "split_batches_loop": {
+      "Split In Batches": {
+        "main": [
+          [
+            { "node": "Process Batch", "type": "main", "index": 0 }
+          ],
+          [
+            { "node": "Done", "type": "main", "index": 0 }
+          ]
+        ]
+      },
+      "Process Batch": {
+        "main": [
+          [
+            { "node": "Split In Batches", "type": "main", "index": 0 }
+          ]
+        ]
+      }
+    },
+
+    "_doc_multi_output": "One node feeding multiple downstream nodes from same output",
+    "fan_out": {
+      "Trigger": {
+        "main": [
+          [
+            { "node": "Node B", "type": "main", "index": 0 },
+            { "node": "Node C", "type": "main", "index": 0 }
+          ]
+        ]
+      }
+    }
+  },
+
+  "credential_format": {
+    "_doc": "Credentials reference stored creds by ID and name. The 'id' is the credential ID in n8n's database. The key (e.g. 'supabaseApi') is the credential type identifier.",
+    "example": {
+      "supabaseApi": {
+        "id": "abc123",
+        "name": "My Supabase Creds"
+      }
+    },
+    "common_credential_types": {
+      "supabase": "supabaseApi",
+      "telegram": "telegramApi",
+      "openrouter": "openRouterApi",
+      "http_header_auth": "httpHeaderAuth",
+      "http_basic_auth": "httpBasicAuth"
+    }
+  },
+
+  "nodes": {
+
+    "schedule_trigger": {
+      "_doc": "Cron-based schedule trigger. typeVersion 1.2 is current.",
+      "id": "schedule-trigger-id",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * *"
+            }
+          ]
+        }
+      }
+    },
+
+    "schedule_trigger_simple_hours": {
+      "_doc": "Alternative: trigger every N hours instead of cron",
+      "id": "schedule-trigger-hours-id",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      }
+    },
+
+    "supabase_get_all": {
+      "_doc": "Supabase: get all rows from a table. operation=getAll, returnAll or limit.",
+      "id": "supabase-getall-id",
+      "name": "Supabase",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [400, 0],
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "my_table",
+        "returnAll": false,
+        "limit": 50,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "status",
+              "condition": "eq",
+              "keyValue": "active"
+            }
+          ]
+        }
+      },
+      "credentials": {
+        "supabaseApi": {
+          "id": "cred-id",
+          "name": "Supabase account"
+        }
+      }
+    },
+
+    "supabase_create": {
+      "_doc": "Supabase: insert a row",
+      "id": "supabase-create-id",
+      "name": "Supabase Create",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [400, 200],
+      "parameters": {
+        "operation": "create",
+        "tableId": "my_table",
+        "fieldsToSend": "defineBelow",
+        "fieldValues": {
+          "values": [
+            { "fieldName": "name", "fieldValue": "={{ $json.name }}" },
+            { "fieldName": "email", "fieldValue": "={{ $json.email }}" }
+          ]
+        }
+      },
+      "credentials": {
+        "supabaseApi": {
+          "id": "cred-id",
+          "name": "Supabase account"
+        }
+      }
+    },
+
+    "supabase_update": {
+      "_doc": "Supabase: update rows matching filter",
+      "id": "supabase-update-id",
+      "name": "Supabase Update",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [400, 400],
+      "parameters": {
+        "operation": "update",
+        "tableId": "my_table",
+        "filterType": "string",
+        "filterString": "id=eq.{{ $json.id }}",
+        "fieldsToSend": "defineBelow",
+        "fieldValues": {
+          "values": [
+            { "fieldName": "status", "fieldValue": "processed" }
+          ]
+        }
+      },
+      "credentials": {
+        "supabaseApi": {
+          "id": "cred-id",
+          "name": "Supabase account"
+        }
+      }
+    },
+
+    "supabase_delete": {
+      "_doc": "Supabase: delete a row by ID",
+      "id": "supabase-delete-id",
+      "name": "Supabase Delete",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [400, 600],
+      "parameters": {
+        "operation": "delete",
+        "tableId": "my_table",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        }
+      },
+      "credentials": {
+        "supabaseApi": {
+          "id": "cred-id",
+          "name": "Supabase account"
+        }
+      }
+    },
+
+    "code_node": {
+      "_doc": "Code node: typeVersion 2 uses jsCode parameter. Mode defaults to 'runOnceForAllItems'.",
+      "id": "code-node-id",
+      "name": "Process Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [600, 0],
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  results.push({\n    json: {\n      processed: true,\n      name: item.json.name.toUpperCase(),\n      timestamp: new Date().toISOString()\n    }\n  });\n}\n\nreturn results;"
+      }
+    },
+
+    "code_node_each_item": {
+      "_doc": "Code node: run once for each item mode",
+      "id": "code-each-id",
+      "name": "Transform Item",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [600, 200],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "return {\n  json: {\n    id: $json.id,\n    label: `Item #${$json.id}: ${$json.title}`\n  }\n};"
+      }
+    },
+
+    "http_request_get": {
+      "_doc": "HTTP Request: GET with custom headers. typeVersion 4.2 is current.",
+      "id": "http-get-id",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [800, 0],
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.example.com/data",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $json.token }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000
+        }
+      }
+    },
+
+    "http_request_post_json": {
+      "_doc": "HTTP Request: POST with JSON body",
+      "id": "http-post-id",
+      "name": "HTTP Request POST",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [800, 200],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.example.com/submit",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ title: $json.title, body: $json.body }) }}",
+        "options": {}
+      }
+    },
+
+    "http_request_binary_response": {
+      "_doc": "HTTP Request: download file as binary. Set responseFormat to 'file'.",
+      "id": "http-binary-id",
+      "name": "Download File",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [800, 400],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.file_url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "data"
+            }
+          }
+        }
+      }
+    },
+
+    "http_request_with_credential_auth": {
+      "_doc": "HTTP Request: using predefined Header Auth credential",
+      "id": "http-auth-id",
+      "name": "Authenticated Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [800, 600],
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.example.com/protected",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "auth-cred-id",
+          "name": "My API Key"
+        }
+      }
+    },
+
+    "telegram_trigger": {
+      "_doc": "Telegram Trigger: listens for updates. Set updates array to filter event types. typeVersion 1.2 is current.",
+      "id": "tg-trigger-id",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0],
+      "webhookId": "unique-webhook-id",
+      "parameters": {
+        "updates": ["callback_query"],
+        "additionalFields": {}
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "tg-cred-id",
+          "name": "My Telegram Bot"
+        }
+      }
+    },
+
+    "telegram_trigger_multiple_events": {
+      "_doc": "Telegram Trigger: listen to both messages and callback queries",
+      "id": "tg-trigger-multi-id",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0],
+      "webhookId": "unique-webhook-id-2",
+      "parameters": {
+        "updates": ["message", "callback_query"],
+        "additionalFields": {}
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "tg-cred-id",
+          "name": "My Telegram Bot"
+        }
+      }
+    },
+
+    "telegram_send_message_inline_keyboard": {
+      "_doc": "Telegram: send message with inline keyboard buttons. typeVersion 1.2. replyMarkup=inlineKeyboard with button rows.",
+      "id": "tg-send-id",
+      "name": "Send Telegram Message",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [400, 0],
+      "parameters": {
+        "operation": "sendMessage",
+        "chatId": "={{ $json.message.chat.id }}",
+        "text": "Choose an option:",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  { "text": "Approve", "additionalFields": { "callback_data": "approve" } },
+                  { "text": "Reject", "additionalFields": { "callback_data": "reject" } }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  { "text": "View Details", "additionalFields": { "url": "https://example.com" } }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "tg-cred-id",
+          "name": "My Telegram Bot"
+        }
+      }
+    },
+
+    "telegram_send_message_json_keyboard": {
+      "_doc": "Telegram: send message with JSON-defined keyboard (typeVersion 1.2+, requires PR #17258 merge). Use specifyKeyboard=json for dynamic keyboards.",
+      "id": "tg-send-json-kb-id",
+      "name": "Send Dynamic Keyboard",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [400, 200],
+      "parameters": {
+        "operation": "sendMessage",
+        "chatId": "={{ $json.chat_id }}",
+        "text": "Select an item:",
+        "replyMarkup": "inlineKeyboard",
+        "specifyKeyboard": "json",
+        "inlineKeyboardJson": "={{ JSON.stringify($json.keyboard_rows) }}",
+        "additionalFields": {}
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "tg-cred-id",
+          "name": "My Telegram Bot"
+        }
+      }
+    },
+
+    "telegram_answer_callback": {
+      "_doc": "Telegram: answer a callback query (acknowledge inline keyboard press)",
+      "id": "tg-answer-cb-id",
+      "name": "Answer Callback",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [600, 0],
+      "parameters": {
+        "operation": "answerQuery",
+        "queryId": "={{ $json.callback_query.id }}",
+        "additionalFields": {
+          "text": "Processing...",
+          "show_alert": false
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "tg-cred-id",
+          "name": "My Telegram Bot"
+        }
+      }
+    },
+
+    "basic_llm_chain": {
+      "_doc": "Basic LLM Chain: promptType='define' with system message via messages.messageValues. typeVersion 1.6 is current. Connect a chat model sub-node via ai_languageModel.",
+      "id": "chain-llm-id",
+      "name": "Basic LLM Chain",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [600, 0],
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.user_message }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are a helpful assistant that responds in JSON format. Always include a 'status' field."
+            }
+          ]
+        },
+        "hasOutputParser": false
+      }
+    },
+
+    "basic_llm_chain_with_parser": {
+      "_doc": "Basic LLM Chain with structured output parser enabled",
+      "id": "chain-llm-parser-id",
+      "name": "Extract Data",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [600, 200],
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.raw_text }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Extract structured data from the provided text."
+            }
+          ]
+        }
+      }
+    },
+
+    "openrouter_chat_model": {
+      "_doc": "OpenRouter Chat Model sub-node. Connects to chainLlm or agent via ai_languageModel. typeVersion 1.",
+      "id": "openrouter-model-id",
+      "name": "OpenRouter Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [600, 200],
+      "parameters": {
+        "model": "anthropic/claude-sonnet-4",
+        "options": {
+          "temperature": 0.7,
+          "maxTokens": 4096
+        }
+      },
+      "credentials": {
+        "openRouterApi": {
+          "id": "or-cred-id",
+          "name": "OpenRouter API Key"
+        }
+      }
+    },
+
+    "if_node": {
+      "_doc": "IF node: typeVersion 2.2. conditions.conditions array holds the checks. combinator is 'and' or 'or'. Output[0]=true, Output[1]=false.",
+      "id": "if-node-id",
+      "name": "IF",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [800, 0],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "condition-uuid-1",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "active",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+
+    "if_node_boolean": {
+      "_doc": "IF node: boolean check (is true)",
+      "id": "if-bool-id",
+      "name": "Check Flag",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [800, 200],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "condition-uuid-2",
+              "leftValue": "={{ $json.is_approved }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+
+    "if_node_number_gt": {
+      "_doc": "IF node: number greater-than comparison",
+      "id": "if-number-id",
+      "name": "Check Count",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [800, 400],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "condition-uuid-3",
+              "leftValue": "={{ $json.count }}",
+              "rightValue": 10,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+
+    "if_node_multiple_conditions": {
+      "_doc": "IF node: multiple conditions with OR combinator",
+      "id": "if-multi-id",
+      "name": "Check Multiple",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [800, 600],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond-a",
+              "leftValue": "={{ $json.type }}",
+              "rightValue": "urgent",
+              "operator": { "type": "string", "operation": "equals" }
+            },
+            {
+              "id": "cond-b",
+              "leftValue": "={{ $json.priority }}",
+              "rightValue": 1,
+              "operator": { "type": "number", "operation": "lte" }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      }
+    },
+
+    "split_in_batches": {
+      "_doc": "Split In Batches: typeVersion 3. Output[0]=batch items (loop body), Output[1]=done. Loop back from end of batch processing to this node's input.",
+      "id": "split-batches-id",
+      "name": "Split In Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [400, 0],
+      "parameters": {
+        "batchSize": 10,
+        "options": {
+          "reset": false
+        }
+      }
+    }
+  },
+
+  "complete_workflow_examples": {
+
+    "_doc_example1": "Example: Schedule Trigger -> Supabase getAll -> Code transform -> HTTP POST",
+    "example_etl_pipeline": {
+      "name": "ETL Pipeline",
+      "nodes": [
+        {
+          "id": "node-1",
+          "name": "Every Morning",
+          "type": "n8n-nodes-base.scheduleTrigger",
+          "typeVersion": 1.2,
+          "position": [0, 0],
+          "parameters": {
+            "rule": {
+              "interval": [{ "field": "cronExpression", "expression": "0 9 * * *" }]
+            }
+          }
+        },
+        {
+          "id": "node-2",
+          "name": "Get Records",
+          "type": "n8n-nodes-base.supabase",
+          "typeVersion": 1,
+          "position": [200, 0],
+          "parameters": {
+            "operation": "getAll",
+            "tableId": "items",
+            "returnAll": true
+          },
+          "credentials": { "supabaseApi": { "id": "1", "name": "Supabase" } }
+        },
+        {
+          "id": "node-3",
+          "name": "Transform",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [400, 0],
+          "parameters": {
+            "jsCode": "return $input.all().map(item => ({\n  json: { title: item.json.name, synced: true }\n}));"
+          }
+        },
+        {
+          "id": "node-4",
+          "name": "Send to API",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.2,
+          "position": [600, 0],
+          "parameters": {
+            "method": "POST",
+            "url": "https://api.example.com/sync",
+            "sendBody": true,
+            "specifyBody": "json",
+            "jsonBody": "={{ JSON.stringify($json) }}",
+            "options": {}
+          }
+        }
+      ],
+      "connections": {
+        "Every Morning": { "main": [[{ "node": "Get Records", "type": "main", "index": 0 }]] },
+        "Get Records": { "main": [[{ "node": "Transform", "type": "main", "index": 0 }]] },
+        "Transform": { "main": [[{ "node": "Send to API", "type": "main", "index": 0 }]] }
+      },
+      "settings": { "executionOrder": "v1" }
+    },
+
+    "_doc_example2": "Example: Telegram callback_query -> IF check -> LLM Chain + OpenRouter -> Send reply",
+    "example_telegram_bot_with_llm": {
+      "name": "Telegram AI Bot",
+      "nodes": [
+        {
+          "id": "tg-1",
+          "name": "Telegram Trigger",
+          "type": "n8n-nodes-base.telegramTrigger",
+          "typeVersion": 1.2,
+          "position": [0, 0],
+          "webhookId": "tg-webhook-1",
+          "parameters": {
+            "updates": ["callback_query"],
+            "additionalFields": {}
+          },
+          "credentials": { "telegramApi": { "id": "tg-1", "name": "Bot" } }
+        },
+        {
+          "id": "tg-2",
+          "name": "Check Action",
+          "type": "n8n-nodes-base.if",
+          "typeVersion": 2.2,
+          "position": [200, 0],
+          "parameters": {
+            "conditions": {
+              "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 },
+              "conditions": [{
+                "id": "cond-1",
+                "leftValue": "={{ $json.callback_query.data }}",
+                "rightValue": "generate",
+                "operator": { "type": "string", "operation": "equals" }
+              }],
+              "combinator": "and"
+            },
+            "options": {}
+          }
+        },
+        {
+          "id": "tg-3",
+          "name": "Basic LLM Chain",
+          "type": "@n8n/n8n-nodes-langchain.chainLlm",
+          "typeVersion": 1.6,
+          "position": [400, -100],
+          "parameters": {
+            "promptType": "define",
+            "text": "Generate a creative response about: {{ $json.callback_query.data }}",
+            "messages": {
+              "messageValues": [{ "message": "You are a creative assistant." }]
+            }
+          }
+        },
+        {
+          "id": "tg-4",
+          "name": "OpenRouter Chat Model",
+          "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+          "typeVersion": 1,
+          "position": [400, 100],
+          "parameters": {
+            "model": "anthropic/claude-sonnet-4",
+            "options": {}
+          },
+          "credentials": { "openRouterApi": { "id": "or-1", "name": "OpenRouter" } }
+        },
+        {
+          "id": "tg-5",
+          "name": "Send Reply",
+          "type": "n8n-nodes-base.telegram",
+          "typeVersion": 1.2,
+          "position": [600, -100],
+          "parameters": {
+            "operation": "sendMessage",
+            "chatId": "={{ $('Telegram Trigger').item.json.callback_query.message.chat.id }}",
+            "text": "={{ $json.text }}",
+            "replyMarkup": "inlineKeyboard",
+            "inlineKeyboard": {
+              "rows": [{
+                "row": {
+                  "buttons": [
+                    { "text": "Generate Again", "additionalFields": { "callback_data": "generate" } },
+                    { "text": "Done", "additionalFields": { "callback_data": "done" } }
+                  ]
+                }
+              }]
+            },
+            "additionalFields": { "parse_mode": "HTML" }
+          },
+          "credentials": { "telegramApi": { "id": "tg-1", "name": "Bot" } }
+        },
+        {
+          "id": "tg-6",
+          "name": "Send Fallback",
+          "type": "n8n-nodes-base.telegram",
+          "typeVersion": 1.2,
+          "position": [600, 100],
+          "parameters": {
+            "operation": "sendMessage",
+            "chatId": "={{ $('Telegram Trigger').item.json.callback_query.message.chat.id }}",
+            "text": "Unknown action.",
+            "additionalFields": {}
+          },
+          "credentials": { "telegramApi": { "id": "tg-1", "name": "Bot" } }
+        }
+      ],
+      "connections": {
+        "Telegram Trigger": { "main": [[{ "node": "Check Action", "type": "main", "index": 0 }]] },
+        "Check Action": {
+          "main": [
+            [{ "node": "Basic LLM Chain", "type": "main", "index": 0 }],
+            [{ "node": "Send Fallback", "type": "main", "index": 0 }]
+          ]
+        },
+        "Basic LLM Chain": { "main": [[{ "node": "Send Reply", "type": "main", "index": 0 }]] },
+        "OpenRouter Chat Model": {
+          "ai_languageModel": [[{ "node": "Basic LLM Chain", "type": "ai_languageModel", "index": 0 }]]
+        }
+      },
+      "settings": { "executionOrder": "v1" }
+    }
+  },
+
+  "operator_reference": {
+    "_doc": "Common operators for IF node conditions",
+    "string": ["equals", "notEquals", "contains", "notContains", "startsWith", "endsWith", "regex", "isEmpty", "isNotEmpty"],
+    "number": ["equals", "notEquals", "gt", "gte", "lt", "lte", "isEmpty", "isNotEmpty"],
+    "boolean": ["true", "false", "isEmpty", "isNotEmpty"],
+    "dateTime": ["after", "before", "equals"]
+  },
+
+  "expression_reference": {
+    "_doc": "Common expressions used in node parameters",
+    "access_current_item": "={{ $json.fieldName }}",
+    "access_specific_node": "={{ $('Node Name').item.json.fieldName }}",
+    "access_all_items": "={{ $('Node Name').all() }}",
+    "access_first_item": "={{ $('Node Name').first().json.fieldName }}",
+    "conditional_expression": "={{ $json.value ? 'yes' : 'no' }}",
+    "json_stringify": "={{ JSON.stringify($json) }}",
+    "date_now": "={{ DateTime.now().toISO() }}",
+    "env_variable": "={{ $env.MY_VAR }}"
+  },
+
+  "tips": {
+    "node_ids": "Use UUIDs (e.g., crypto.randomUUID()) for node IDs to avoid conflicts",
+    "node_names": "Node names must be unique within a workflow. Connections reference nodes by name, not by ID.",
+    "position": "Position is [x, y] in pixels. Space nodes ~200px apart horizontally. Negative y = upward.",
+    "webhook_id": "Trigger nodes that use webhooks need a unique webhookId string.",
+    "expressions": "All expressions must be wrapped in ={{ ... }}. They are single-line JavaScript.",
+    "api_import": "PUT /api/v1/workflows/{id} replaces the entire workflow. GET first, modify, PUT back.",
+    "activation": "After PUT, activate with PATCH /api/v1/workflows/{id} body: {\"active\": true}",
+    "credential_ids": "Get credential IDs via GET /api/v1/credentials. The id in node JSON must match."
+  }
+}

@@ -1,0 +1,480 @@
+{
+  "name": "[WF-01] RSS Score & Curate",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [-1216, 96],
+      "id": "d84db0a9-7af3-424f-80f9-790001ec1a27",
+      "name": "When clicking 'Execute workflow'"
+    },
+    {
+      "parameters": {
+        "url": "https://feeds.bbci.co.uk/news/rss.xml ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [-1008, 96],
+      "id": "3c8a5c9f-fc78-4cce-8a5e-f68ef24b82da",
+      "name": "RSS Read"
+    },
+    {
+      "parameters": {
+        "maxItems": 10
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [-800, 96],
+      "id": "a1b2c3d4-1111-4000-a000-000000000001",
+      "name": "Limit to 10 Articles"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "articles",
+        "returnAll": false,
+        "limit": 500,
+        "filterType": "string",
+        "filterString": "ingested_at=gte.{{ $now.minus(7, 'days').toISO() }}"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [-600, 96],
+      "id": "a1b2c3d4-2222-4000-a000-000000000002",
+      "name": "Get Recent URLs",
+      "credentials": {
+        "supabaseApi": {
+          "id": "k5u4E7DLyRpsGAB0",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Get the RSS articles from 'Limit to 10 Articles' node\nconst rssItems = $('Limit to 10 Articles').all();\n\n// Get existing URLs from Supabase 'Get Recent URLs' node\nconst existingUrls = new Set(\n  $('Get Recent URLs').all().map(item => item.json.url).filter(Boolean)\n);\n\n// Filter out articles whose URL already exists in Supabase\nconst newItems = rssItems.filter(item => {\n  const articleUrl = item.json.link || item.json.url || '';\n  return !existingUrls.has(articleUrl);\n});\n\n// Return new items (or empty array if all are duplicates)\nreturn newItems.map(item => ({ json: item.json }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-400, 96],
+      "id": "a1b2c3d4-3333-4000-a000-000000000003",
+      "name": "Dedup Against DB"
+    },
+    {
+      "parameters": {
+        "batchSize": 3
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [-200, 96],
+      "id": "a1b2c3d4-4444-4000-a000-000000000004",
+      "name": "Batch 3 at a Time"
+    },
+    {
+      "parameters": {
+        "url": "=https://r.jina.ai/{{ $json.link }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer jina_a811d82131fe4f10816452ae5b3db00dyMHYT-sknMYUF1OBl32x3ami5YLF"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [0, 96],
+      "id": "245cf25a-3c20-480d-934c-af95be4dfb01",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Score this article on all 5 dimensions. Return this exact JSON structure:\n{\"relevance\": N, \"relevance_reason\": \"...\", \"novelty\": N, \"novelty_reason\": \"...\", \"cross_domain\": N, \"cross_domain_reason\": \"...\", \"storytelling\": N, \"storytelling_reason\": \"...\", \"controversy\": N, \"controversy_reason\": \"...\", \"composite\": N.NN, \"suggested_pillar\": \"geopolitics|science|tech|economics\", \"suggested_pair_with\": \"optional topic\"}\n\nArticle title: {{ $json.data.title }}\nArticle content: {{ $json.data.content }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are Brett Moore's news curator for his geopolitics/tech/science/economics podcast. Score each article on 5 dimensions (1-10 scale):\n\n1. RELEVANCE (wt 0.25): Match to Brett's pillars — geopolitics, technology, science, economics. State actors/treaties +2-3. AI/quantum/climate/medical +2-3. Pure domestic: cap 5.\n\n2. NOVELTY (wt 0.20): New information vs rehash. Breaking/exclusive +3. Cites other media: cap 5. Day-old same-topic: score lower.\n\n3. CROSS-DOMAIN (wt 0.15): Bridges multiple domains — Brett's signature. Triple bridge (geopol+tech+econ) = 10. Single domain = 4. Chips/AI governance, sanctions/supply-chains, pandemic/climate treaties score high.\n\n4. STORYTELLING (wt 0.20): Podcast-ready narrative. Named individuals with agency +2. Surprising facts +2. Pure statistics -2. Legal text without consequences -2.\n\n5. CONTROVERSY (wt 0.20): Would Brett have a strong take? Western consensus Brett would challenge +3. No-right-answer governance +2. Orthodoxy tested by outcomes +2.\n\nComposite = (relevance*0.25)+(novelty*0.20)+(cross_domain*0.15)+(storytelling*0.20)+(controversy*0.20)\n\nScore thresholds: 8+ must use, 6.5-7.9 strong candidate, 5-6.4 maybe, <5 skip.\n\nReturn ONLY valid JSON. No markdown, no explanation, no code fences."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [200, 96],
+      "id": "46d20961-0f4e-4e74-a172-b4101a3d0acb",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-5.4-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [200, 288],
+      "id": "5670ad37-617b-46af-954b-6c3f73119fe0",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "1HjiTjhZTVqv5vLc",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "tableId": "articles",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "url",
+              "fieldValue": "={{ $('HTTP Request').item.json.data.url }}"
+            },
+            {
+              "fieldId": "title",
+              "fieldValue": "={{ $('HTTP Request').item.json.data.title }}"
+            },
+            {
+              "fieldId": "full_text",
+              "fieldValue": "={{ $('HTTP Request').item.json.data.content }}"
+            },
+            {
+              "fieldId": "url_hash",
+              "fieldValue": "={{ $('HTTP Request').item.json.data.url.hashCode ? $('HTTP Request').item.json.data.url : $('HTTP Request').item.json.data.url }}"
+            },
+            {
+              "fieldId": "category",
+              "fieldValue": "={{ JSON.parse($json.text).suggested_pillar }}"
+            },
+            {
+              "fieldId": "published_at",
+              "fieldValue": "={{ $('Batch 3 at a Time').item.json.pubDate || $now.toISO() }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "scored"
+            },
+            {
+              "fieldId": "relevance_score",
+              "fieldValue": "={{ JSON.parse($json.text).relevance }}"
+            },
+            {
+              "fieldId": "novelty_score",
+              "fieldValue": "={{ JSON.parse($json.text).novelty }}"
+            },
+            {
+              "fieldId": "composite_score",
+              "fieldValue": "={{ JSON.parse($json.text).composite }}"
+            },
+            {
+              "fieldId": "scored_at",
+              "fieldValue": "={{ $now.toISO() }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [400, 96],
+      "id": "a1b2c3d4-5555-4000-a000-000000000005",
+      "name": "Save Article",
+      "credentials": {
+        "supabaseApi": {
+          "id": "k5u4E7DLyRpsGAB0",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 2,
+        "unit": "seconds"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [600, 96],
+      "id": "a1b2c3d4-6666-4000-a000-000000000006",
+      "name": "Wait 2s",
+      "webhookId": "a1b2c3d4-wait-webhook-id"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "d5328309-039f-4972-a39a-b2f63a7bf147",
+              "leftValue": "={{ JSON.parse($json.text).composite }}",
+              "rightValue": 6.5,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [800, 96],
+      "id": "966e012b-0148-4bbb-8b05-bd6e85e2b9e9",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "articles",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "presented"
+            },
+            {
+              "fieldId": "presented_at",
+              "fieldValue": "={{ $now.toISO() }}"
+            }
+          ]
+        },
+        "filterType": "string",
+        "filterString": "url=eq.{{ $('HTTP Request').item.json.data.url }}"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1000, 0],
+      "id": "a1b2c3d4-7777-4000-a000-000000000007",
+      "name": "Mark Presented",
+      "credentials": {
+        "supabaseApi": {
+          "id": "k5u4E7DLyRpsGAB0",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "1240314255",
+        "text": "=\ud83d\udcca {{ JSON.parse($json.text).composite }}/10 \u2014 {{ JSON.parse($json.text).suggested_pillar }}\nR:{{ JSON.parse($json.text).relevance }} N:{{ JSON.parse($json.text).novelty }} X:{{ JSON.parse($json.text).cross_domain }} S:{{ JSON.parse($json.text).storytelling }} C:{{ JSON.parse($json.text).controversy }}\n{{ JSON.parse($json.text).relevance_reason }}",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "\u2705 Include",
+                    "additionalFields": {
+                      "callback_data": "=approve"
+                    }
+                  },
+                  {
+                    "text": "\u274c Skip",
+                    "additionalFields": {
+                      "callback_data": "skip"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1200, 0],
+      "id": "7cc57a5d-e21a-473f-ad44-5d00338d4ca1",
+      "name": "Send a text message",
+      "webhookId": "0d8edac2-7f7a-4909-8793-f4064a1e0dee",
+      "credentials": {
+        "telegramApi": {
+          "id": "V1Z3rnsrUvXf0TPr",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Limit to 10 Articles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit to 10 Articles": {
+      "main": [
+        [
+          {
+            "node": "Get Recent URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Recent URLs": {
+      "main": [
+        [
+          {
+            "node": "Dedup Against DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dedup Against DB": {
+      "main": [
+        [
+          {
+            "node": "Batch 3 at a Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Batch 3 at a Time": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Save Article",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Article": {
+      "main": [
+        [
+          {
+            "node": "Wait 2s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 2s": {
+      "main": [
+        [
+          {
+            "node": "Batch 3 at a Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Mark Presented",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Presented": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {}
+}

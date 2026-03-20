@@ -3,3 +3,10 @@
 *.swo
 *~
 .env
+.env.*
+
+# n8n local data
+n8n_data/
+
+# Temporary files
+*.output
