@@ -1,0 +1,269 @@
+{
+  "name": "[WF-01b-v3] Morning Curate + Select",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "bdc3e8bc-489a-4495-956b-bde5fa31d6f3",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -600,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "var CONFIG = {MIN_SCORE: 4, TOP_N: 10, DIVERSITY_CATEGORIES: ['politics','geopolitics','science','tech','economics','quirky'], MAX_AGE_HOURS: 24};\nreturn [{json: CONFIG}];"
+      },
+      "id": "b1a98ddd-5457-47d4-a5ec-5b23da57c046",
+      "name": "Config",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -400,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "articles",
+        "returnAll": true,
+        "filterType": "string",
+        "filterString": "status=eq.header_scored"
+      },
+      "id": "47061d7e-5dbd-4a29-822b-425285a34ecc",
+      "name": "Get Scored Articles",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        200
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "k5u4E7DLyRpsGAB0",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "var config = $('Config').first().json;\nvar items = $input.all();\nif (!items || items.length === 0) {\n  return [{json: {_empty: true, message: 'No scored articles found'}}];\n}\nvar now = new Date();\nvar cutoff = new Date(now.getTime() - config.MAX_AGE_HOURS * 60 * 60 * 1000);\nvar filtered = items.filter(function(item) {\n  var score = item.json.composite_score || item.json.header_score || 0;\n  if (score < config.MIN_SCORE) return false;\n  var created = item.json.created_at ? new Date(item.json.created_at) : now;\n  if (created < cutoff) return false;\n  return true;\n});\nfiltered.sort(function(a, b) {\n  var sa = a.json.composite_score || a.json.header_score || 0;\n  var sb = b.json.composite_score || b.json.header_score || 0;\n  return sb - sa;\n});\nif (filtered.length === 0) {\n  return [{json: {_empty: true, message: 'No articles passed filter'}}];\n}\nreturn filtered;"
+      },
+      "id": "b6435567-0f1c-4e39-b85a-e88c4597b4d8",
+      "name": "Filter Recent",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "var config = $('Config').first().json;\nvar items = $input.all();\nif (items.length === 1 && items[0].json._empty) return items;\nvar categories = config.DIVERSITY_CATEGORIES;\nvar topN = config.TOP_N;\n\n// Parse category from metadata\nfunction getCategory(item) {\n  var meta = item.json.llm_metadata || item.json.metadata || {};\n  if (typeof meta === 'string') {\n    try { meta = JSON.parse(meta); } catch(e) { meta = {}; }\n  }\n  var cat = (meta.category || item.json.category || 'uncategorized').toLowerCase();\n  return cat;\n}\n\n// Build category buckets\nvar buckets = {};\nfor (var i = 0; i < categories.length; i++) {\n  buckets[categories[i]] = [];\n}\nbuckets['other'] = [];\n\nfor (var j = 0; j < items.length; j++) {\n  var cat = getCategory(items[j]);\n  if (buckets[cat]) {\n    buckets[cat].push(items[j]);\n  } else {\n    buckets['other'].push(items[j]);\n  }\n}\n\nvar selected = [];\nvar usedUrls = {};\n\n// First pass: 1 per category\nfor (var k = 0; k < categories.length; k++) {\n  var bucket = buckets[categories[k]];\n  if (bucket && bucket.length > 0) {\n    selected.push(bucket[0]);\n    usedUrls[bucket[0].json.url] = true;\n  }\n}\n\n// Second pass: round-robin least represented\nvar round = 1;\nwhile (selected.length < topN) {\n  var added = false;\n  for (var m = 0; m < categories.length; m++) {\n    if (selected.length >= topN) break;\n    var b = buckets[categories[m]];\n    if (b && b.length > round) {\n      var candidate = b[round];\n      if (!usedUrls[candidate.json.url]) {\n        selected.push(candidate);\n        usedUrls[candidate.json.url] = true;\n        added = true;\n      }\n    }\n  }\n  // Fill from other if needed\n  if (!added || selected.length < topN) {\n    for (var n = 0; n < buckets['other'].length; n++) {\n      if (selected.length >= topN) break;\n      var oc = buckets['other'][n];\n      if (!usedUrls[oc.json.url]) {\n        selected.push(oc);\n        usedUrls[oc.json.url] = true;\n      }\n    }\n    if (!added) break;\n  }\n  round++;\n}\n\nif (selected.length === 0) {\n  return [{json: {_empty: true, message: 'No articles after curation'}}];\n}\nreturn selected;"
+      },
+      "id": "30b0ca10-8337-4a1a-a941-37641429b133",
+      "name": "Smart Curate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        200,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "var items = $input.all();\nif (items.length <= 1 || (items[0].json._empty)) return items;\n\nfunction getCategory(item) {\n  var meta = item.json.llm_metadata || item.json.metadata || {};\n  if (typeof meta === 'string') {\n    try { meta = JSON.parse(meta); } catch(e) { meta = {}; }\n  }\n  return (meta.category || item.json.category || 'uncategorized').toLowerCase();\n}\n\nfunction getKeywords(item) {\n  var meta = item.json.llm_metadata || item.json.metadata || {};\n  if (typeof meta === 'string') {\n    try { meta = JSON.parse(meta); } catch(e) { meta = {}; }\n  }\n  var tags = meta.tags || meta.keywords || [];\n  if (typeof tags === 'string') tags = tags.split(',');\n  return tags.map(function(t) { return t.toLowerCase().trim(); });\n}\n\nvar connections = [];\nfor (var i = 0; i < items.length; i++) {\n  var catI = getCategory(items[i]);\n  var kwI = getKeywords(items[i]);\n  for (var j = i + 1; j < items.length; j++) {\n    var catJ = getCategory(items[j]);\n    if (catI === catJ) continue;\n    var kwJ = getKeywords(items[j]);\n    var overlap = 0;\n    for (var k = 0; k < kwI.length; k++) {\n      for (var l = 0; l < kwJ.length; l++) {\n        if (kwI[k] === kwJ[l] && kwI[k].length > 2) overlap++;\n      }\n    }\n    var maxKw = Math.max(kwI.length, kwJ.length, 1);\n    var score = overlap / maxKw;\n    if (score > 0.15) {\n      connections.push({\n        article_a: items[i].json.title || items[i].json.url,\n        article_b: items[j].json.title || items[j].json.url,\n        categories: catI + ' <-> ' + catJ,\n        connection_score: Math.round(score * 100) / 100,\n        shared_keywords: kwI.filter(function(k) { return kwJ.indexOf(k) >= 0 && k.length > 2; })\n      });\n    }\n  }\n}\n\n// Attach cross-domain flags to items\nvar connectedUrls = {};\nfor (var c = 0; c < connections.length; c++) {\n  connectedUrls[connections[c].article_a] = connections[c];\n  connectedUrls[connections[c].article_b] = connections[c];\n}\n\nvar result = items.map(function(item) {\n  var key = item.json.title || item.json.url;\n  var conn = connectedUrls[key];\n  var newJson = {};\n  for (var p in item.json) { newJson[p] = item.json[p]; }\n  newJson.cross_domain = conn ? true : false;\n  newJson.cross_domain_connection = conn || null;\n  return {json: newJson};\n});\n\nreturn result;"
+      },
+      "id": "9327c4dc-930b-4142-8863-3827ad2f316e",
+      "name": "Cross-domain Detection",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "var items = $input.all();\nif (items.length === 1 && items[0].json._empty) {\n  return [{json: {_skip: true, message: items[0].json.message}}];\n}\nreturn items.map(function(item) {\n  return {json: {url: item.json.url}};\n});"
+      },
+      "id": "7dc5b71c-8c74-478f-bcd6-d16a670c870c",
+      "name": "Prepare Update",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        600,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "id": "9aec66e4-cb92-4ecc-8a24-a22b0fb37389",
+      "name": "Loop Update",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        800,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "articles",
+        "filterType": "string",
+        "filterString": "=url=eq.{{ $json.url }}",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "curated"
+            }
+          ]
+        }
+      },
+      "id": "130b942b-9fb3-4873-b25c-036e45a87358",
+      "name": "Mark Curated",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        800,
+        400
+      ],
+      "continueOnFail": true,
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "k5u4E7DLyRpsGAB0",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## [WF-01b-v3] Morning Curate + Select\n\nReads header_scored articles from Supabase, picks top 10 with diversity across categories, detects cross-domain connections, marks selected as curated."
+      },
+      "id": "77ac4852-7177-402a-a284-5d9385d7b78d",
+      "name": "Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -600,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Get Scored Articles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Scored Articles": {
+      "main": [
+        [
+          {
+            "node": "Filter Recent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Recent": {
+      "main": [
+        [
+          {
+            "node": "Smart Curate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Smart Curate": {
+      "main": [
+        [
+          {
+            "node": "Cross-domain Detection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cross-domain Detection": {
+      "main": [
+        [
+          {
+            "node": "Prepare Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Update": {
+      "main": [
+        [
+          {
+            "node": "Loop Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Update": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Mark Curated",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Curated": {
+      "main": [
+        [
+          {
+            "node": "Loop Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
