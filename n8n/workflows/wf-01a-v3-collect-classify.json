@@ -1,688 +1,727 @@
 {
-  "name": "[WF-01a-v3] RSS Collect + Classify",
-  "nodes": [
-    {
-      "parameters": {},
-      "id": "98885057-1b37-4323-8774-46478bc110eb",
-      "name": "Manual Trigger",
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
-      "position": [
-        -1200,
-        340
-      ]
-    },
-    {
-      "parameters": {
-        "rule": {
-          "interval": [
-            {
-              "field": "cronExpression",
-              "expression": "0 */4 * * *"
-            }
-          ]
-        }
-      },
-      "id": "989a2b62-c7ac-49cf-b6ae-ff220ce98c6d",
-      "name": "Schedule Trigger",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
-      "position": [
-        -1200,
-        540
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "var CONFIG = {\n  BATCH_NUMBER: -1,\n  HEADER_SCORE_THRESHOLD: 5,\n  MAX_ARTICLE_AGE_HOURS: 48,\n  CLASSIFICATION_BATCH_SIZE: 30,\n};\nreturn [{ json: CONFIG }];"
-      },
-      "id": "899f6fc3-4d5d-49ad-b578-9a822629d0ec",
-      "name": "Config",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -976,
-        340
-      ]
-    },
-    {
-      "parameters": {
-        "operation": "getAll",
-        "tableId": "feeds",
-        "returnAll": true,
-        "filterType": "string",
-        "filterString": "is_active=eq.true"
-      },
-      "id": "c8cb508d-c762-447a-9ec9-a02859ffbb46",
-      "name": "Get Active Feeds",
-      "type": "n8n-nodes-base.supabase",
-      "typeVersion": 1,
-      "position": [
-        -752,
-        340
-      ],
-      "credentials": {
-        "supabaseApi": {
-          "id": "k5u4E7DLyRpsGAB0",
-          "name": "Supabase account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "var config = $('Config').first().json;\nvar feeds = $input.all();\nvar filtered;\nif (config.BATCH_NUMBER === -1) {\n  filtered = feeds;\n} else {\n  filtered = feeds.filter(function(f) {\n    return f.json.batch_number === config.BATCH_NUMBER;\n  });\n}\nif (filtered.length === 0) {\n  throw new Error('No active feeds found for batch ' + config.BATCH_NUMBER);\n}\nreturn filtered;"
-      },
-      "id": "9ff8b074-c91b-49db-a5d6-2680acb5895f",
-      "name": "Filter by Batch",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -528,
-        340
-      ]
-    },
-    {
-      "parameters": {
-        "options": {
-          "reset": false
-        }
-      },
-      "id": "67bf0243-b657-4837-a423-7a80757308d0",
-      "name": "Loop Feeds",
-      "type": "n8n-nodes-base.splitInBatches",
-      "typeVersion": 3,
-      "position": [
-        -304,
-        340
-      ]
-    },
-    {
-      "parameters": {
-        "url": "={{ $json.url }}",
-        "options": {}
-      },
-      "id": "930a74cf-b448-4ef9-a709-8fe2400028ca",
-      "name": "RSS Read",
-      "type": "n8n-nodes-base.rssFeedRead",
-      "typeVersion": 1.2,
-      "position": [
-        -80,
-        268
-      ],
-      "alwaysOutputData": true,
-      "continueOnFail": true
-    },
-    {
-      "parameters": {
-        "jsCode": "var feedData = $('Loop Feeds').first().json;\nvar config = $('Config').first().json;\nvar items = $input.all();\nvar now = new Date();\nvar maxAge = config.MAX_ARTICLE_AGE_HOURS * 60 * 60 * 1000;\nvar results = [];\nfor (var i = 0; i < items.length; i++) {\n  var item = items[i];\n  if (item.json.error) continue;\n  var pubDate = new Date(item.json.isoDate || item.json.pubDate || now);\n  var age = now - pubDate;\n  if (age > maxAge) continue;\n  results.push({\n    json: {\n      title: item.json.title || '',\n      description: item.json.contentSnippet || item.json.content || '',\n      url: item.json.link || item.json.guid || '',\n      pubDate: item.json.isoDate || item.json.pubDate || now.toISOString(),\n      feed_id: feedData.id,\n      feed_name: feedData.name,\n      feed_category: feedData.category,\n      feed_url: feedData.url\n    }\n  });\n}\nif (results.length === 0) {\n  return [{ json: { _skip: true, feed_name: feedData.name } }];\n}\nreturn results;"
-      },
-      "id": "aa58f6e9-a297-4166-b405-a5dd6a6c7472",
-      "name": "Attach Feed Info",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        144,
-        412
-      ],
-      "alwaysOutputData": true
-    },
-    {
-      "parameters": {
-        "jsCode": "var allItems = $('Attach Feed Info').all();\nvar headers = allItems.filter(function(item) {\n  return !item.json._skip && item.json.title;\n});\nif (headers.length === 0) {\n  return [{ json: { total_headers: 0, headers: [] } }];\n}\nreturn [{\n  json: {\n    total_headers: headers.length,\n    headers: headers.map(function(h) { return h.json; })\n  }\n}];"
-      },
-      "id": "958fd34a-4603-4cc0-8186-bc10367511e5",
-      "name": "Merge + Filter",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -80,
-        76
-      ]
-    },
-    {
-      "parameters": {
-        "operation": "getAll",
-        "tableId": "articles",
-        "returnAll": true
-      },
-      "id": "a0f393bd-6de3-4ed3-ab2c-988a51fc120f",
-      "name": "Get Existing URLs",
-      "type": "n8n-nodes-base.supabase",
-      "typeVersion": 1,
-      "position": [
-        144,
-        76
-      ],
-      "alwaysOutputData": true,
-      "credentials": {
-        "supabaseApi": {
-          "id": "k5u4E7DLyRpsGAB0",
-          "name": "Supabase account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "var existingItems = $('Get Existing URLs').all();\nvar existingUrls = {};\nfor (var i = 0; i < existingItems.length; i++) {\n  var u = existingItems[i].json.url;\n  if (u) existingUrls[u] = true;\n}\nvar allHeaders = $('Merge + Filter').first().json.headers;\nvar newHeaders = allHeaders.filter(function(h) {\n  return !existingUrls[h.url];\n});\nreturn [{\n  json: {\n    total_new: newHeaders.length,\n    total_skipped: allHeaders.length - newHeaders.length,\n    headers: newHeaders\n  }\n}];"
-      },
-      "id": "620a0ab6-49d0-4ef5-8782-631b395f4151",
-      "name": "Dedup",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        368,
-        76
-      ]
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 2
-          },
-          "conditions": [
-            {
-              "id": "d0421ed8-10a9-4ed7-a651-ec80f2871a84",
-              "leftValue": "={{ $json.total_new }}",
-              "rightValue": 0,
-              "operator": {
-                "type": "number",
-                "operation": "gt"
-              }
-            }
-          ],
-          "combinator": "and"
+    "updatedAt": "2026-03-25T11:17:07.087Z",
+    "createdAt": "2026-03-24T22:18:35.343Z",
+    "id": "EcAR46ViBk9eTMAr",
+    "name": "[WF-01a-v3] RSS Collect + Classify",
+    "description": null,
+    "active": false,
+    "isArchived": false,
+    "nodes": [
+        {
+            "parameters": {},
+            "id": "98885057-1b37-4323-8774-46478bc110eb",
+            "name": "Manual Trigger",
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                -1200,
+                160
+            ]
         },
-        "options": {}
-      },
-      "id": "57a1f089-da10-4130-b191-500272544ad5",
-      "name": "Has New Articles?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        592,
-        76
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "var config = $('Config').first().json;\nvar data = $input.first().json;\nvar headers = data.headers;\nvar batchSize = config.CLASSIFICATION_BATCH_SIZE;\nvar batches = [];\nfor (var i = 0; i < headers.length; i += batchSize) {\n  batches.push({\n    json: {\n      batch_index: Math.floor(i / batchSize),\n      batch_size: Math.min(batchSize, headers.length - i),\n      headlines: headers.slice(i, i + batchSize)\n    }\n  });\n}\nif (batches.length === 0) {\n  return [{ json: { headlines: [], batch_index: 0, batch_size: 0 } }];\n}\nreturn batches;"
-      },
-      "id": "bafd56d2-69f1-4583-94af-e54f2bf89191",
-      "name": "Prepare Batches",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        816,
-        76
-      ]
-    },
-    {
-      "parameters": {
-        "options": {
-          "reset": false
-        }
-      },
-      "id": "17cd408c-c0a3-4cb2-b655-f74a5130ffa9",
-      "name": "Loop Classify",
-      "type": "n8n-nodes-base.splitInBatches",
-      "typeVersion": 3,
-      "position": [
-        1040,
-        76
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "var batch = $json;\nvar headlines = batch.headlines;\nvar headlineList = headlines.map(function(h, i) {\n  var title = (h.title || '').replace(/\"/g, \"'\").substring(0, 150);\n  var desc = (h.description || '').replace(/\"/g, \"'\").substring(0, 200);\n  return (i + 1) + '. \"' + title + '\" -- ' + desc;\n}).join('\\n');\nvar prompt = 'Classify these news headlines for Brett Moore podcast Fasten Your Seatbelt. ';\nprompt += 'Brett covers geopolitics, science/tech, economics, and quirky/surprising stories.\\n\\n';\nprompt += 'For each headline return a JSON array. Each item must have:\\n';\nprompt += '- index: headline number (1-based)\\n';\nprompt += '- category: one of [politics, geopolitics, science, tech, economics, quirky, other]\\n';\nprompt += '- relevance: 1-10 how relevant to Brett\\n';\nprompt += '- tags: object with keys entities (people/orgs/places), topics (themes), events (what happened)\\n';\nprompt += '- extract: true if worth reading full article, false to skip\\n';\nprompt += '- confidence: 0-1 how sure you are\\n\\n';\nprompt += 'Headlines:\\n' + headlineList + '\\n\\nReturn ONLY the JSON array.';\nreturn [{\n  json: {\n    headlines: batch.headlines,\n    batch_index: batch.batch_index,\n    batch_size: batch.batch_size,\n    classify_prompt: prompt\n  }\n}];"
-      },
-      "id": "c5dcd6e7-1e85-42a9-933e-6dcf4259de8f",
-      "name": "Build Prompt",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1264,
-        120
-      ]
-    },
-    {
-      "parameters": {
-        "promptType": "define",
-        "text": "={{ $json.classify_prompt }}",
-        "messages": {
-          "messageValues": [
-            {
-              "message": "You are a news classifier. Return only valid JSON arrays. No other text."
-            }
-          ]
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "cronExpression",
+                            "expression": "0 */4 * * *"
+                        }
+                    ]
+                }
+            },
+            "id": "989a2b62-c7ac-49cf-b6ae-ff220ce98c6d",
+            "name": "Schedule Trigger",
+            "type": "n8n-nodes-base.scheduleTrigger",
+            "typeVersion": 1.2,
+            "position": [
+                -1200,
+                352
+            ]
         },
-        "batching": {}
-      },
-      "id": "7f843a93-d915-4724-8756-199759ef5493",
-      "name": "Classify Headlines",
-      "type": "@n8n/n8n-nodes-langchain.chainLlm",
-      "typeVersion": 1.9,
-      "position": [
-        1488,
-        120
-      ]
-    },
-    {
-      "parameters": {
-        "model": "openai/gpt-5.4-nano",
-        "options": {}
-      },
-      "id": "00ec2894-b445-433a-8d53-e899001e552a",
-      "name": "Nano Model",
-      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
-      "typeVersion": 1,
-      "position": [
-        1560,
-        344
-      ],
-      "credentials": {
-        "openRouterApi": {
-          "id": "1HjiTjhZTVqv5vLc",
-          "name": "OpenRouter account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "var response = $input.first().json;\nvar batchData = $('Build Prompt').item.json;\nvar headlines = batchData.headlines;\nvar classified = [];\ntry {\n  var content = response.text || '[]';\n  var fence = String.fromCharCode(96,96,96); content = content.replace(new RegExp(fence + 'json', 'g'), '').replace(new RegExp(fence, 'g'), '');\n  var jsonMatch = content.match(/\\[[\\s\\S]*\\]/);\n  if (jsonMatch) {\n    classified = JSON.parse(jsonMatch[0]);\n  }\n} catch (e) {\n  classified = headlines.map(function(h, i) {\n    return {\n      index: i + 1, category: 'other', relevance: 5,\n      tags: { entities: [], topics: [], events: [] },\n      extract: true, confidence: 0\n    };\n  });\n}\nvar results = headlines.map(function(h, i) {\n  var cls = null;\n  for (var j = 0; j < classified.length; j++) {\n    if (classified[j].index === i + 1) { cls = classified[j]; break; }\n  }\n  if (!cls) cls = classified[i] || {\n    category: 'other', relevance: 5,\n    tags: { entities: [], topics: [], events: [] },\n    extract: true, confidence: 0\n  };\n  return {\n    json: {\n      title: h.title,\n      description: h.description,\n      url: h.url,\n      pubDate: h.pubDate,\n      feed_id: h.feed_id,\n      feed_name: h.feed_name,\n      feed_category: h.feed_category,\n      category: cls.category || h.feed_category || 'other',\n      header_score: cls.relevance || 5,\n      tags: cls.tags || { entities: [], topics: [], events: [] },\n      extract_worthy: cls.extract !== false,\n      confidence: cls.confidence || 0,\n      status: (cls.extract !== false) ? 'extract_worthy' : 'header_scored'\n    }\n  };\n});\nreturn results;"
-      },
-      "id": "09d439b5-2b34-4871-8933-ed9459a87534",
-      "name": "Parse Classifications",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1840,
-        244
-      ],
-      "alwaysOutputData": true
-    },
-    {
-      "parameters": {
-        "jsCode": "var config = $('Config').first().json;\nvar allArticles = $('Parse Classifications').all().map(function(i) { return i.json; });\n\n// ---- FIX: Use feed_category as fallback for diversity ----\n// Keep geopolitics as its own category \u2014 do NOT collapse to politics\nvar feedCatMap = {\n  'world_news': 'geopolitics',\n  'politics': 'politics',\n  'geopolitics': 'geopolitics',\n  'science': 'science',\n  'technology': 'tech',\n  'tech': 'tech',\n  'economics': 'economics',\n  'finance': 'economics',\n  'quirky': 'quirky',\n  'longform': 'quirky',\n  'culture': 'quirky',\n  'australia': 'geopolitics',\n  'canada': 'geopolitics'\n};\n\n// If LLM classified as politics/other but feed_category suggests otherwise, trust the feed\nfor (var fi = 0; fi < allArticles.length; fi++) {\n  var art = allArticles[fi];\n  var llmCat = art.category || 'other';\n  var feedCat = art.feed_category || '';\n  var mappedFeedCat = feedCatMap[feedCat.toLowerCase()] || '';\n  if ((llmCat === 'politics' || llmCat === 'other') && mappedFeedCat && mappedFeedCat !== 'politics') {\n    art.category = mappedFeedCat;\n  }\n  if (llmCat === 'other' && mappedFeedCat) {\n    art.category = mappedFeedCat;\n  }\n}\n\n// ---- CLUSTERING BY TAGS ----\nvar clusters = {};\nvar clusterCounter = 0;\nfor (var i = 0; i < allArticles.length; i++) {\n  var a = allArticles[i];\n  var aEntities = (a.tags && a.tags.entities ? a.tags.entities : []).map(function(t) { return t.toLowerCase(); });\n  var aEvents = (a.tags && a.tags.events ? a.tags.events : []).map(function(t) { return t.toLowerCase(); });\n  var aTags = aEntities.concat(aEvents);\n  var foundCluster = null;\n  var clusterKeys = Object.keys(clusters);\n  for (var ci = 0; ci < clusterKeys.length; ci++) {\n    var cId = clusterKeys[ci];\n    var cluster = clusters[cId];\n    var sharedEntities = aEntities.filter(function(t) { return cluster.entities.indexOf(t) >= 0; });\n    var sharedEvents = aEvents.filter(function(t) { return cluster.events.indexOf(t) >= 0; });\n    var shared = aTags.filter(function(t) { return cluster.tags.indexOf(t) >= 0; });\n    if ((sharedEntities.length >= 1 && sharedEvents.length >= 1) || shared.length >= 3) {\n      foundCluster = cId;\n      break;\n    }\n  }\n  if (foundCluster) {\n    clusters[foundCluster].articles.push(i);\n    var merged = clusters[foundCluster].tags.concat(aTags);\n    clusters[foundCluster].tags = merged.filter(function(v, idx, arr) { return arr.indexOf(v) === idx; });\n    var mEnt = clusters[foundCluster].entities.concat(aEntities);\n    clusters[foundCluster].entities = mEnt.filter(function(v, idx, arr) { return arr.indexOf(v) === idx; });\n    var mEv = clusters[foundCluster].events.concat(aEvents);\n    clusters[foundCluster].events = mEv.filter(function(v, idx, arr) { return arr.indexOf(v) === idx; });\n  } else {\n    var newId = 'cluster_' + (clusterCounter++);\n    clusters[newId] = {\n      articles: [i],\n      tags: aTags.filter(function(v, idx, arr) { return arr.indexOf(v) === idx; }),\n      entities: aEntities.filter(function(v, idx, arr) { return arr.indexOf(v) === idx; }),\n      events: aEvents.filter(function(v, idx, arr) { return arr.indexOf(v) === idx; })\n    };\n  }\n}\n\n// Assign cluster info + compute cluster_score\nvar clusterKeys2 = Object.keys(clusters);\nfor (var ci2 = 0; ci2 < clusterKeys2.length; ci2++) {\n  var cId2 = clusterKeys2[ci2];\n  var cl = clusters[cId2];\n  cl.articles.sort(function(a, b) {\n    return (allArticles[b].header_score || 0) - (allArticles[a].header_score || 0);\n  });\n  for (var r = 0; r < cl.articles.length; r++) {\n    var idx = cl.articles[r];\n    allArticles[idx].cluster_id = cId2;\n    allArticles[idx].cluster_rank = r + 1;\n    allArticles[idx].source_count = cl.articles.length;\n    var pubMs = new Date(allArticles[idx].pubDate).getTime();\n    var ageHours = (Date.now() - pubMs) / 3600000;\n    var freshness = ageHours < 6 ? 1.5 : (ageHours < 12 ? 1.2 : (ageHours < 24 ? 1.0 : 0.8));\n    allArticles[idx].cluster_score = (allArticles[idx].header_score || 5) * Math.log(cl.articles.length + 1) * freshness;\n  }\n}\n\n// ---- DIVERSITY-AWARE TOP SELECTION ----\nvar candidates = allArticles.filter(function(a) {\n  return a.cluster_rank === 1 && a.extract_worthy && (a.header_score || 0) >= config.HEADER_SCORE_THRESHOLD;\n});\ncandidates.sort(function(a, b) { return (b.cluster_score || 0) - (a.cluster_score || 0); });\n\n// Relaxed pool for diversity fills (lower threshold)\nvar relaxedCandidates = allArticles.filter(function(a) {\n  return a.cluster_rank === 1 && (a.header_score || 0) >= Math.max(config.HEADER_SCORE_THRESHOLD - 2, 1);\n});\nrelaxedCandidates.sort(function(a, b) { return (b.cluster_score || 0) - (a.cluster_score || 0); });\n\n// Category diversity - guarantee at least 1 per category (now includes geopolitics)\nvar categories = ['politics', 'geopolitics', 'science', 'tech', 'economics', 'quirky', 'other'];\nvar picked = [];\nvar pickedUrls = {};\n\n// First pass: pick best from each category (strict then relaxed)\nfor (var ci3 = 0; ci3 < categories.length; ci3++) {\n  var cat = categories[ci3];\n  var found = false;\n  for (var pi = 0; pi < candidates.length; pi++) {\n    if (candidates[pi].category === cat && !pickedUrls[candidates[pi].url]) {\n      picked.push(candidates[pi]);\n      pickedUrls[candidates[pi].url] = true;\n      found = true;\n      break;\n    }\n  }\n  if (!found) {\n    for (var ri = 0; ri < relaxedCandidates.length; ri++) {\n      if (relaxedCandidates[ri].category === cat && !pickedUrls[relaxedCandidates[ri].url]) {\n        picked.push(relaxedCandidates[ri]);\n        pickedUrls[relaxedCandidates[ri].url] = true;\n        break;\n      }\n    }\n  }\n}\n\n// Second pass: round-robin by category, least represented first\nvar catCounts = {};\nfor (var pc = 0; pc < picked.length; pc++) {\n  var pCat = picked[pc].category || 'other';\n  catCounts[pCat] = (catCounts[pCat] || 0) + 1;\n}\n\n// Build per-category queues from remaining candidates\nvar catQueues = {};\nfor (var qi = 0; qi < candidates.length; qi++) {\n  var qCat = candidates[qi].category || 'other';\n  if (!pickedUrls[candidates[qi].url]) {\n    if (!catQueues[qCat]) catQueues[qCat] = [];\n    catQueues[qCat].push(candidates[qi]);\n  }\n}\n\n// Fill to 30 via round-robin (least represented category first each round)\nwhile (picked.length < 30) {\n  // Sort categories by current count ascending\n  var sortedCats = categories.slice().sort(function(a, b) {\n    return (catCounts[a] || 0) - (catCounts[b] || 0);\n  });\n  var addedThisRound = false;\n  for (var sci = 0; sci < sortedCats.length && picked.length < 30; sci++) {\n    var sCat = sortedCats[sci];\n    if (catQueues[sCat] && catQueues[sCat].length > 0) {\n      var next = catQueues[sCat].shift();\n      picked.push(next);\n      pickedUrls[next.url] = true;\n      catCounts[sCat] = (catCounts[sCat] || 0) + 1;\n      addedThisRound = true;\n    }\n  }\n  if (!addedThisRound) break;\n}\n\nvar trending = clusterKeys2.filter(function(cId) {\n  return clusters[cId].articles.length >= 3;\n}).map(function(cId) {\n  return { cluster_id: cId, source_count: clusters[cId].articles.length, tags: clusters[cId].tags.slice(0, 5) };\n});\n\nreturn [{\n  json: {\n    total_classified: allArticles.length,\n    total_clusters: clusterKeys2.length,\n    total_trending: trending.length,\n    total_picked: picked.length,\n    trending: trending,\n    all_articles: allArticles,\n    top_candidates: picked\n  }\n}];"
-      },
-      "id": "23f9a215-e59e-410c-ab77-fe0b0e79a8cf",
-      "name": "Cluster + Score",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1264,
-        -176
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "var scoreData = $('Cluster + Score').first().json;\nvar allArticles = scoreData.all_articles || [];\nvar items = [];\nfor (var i = 0; i < allArticles.length; i++) {\n  var a = allArticles[i];\n  items.push({\n    json: {\n      url: a.url || '',\n      title: (a.title || '').substring(0, 500),\n      source_name: a.feed_name || 'RSS',\n      source_type: 'rss',\n      category: a.category || 'other',\n      composite_score: a.header_score || 0,\n      header_score: a.header_score || 0,\n      source_count: a.source_count || 1,\n      status: 'header_scored',\n      metadata: JSON.stringify({\n        tags: a.tags || {},\n        cluster_id: a.cluster_id || '',\n        cluster_rank: a.cluster_rank || 1,\n        confidence: a.confidence || 0,\n        feed_id: a.feed_id || '',\n        feed_name: a.feed_name || '',\n        description: (a.description || '').substring(0, 1000)\n      })\n    }\n  });\n}\nif (items.length === 0) items.push({json: {_empty: true}});\nreturn items;"
-      },
-      "id": "c1118436-141c-4ecb-9f1e-1ff623d98989",
-      "name": "Prepare Save Items",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1488,
-        -176
-      ]
-    },
-    {
-      "parameters": {
-        "options": {}
-      },
-      "id": "fa3d0f4c-20ea-499c-bdfa-93b816782f3b",
-      "name": "Loop Save",
-      "type": "n8n-nodes-base.splitInBatches",
-      "typeVersion": 3,
-      "position": [
-        1712,
-        -176
-      ]
-    },
-    {
-      "parameters": {
-        "tableId": "articles",
-        "fieldsUi": {
-          "fieldValues": [
-            {
-              "fieldId": "url",
-              "fieldValue": "={{ $json.url }}"
+        {
+            "parameters": {
+                "jsCode": "var staticData = $getWorkflowStaticData(\"global\");\nstaticData.allArticles = [];\nstaticData.classified = [];\n\n  var CONFIG = {\n    BATCH_NUMBER: -1,              // -1 = all feeds, 0-23 = specific batch\n    MAX_ARTICLE_AGE_HOURS: 168,    // 7 days\n    CLASSIFICATION_BATCH_SIZE: 30, // headlines per LLM call\n    MAX_ARTICLES: 500,             // cap before classification\n    HEADER_MODEL: 'openai/gpt-5.4-nano'\n  };\n  return [{ json: CONFIG }];"
             },
-            {
-              "fieldId": "title",
-              "fieldValue": "={{ $json.title }}"
+            "id": "899f6fc3-4d5d-49ad-b578-9a822629d0ec",
+            "name": "Config",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -976,
+                320
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "getAll",
+                "tableId": "feeds",
+                "returnAll": true,
+                "filterType": "string",
+                "filterString": "is_active=eq.true"
             },
-            {
-              "fieldId": "source_name",
-              "fieldValue": "={{ $json.source_name }}"
-            },
-            {
-              "fieldId": "source_type",
-              "fieldValue": "={{ $json.source_type }}"
-            },
-            {
-              "fieldId": "category",
-              "fieldValue": "={{ $json.category }}"
-            },
-            {
-              "fieldId": "composite_score",
-              "fieldValue": "={{ $json.composite_score }}"
-            },
-            {
-              "fieldId": "header_score",
-              "fieldValue": "={{ $json.header_score }}"
-            },
-            {
-              "fieldId": "source_count",
-              "fieldValue": "={{ $json.source_count }}"
-            },
-            {
-              "fieldId": "status",
-              "fieldValue": "={{ $json.status }}"
-            },
-            {
-              "fieldId": "metadata",
-              "fieldValue": "={{ $json.metadata }}"
+            "id": "c8cb508d-c762-447a-9ec9-a02859ffbb46",
+            "name": "Get Active Feeds",
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                -752,
+                320
+            ],
+            "credentials": {
+                "supabaseApi": {
+                    "id": "k5u4E7DLyRpsGAB0",
+                    "name": "Supabase account"
+                }
             }
-          ]
+        },
+        {
+            "parameters": {
+                "jsCode": "var config = $('Config').first().json;\nvar feeds = $input.all();\nvar filtered;\nif (config.BATCH_NUMBER === -1) {\n  filtered = feeds;\n} else {\n  filtered = feeds.filter(function(f) {\n    return f.json.batch_number === config.BATCH_NUMBER;\n  });\n}\nif (filtered.length === 0) {\n  throw new Error('No active feeds found for batch ' + config.BATCH_NUMBER);\n}\nreturn filtered;"
+            },
+            "id": "9ff8b074-c91b-49db-a5d6-2680acb5895f",
+            "name": "Filter by Batch",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -528,
+                320
+            ]
+        },
+        {
+            "parameters": {
+                "options": {
+                    "reset": false
+                }
+            },
+            "id": "67bf0243-b657-4837-a423-7a80757308d0",
+            "name": "Loop Feeds",
+            "type": "n8n-nodes-base.splitInBatches",
+            "typeVersion": 3,
+            "position": [
+                -304,
+                320
+            ]
+        },
+        {
+            "parameters": {
+                "url": "={{ $json.url }}",
+                "options": {}
+            },
+            "id": "930a74cf-b448-4ef9-a709-8fe2400028ca",
+            "name": "RSS Read",
+            "type": "n8n-nodes-base.rssFeedRead",
+            "typeVersion": 1.2,
+            "position": [
+                -80,
+                272
+            ],
+            "alwaysOutputData": true,
+            "continueOnFail": true
+        },
+        {
+            "parameters": {
+                "jsCode": "var feedData = $('Loop Feeds').first().json;\nvar config = $('Config').first().json;\nvar items = $input.all();\nvar now = new Date();\nvar maxAge = config.MAX_ARTICLE_AGE_HOURS * 60 * 60 * 1000;\nvar results = [];\nfor (var i = 0; i < items.length; i++) {\n  var item = items[i];\n  if (item.json.error) continue;\n  var pubDate = new Date(item.json.isoDate || item.json.pubDate || now);\n  var age = now - pubDate;\n  if (age > maxAge) continue;\n  results.push({\n    json: {\n      title: item.json.title || '',\n      description: item.json.contentSnippet || item.json.content || '',\n      url: item.json.link || item.json.guid || '',\n      pubDate: item.json.isoDate || item.json.pubDate || now.toISOString(),\n      feed_id: feedData.id,\n      feed_name: feedData.name,\n      feed_category: feedData.category,\n      feed_url: feedData.url\n    }\n  });\n}\nvar staticData = $getWorkflowStaticData(\"global\");\nif (!staticData.allArticles) staticData.allArticles = [];\nfor (var ri = 0; ri < results.length; ri++) {\n  staticData.allArticles.push(results[ri].json);\n}\n\nif (results.length === 0) {\n  return [{ json: { _skip: true, feed_name: feedData.name } }];\n}\nreturn results;"
+            },
+            "id": "aa58f6e9-a297-4166-b405-a5dd6a6c7472",
+            "name": "Attach Feed Info",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                144,
+                384
+            ],
+            "alwaysOutputData": true
+        },
+        {
+            "parameters": {
+                "jsCode": "var staticData = $getWorkflowStaticData('global');\nvar allArticles = staticData.allArticles || [];\nvar config = $('Config').first().json;\nvar maxArticles = config.MAX_ARTICLES || 500;\n\nvar headers = allArticles.filter(function(a) {\n  return a.title && a.url && !a._skip;\n});\n\nvar seen = {};\nvar unique = [];\nfor (var i = 0; i < headers.length; i++) {\n  var url = headers[i].url;\n  if (!seen[url]) {\n    seen[url] = true;\n    unique.push(headers[i]);\n  }\n}\n\nif (unique.length > maxArticles) {\n  unique.sort(function() { return Math.random() - 0.5; });\n  unique = unique.slice(0, maxArticles);\n}\n\nreturn [{\n  json: {\n    total_headers: unique.length,\n    total_before_dedup: headers.length,\n    total_raw: allArticles.length,\n    headers: unique\n  }\n}];"
+            },
+            "id": "958fd34a-4603-4cc0-8186-bc10367511e5",
+            "name": "Merge + Filter",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -80,
+                80
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "getAll",
+                "tableId": "articles",
+                "returnAll": true
+            },
+            "id": "a0f393bd-6de3-4ed3-ab2c-988a51fc120f",
+            "name": "Get Existing URLs",
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                144,
+                80
+            ],
+            "alwaysOutputData": true,
+            "credentials": {
+                "supabaseApi": {
+                    "id": "k5u4E7DLyRpsGAB0",
+                    "name": "Supabase account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "var existingItems = $('Get Existing URLs').all();\nvar existingUrls = {};\nfor (var i = 0; i < existingItems.length; i++) {\n  var u = existingItems[i].json.url;\n  if (u) existingUrls[u] = true;\n}\nvar allHeaders = $('Merge + Filter').first().json.headers;\nvar newHeaders = allHeaders.filter(function(h) {\n  return !existingUrls[h.url];\n});\nreturn [{\n  json: {\n    total_new: newHeaders.length,\n    total_skipped: allHeaders.length - newHeaders.length,\n    headers: newHeaders\n  }\n}];"
+            },
+            "id": "620a0ab6-49d0-4ef5-8782-631b395f4151",
+            "name": "Dedup",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                368,
+                80
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "strict",
+                        "version": 2
+                    },
+                    "conditions": [
+                        {
+                            "id": "d0421ed8-10a9-4ed7-a651-ec80f2871a84",
+                            "leftValue": "={{ $json.total_new }}",
+                            "rightValue": 0,
+                            "operator": {
+                                "type": "number",
+                                "operation": "gt"
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": {}
+            },
+            "id": "57a1f089-da10-4130-b191-500272544ad5",
+            "name": "Has New Articles?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2.2,
+            "position": [
+                592,
+                80
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "var config = $('Config').first().json;\nvar data = $input.first().json;\nvar headers = data.headers;\nvar batchSize = config.CLASSIFICATION_BATCH_SIZE;\nvar batches = [];\nfor (var i = 0; i < headers.length; i += batchSize) {\n  batches.push({\n    json: {\n      batch_index: Math.floor(i / batchSize),\n      batch_size: Math.min(batchSize, headers.length - i),\n      headlines: headers.slice(i, i + batchSize)\n    }\n  });\n}\nif (batches.length === 0) {\n  return [{ json: { headlines: [], batch_index: 0, batch_size: 0 } }];\n}\nreturn batches;"
+            },
+            "id": "bafd56d2-69f1-4583-94af-e54f2bf89191",
+            "name": "Prepare Batches",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                816,
+                80
+            ]
+        },
+        {
+            "parameters": {
+                "options": {
+                    "reset": false
+                }
+            },
+            "id": "17cd408c-c0a3-4cb2-b655-f74a5130ffa9",
+            "name": "Loop Classify",
+            "type": "n8n-nodes-base.splitInBatches",
+            "typeVersion": 3,
+            "position": [
+                1040,
+                80
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "var batch = $json;\nvar headlines = batch.headlines;\nvar headlineList = headlines.map(function(h, i) {\n  var title = (h.title || '').replace(/\"/g, \"'\").substring(0, 150);\n  var desc = (h.description || '').replace(/\"/g, \"'\").substring(0, 200);\n  return (i + 1) + '. \"' + title + '\" -- ' + desc;\n}).join('\\n');\nvar prompt = 'Classify these news headlines for Brett Moore podcast Fasten Your Seatbelt. ';\nprompt += 'Brett covers geopolitics, science/tech, economics, and quirky/surprising stories.\\n\\n';\nprompt += 'For each headline return a JSON array. Each item must have:\\n';\nprompt += '- index: headline number (1-based)\\n';\nprompt += '- category: one of [politics, geopolitics, science, tech, economics, quirky, other]\\n';\nprompt += '- relevance: 1-10 how relevant to Brett\\n';\nprompt += '- tags: object with keys entities (people/orgs/places), topics (themes), events (what happened)\\n';\nprompt += '- extract: true if worth reading full article, false to skip\\n';\nprompt += '- confidence: 0-1 how sure you are\\n\\n';\nprompt += 'Headlines:\\n' + headlineList + '\\n\\nReturn ONLY the JSON array.';\nreturn [{\n  json: {\n    headlines: batch.headlines,\n    batch_index: batch.batch_index,\n    batch_size: batch.batch_size,\n    classify_prompt: prompt\n  }\n}];"
+            },
+            "id": "c5dcd6e7-1e85-42a9-933e-6dcf4259de8f",
+            "name": "Build Prompt",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1264,
+                128
+            ]
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "={{ $json.classify_prompt }}",
+                "messages": {
+                    "messageValues": [
+                        {
+                            "message": "You are a news classifier. Return only valid JSON arrays. No other text."
+                        }
+                    ]
+                },
+                "batching": {}
+            },
+            "id": "7f843a93-d915-4724-8756-199759ef5493",
+            "name": "Classify Headlines",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.9,
+            "position": [
+                1488,
+                128
+            ]
+        },
+        {
+            "parameters": {
+                "model": "openai/gpt-5.4-nano",
+                "options": {}
+            },
+            "id": "00ec2894-b445-433a-8d53-e899001e552a",
+            "name": "Nano Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+            "typeVersion": 1,
+            "position": [
+                1504,
+                352
+            ],
+            "credentials": {
+                "openRouterApi": {
+                    "id": "1HjiTjhZTVqv5vLc",
+                    "name": "OpenRouter account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "var response = $input.first().json;\nvar batchData = $('Build Prompt').item.json;\nvar headlines = batchData.headlines;\nvar classified = [];\ntry {\n  var content = response.text || '[]';\n  var fence = String.fromCharCode(96,96,96); content = content.replace(new RegExp(fence + 'json', 'g'), '').replace(new RegExp(fence, 'g'), '');\n  var jsonMatch = content.match(/\\[[\\s\\S]*\\]/);\n  if (jsonMatch) {\n    classified = JSON.parse(jsonMatch[0]);\n  }\n} catch (e) {\n  classified = headlines.map(function(h, i) {\n    return {\n      index: i + 1, category: 'other', relevance: 5,\n      tags: { entities: [], topics: [], events: [] },\n      extract: true, confidence: 0\n    };\n  });\n}\nvar results = headlines.map(function(h, i) {\n  var cls = null;\n  for (var j = 0; j < classified.length; j++) {\n    if (classified[j].index === i + 1) { cls = classified[j]; break; }\n  }\n  if (!cls) cls = classified[i] || {\n    category: 'other', relevance: 5,\n    tags: { entities: [], topics: [], events: [] },\n    extract: true, confidence: 0\n  };\n  return {\n    json: {\n      title: h.title,\n      description: h.description,\n      url: h.url,\n      pubDate: h.pubDate,\n      feed_id: h.feed_id,\n      feed_name: h.feed_name,\n      feed_category: h.feed_category,\n      category: cls.category || h.feed_category || 'other',\n      header_score: cls.relevance || 5,\n      tags: cls.tags || { entities: [], topics: [], events: [] },\n      extract_worthy: cls.extract !== false,\n      confidence: cls.confidence || 0,\n      status: (cls.extract !== false) ? 'extract_worthy' : 'header_scored'\n    }\n  };\n});\n\n// Accumulate in staticData (survives SplitInBatches)\nvar staticData = $getWorkflowStaticData('global');\nif (!staticData.classified) staticData.classified = [];\nfor (var ri = 0; ri < results.length; ri++) {\n  staticData.classified.push(results[ri].json);\n}\n\nreturn results;"
+            },
+            "id": "09d439b5-2b34-4871-8933-ed9459a87534",
+            "name": "Parse Classifications",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1840,
+                176
+            ],
+            "alwaysOutputData": true
+        },
+        {
+            "parameters": {
+                "jsCode": "var config = $('Config').first().json;\n// Read from staticData (accumulated across all SplitInBatches iterations)\nvar staticData = $getWorkflowStaticData('global');\nvar allArticles = (staticData.classified || []).slice();\n\n// ---- FIX: Use feed_category as fallback for diversity ----\nvar feedCatMap = {\n  'world_news': 'geopolitics',\n  'politics': 'politics',\n  'geopolitics': 'geopolitics',\n  'science': 'science',\n  'technology': 'tech',\n  'tech': 'tech',\n  'economics': 'economics',\n  'finance': 'economics',\n  'quirky': 'quirky',\n  'longform': 'quirky',\n  'culture': 'quirky',\n  'australia': 'geopolitics',\n  'canada': 'geopolitics',\n  'general': 'geopolitics',\n  'business': 'economics',\n  'health': 'science'\n};\n\nfor (var fi = 0; fi < allArticles.length; fi++) {\n  var art = allArticles[fi];\n  var llmCat = art.category || 'other';\n  var feedCat = art.feed_category || '';\n  var mappedFeedCat = feedCatMap[feedCat.toLowerCase()] || '';\n  if ((llmCat === 'politics' || llmCat === 'other') && mappedFeedCat && mappedFeedCat !== 'politics') {\n    art.category = mappedFeedCat;\n  }\n  if (llmCat === 'other' && mappedFeedCat) {\n    art.category = mappedFeedCat;\n  }\n}\n\n// ---- CLUSTERING BY TAGS ----\nvar clusters = {};\nvar clusterCounter = 0;\nfor (var i = 0; i < allArticles.length; i++) {\n  var a = allArticles[i];\n  var rawEnt = a.tags && a.tags.entities ? a.tags.entities : [];\n  if (!Array.isArray(rawEnt)) rawEnt = typeof rawEnt === 'string' ? [rawEnt] : [];\n  var aEntities = rawEnt.map(function(t) { return String(t).toLowerCase(); });\n  var rawEv = a.tags && a.tags.events ? a.tags.events : [];\n  if (!Array.isArray(rawEv)) rawEv = typeof rawEv === 'string' ? [rawEv] : [];\n  var aEvents = rawEv.map(function(t) { return String(t).toLowerCase(); });\n  var aTags = aEntities.concat(aEvents);\n  var foundCluster = null;\n  var clusterKeys = Object.keys(clusters);\n  for (var ci = 0; ci < clusterKeys.length; ci++) {\n    var cId = clusterKeys[ci];\n    var cluster = clusters[cId];\n    var sharedEntities = aEntities.filter(function(t) { return cluster.entities.indexOf(t) >= 0; });\n    var sharedEvents = aEvents.filter(function(t) { return cluster.events.indexOf(t) >= 0; });\n    var shared = aTags.filter(function(t) { return cluster.tags.indexOf(t) >= 0; });\n    if ((sharedEntities.length >= 1 && sharedEvents.length >= 1) || shared.length >= 3) {\n      foundCluster = cId;\n      break;\n    }\n  }\n  if (foundCluster) {\n    clusters[foundCluster].articles.push(i);\n    var merged = clusters[foundCluster].tags.concat(aTags);\n    clusters[foundCluster].tags = merged.filter(function(v, idx, arr) { return arr.indexOf(v) === idx; });\n    var mEnt = clusters[foundCluster].entities.concat(aEntities);\n    clusters[foundCluster].entities = mEnt.filter(function(v, idx, arr) { return arr.indexOf(v) === idx; });\n    var mEv = clusters[foundCluster].events.concat(aEvents);\n    clusters[foundCluster].events = mEv.filter(function(v, idx, arr) { return arr.indexOf(v) === idx; });\n  } else {\n    var newId = 'cluster_' + (clusterCounter++);\n    clusters[newId] = {\n      articles: [i],\n      tags: aTags.filter(function(v, idx, arr) { return arr.indexOf(v) === idx; }),\n      entities: aEntities.filter(function(v, idx, arr) { return arr.indexOf(v) === idx; }),\n      events: aEvents.filter(function(v, idx, arr) { return arr.indexOf(v) === idx; })\n    };\n  }\n}\n\n// Assign cluster info + compute cluster_score\nvar clusterKeys2 = Object.keys(clusters);\nfor (var ci2 = 0; ci2 < clusterKeys2.length; ci2++) {\n  var cId2 = clusterKeys2[ci2];\n  var cl = clusters[cId2];\n  cl.articles.sort(function(a, b) {\n    return (allArticles[b].header_score || 0) - (allArticles[a].header_score || 0);\n  });\n  for (var r = 0; r < cl.articles.length; r++) {\n    var idx = cl.articles[r];\n    allArticles[idx].cluster_id = cId2;\n    allArticles[idx].cluster_rank = r + 1;\n    allArticles[idx].source_count = cl.articles.length;\n    var pubMs = new Date(allArticles[idx].pubDate).getTime();\n    var ageHours = (Date.now() - pubMs) / 3600000;\n    var freshness = ageHours < 6 ? 1.5 : (ageHours < 12 ? 1.2 : (ageHours < 24 ? 1.0 : 0.8));\n    allArticles[idx].cluster_score = (allArticles[idx].header_score || 5) * Math.log(cl.articles.length + 1) * freshness;\n  }\n}\n\n// ---- DIVERSITY-AWARE TOP SELECTION ----\nvar candidates = allArticles.filter(function(a) {\n  return a.cluster_rank === 1 && a.extract_worthy && (a.header_score || 0) >= (config.HEADER_SCORE_THRESHOLD || 3);\n});\ncandidates.sort(function(a, b) { return (b.cluster_score || 0) - (a.cluster_score || 0); });\n\nvar relaxedCandidates = allArticles.filter(function(a) {\n  return a.cluster_rank === 1 && (a.header_score || 0) >= Math.max((config.HEADER_SCORE_THRESHOLD || 3) - 2, 1);\n});\nrelaxedCandidates.sort(function(a, b) { return (b.cluster_score || 0) - (a.cluster_score || 0); });\n\nvar categories = ['politics', 'geopolitics', 'science', 'tech', 'economics', 'quirky'];\nvar picked = [];\nvar pickedUrls = {};\n\n// First pass: pick best from each category\nfor (var ci3 = 0; ci3 < categories.length; ci3++) {\n  var cat = categories[ci3];\n  var found = false;\n  for (var pi = 0; pi < candidates.length; pi++) {\n    if (candidates[pi].category === cat && !pickedUrls[candidates[pi].url]) {\n      picked.push(candidates[pi]);\n      pickedUrls[candidates[pi].url] = true;\n      found = true;\n      break;\n    }\n  }\n  if (!found) {\n    for (var ri = 0; ri < relaxedCandidates.length; ri++) {\n      if (relaxedCandidates[ri].category === cat && !pickedUrls[relaxedCandidates[ri].url]) {\n        picked.push(relaxedCandidates[ri]);\n        pickedUrls[relaxedCandidates[ri].url] = true;\n        break;\n      }\n    }\n  }\n}\n\n// Second pass: round-robin least represented\nvar catCounts = {};\nfor (var pc = 0; pc < picked.length; pc++) {\n  var pCat = picked[pc].category || 'other';\n  catCounts[pCat] = (catCounts[pCat] || 0) + 1;\n}\n\nvar catQueues = {};\nfor (var qi = 0; qi < candidates.length; qi++) {\n  var qCat = candidates[qi].category || 'other';\n  if (!pickedUrls[candidates[qi].url]) {\n    if (!catQueues[qCat]) catQueues[qCat] = [];\n    catQueues[qCat].push(candidates[qi]);\n  }\n}\n\nwhile (picked.length < 30) {\n  var sortedCats = categories.slice().sort(function(a, b) {\n    return (catCounts[a] || 0) - (catCounts[b] || 0);\n  });\n  var addedThisRound = false;\n  for (var sci = 0; sci < sortedCats.length && picked.length < 30; sci++) {\n    var sCat = sortedCats[sci];\n    if (catQueues[sCat] && catQueues[sCat].length > 0) {\n      var next = catQueues[sCat].shift();\n      picked.push(next);\n      pickedUrls[next.url] = true;\n      catCounts[sCat] = (catCounts[sCat] || 0) + 1;\n      addedThisRound = true;\n    }\n  }\n  if (!addedThisRound) break;\n}\n\nvar trending = clusterKeys2.filter(function(cId) {\n  return clusters[cId].articles.length >= 3;\n}).map(function(cId) {\n  return { cluster_id: cId, source_count: clusters[cId].articles.length, tags: clusters[cId].tags.slice(0, 5) };\n});\n\nreturn [{\n  json: {\n    total_classified: allArticles.length,\n    total_clusters: clusterKeys2.length,\n    total_trending: trending.length,\n    total_picked: picked.length,\n    trending: trending,\n    all_articles: allArticles,\n    top_candidates: picked\n  }\n}];\n"
+            },
+            "id": "23f9a215-e59e-410c-ab77-fe0b0e79a8cf",
+            "name": "Cluster + Score",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1264,
+                -176
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "var scoreData = $('Cluster + Score').first().json;\nvar allArticles = scoreData.all_articles || [];\nvar items = [];\nfor (var i = 0; i < allArticles.length; i++) {\n  var a = allArticles[i];\n  items.push({\n    json: {\n      url: a.url || '',\n      title: (a.title || '').substring(0, 500),\n      source_name: a.feed_name || 'RSS',\n      source_type: 'rss',\n      category: a.category || 'other',\n      composite_score: a.header_score || 0,\n      header_score: a.header_score || 0,\n      source_count: a.source_count || 1,\n      status: 'header_scored',\n      metadata: JSON.stringify({\n        tags: a.tags || {},\n        cluster_id: a.cluster_id || '',\n        cluster_rank: a.cluster_rank || 1,\n        confidence: a.confidence || 0,\n        feed_id: a.feed_id || '',\n        feed_name: a.feed_name || '',\n        description: (a.description || '').substring(0, 1000)\n      })\n    }\n  });\n}\nif (items.length === 0) items.push({json: {_empty: true}});\nreturn items;"
+            },
+            "id": "c1118436-141c-4ecb-9f1e-1ff623d98989",
+            "name": "Prepare Save Items",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1552,
+                -176
+            ]
+        },
+        {
+            "parameters": {
+                "options": {}
+            },
+            "id": "fa3d0f4c-20ea-499c-bdfa-93b816782f3b",
+            "name": "Loop Save",
+            "type": "n8n-nodes-base.splitInBatches",
+            "typeVersion": 3,
+            "position": [
+                1840,
+                -176
+            ]
+        },
+        {
+            "parameters": {
+                "tableId": "articles",
+                "fieldsUi": {
+                    "fieldValues": [
+                        {
+                            "fieldId": "url",
+                            "fieldValue": "={{ $json.url }}"
+                        },
+                        {
+                            "fieldId": "title",
+                            "fieldValue": "={{ $json.title }}"
+                        },
+                        {
+                            "fieldId": "source_name",
+                            "fieldValue": "={{ $json.source_name }}"
+                        },
+                        {
+                            "fieldId": "source_type",
+                            "fieldValue": "={{ $json.source_type }}"
+                        },
+                        {
+                            "fieldId": "category",
+                            "fieldValue": "={{ $json.category }}"
+                        },
+                        {
+                            "fieldId": "composite_score",
+                            "fieldValue": "={{ $json.composite_score }}"
+                        },
+                        {
+                            "fieldId": "header_score",
+                            "fieldValue": "={{ $json.header_score }}"
+                        },
+                        {
+                            "fieldId": "source_count",
+                            "fieldValue": "={{ $json.source_count }}"
+                        },
+                        {
+                            "fieldId": "status",
+                            "fieldValue": "={{ $json.status }}"
+                        },
+                        {
+                            "fieldId": "metadata",
+                            "fieldValue": "={{ $json.metadata }}"
+                        }
+                    ]
+                }
+            },
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                2064,
+                -176
+            ],
+            "id": "8195e39f-34f6-454f-9c1e-e7137d3b8925",
+            "name": "Insert Article",
+            "alwaysOutputData": true,
+            "credentials": {
+                "supabaseApi": {
+                    "id": "k5u4E7DLyRpsGAB0",
+                    "name": "Supabase account"
+                }
+            },
+            "continueOnFail": true
+        },
+        {
+            "parameters": {
+                "content": "## [WF-01a-v3] RSS Collect + Classify\n\nPhase 1+2+Save extracted from monolith.\n- Collects RSS feeds, classifies headlines via LLM\n- Clusters, scores, and saves ALL articles to Supabase\n- No Telegram, no presentation logic\n- BATCH_NUMBER: -1 (all feeds)\n- Geopolitics as own category + round-robin diversity",
+                "height": 384,
+                "width": 496
+            },
+            "id": "8d7c66eb-0e77-455e-824a-13c4796d9851",
+            "name": "Architecture Note",
+            "type": "n8n-nodes-base.stickyNote",
+            "typeVersion": 1,
+            "position": [
+                -1104,
+                -560
+            ]
         }
-      },
-      "type": "n8n-nodes-base.supabase",
-      "typeVersion": 1,
-      "position": [
-        1936,
-        -32
-      ],
-      "id": "8195e39f-34f6-454f-9c1e-e7137d3b8925",
-      "name": "Insert Article",
-      "alwaysOutputData": true,
-      "credentials": {
-        "supabaseApi": {
-          "id": "k5u4E7DLyRpsGAB0",
-          "name": "Supabase account"
+    ],
+    "connections": {
+        "Manual Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Config",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Schedule Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Config",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Config": {
+            "main": [
+                [
+                    {
+                        "node": "Get Active Feeds",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get Active Feeds": {
+            "main": [
+                [
+                    {
+                        "node": "Filter by Batch",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Filter by Batch": {
+            "main": [
+                [
+                    {
+                        "node": "Loop Feeds",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Loop Feeds": {
+            "main": [
+                [
+                    {
+                        "node": "Merge + Filter",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "RSS Read",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "RSS Read": {
+            "main": [
+                [
+                    {
+                        "node": "Attach Feed Info",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Attach Feed Info": {
+            "main": [
+                [
+                    {
+                        "node": "Loop Feeds",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Merge + Filter": {
+            "main": [
+                [
+                    {
+                        "node": "Get Existing URLs",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get Existing URLs": {
+            "main": [
+                [
+                    {
+                        "node": "Dedup",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Dedup": {
+            "main": [
+                [
+                    {
+                        "node": "Has New Articles?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Has New Articles?": {
+            "main": [
+                [
+                    {
+                        "node": "Prepare Batches",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                []
+            ]
+        },
+        "Prepare Batches": {
+            "main": [
+                [
+                    {
+                        "node": "Loop Classify",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Loop Classify": {
+            "main": [
+                [
+                    {
+                        "node": "Cluster + Score",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Build Prompt",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Build Prompt": {
+            "main": [
+                [
+                    {
+                        "node": "Classify Headlines",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Nano Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Classify Headlines",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Classify Headlines": {
+            "main": [
+                [
+                    {
+                        "node": "Parse Classifications",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Parse Classifications": {
+            "main": [
+                [
+                    {
+                        "node": "Loop Classify",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Cluster + Score": {
+            "main": [
+                [
+                    {
+                        "node": "Prepare Save Items",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Prepare Save Items": {
+            "main": [
+                [
+                    {
+                        "node": "Loop Save",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Loop Save": {
+            "main": [
+                [],
+                [
+                    {
+                        "node": "Insert Article",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Insert Article": {
+            "main": [
+                [
+                    {
+                        "node": "Loop Save",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
         }
-      },
-      "continueOnFail": true
     },
-    {
-      "parameters": {
-        "content": "## [WF-01a-v3] RSS Collect + Classify\n\nPhase 1+2+Save extracted from monolith.\n- Collects RSS feeds, classifies headlines via LLM\n- Clusters, scores, and saves ALL articles to Supabase\n- No Telegram, no presentation logic\n- BATCH_NUMBER: -1 (all feeds)\n- Geopolitics as own category + round-robin diversity"
-      },
-      "id": "8d7c66eb-0e77-455e-824a-13c4796d9851",
-      "name": "Architecture Note",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        -1240,
-        80
-      ]
-    }
-  ],
-  "connections": {
-    "Manual Trigger": {
-      "main": [
-        [
-          {
-            "node": "Config",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+    "settings": {
+        "executionOrder": "v1",
+        "callerPolicy": "workflowsFromSameOwner",
+        "availableInMCP": false,
+        "binaryMode": "separate"
     },
-    "Schedule Trigger": {
-      "main": [
-        [
-          {
-            "node": "Config",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Config": {
-      "main": [
-        [
-          {
-            "node": "Get Active Feeds",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get Active Feeds": {
-      "main": [
-        [
-          {
-            "node": "Filter by Batch",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Filter by Batch": {
-      "main": [
-        [
-          {
-            "node": "Loop Feeds",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Loop Feeds": {
-      "main": [
-        [
-          {
-            "node": "Merge + Filter",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "RSS Read",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "RSS Read": {
-      "main": [
-        [
-          {
-            "node": "Attach Feed Info",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Attach Feed Info": {
-      "main": [
-        [
-          {
-            "node": "Loop Feeds",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Merge + Filter": {
-      "main": [
-        [
-          {
-            "node": "Get Existing URLs",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get Existing URLs": {
-      "main": [
-        [
-          {
-            "node": "Dedup",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Dedup": {
-      "main": [
-        [
-          {
-            "node": "Has New Articles?",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Has New Articles?": {
-      "main": [
-        [
-          {
-            "node": "Prepare Batches",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        []
-      ]
-    },
-    "Prepare Batches": {
-      "main": [
-        [
-          {
-            "node": "Loop Classify",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Loop Classify": {
-      "main": [
-        [
-          {
-            "node": "Cluster + Score",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Build Prompt",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Build Prompt": {
-      "main": [
-        [
-          {
-            "node": "Classify Headlines",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Nano Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Classify Headlines",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Classify Headlines": {
-      "main": [
-        [
-          {
-            "node": "Parse Classifications",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Parse Classifications": {
-      "main": [
-        [
-          {
-            "node": "Loop Classify",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Cluster + Score": {
-      "main": [
-        [
-          {
-            "node": "Prepare Save Items",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Prepare Save Items": {
-      "main": [
-        [
-          {
-            "node": "Loop Save",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Loop Save": {
-      "main": [
-        [],
-        [
-          {
-            "node": "Insert Article",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Insert Article": {
-      "main": [
-        [
-          {
-            "node": "Loop Save",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    }
-  },
-  "settings": {
-    "executionOrder": "v1"
-  }
+    "staticData": null,
+    "meta": null,
+    "pinData": {},
+    "versionId": "6bf8b315-40f7-476c-8740-a64a0d9d0946",
+    "activeVersionId": null,
+    "versionCounter": 25,
+    "triggerCount": 0,
+    "shared": [
+        {
+            "updatedAt": "2026-03-24T22:18:35.345Z",
+            "createdAt": "2026-03-24T22:18:35.345Z",
+            "role": "workflow:owner",
+            "workflowId": "EcAR46ViBk9eTMAr",
+            "projectId": "S1Sia4mxWWgZxzsz",
+            "project": {
+                "updatedAt": "2026-03-19T21:30:04.243Z",
+                "createdAt": "2026-03-19T21:28:04.434Z",
+                "id": "S1Sia4mxWWgZxzsz",
+                "name": "Christian  Nikolov <christian.nikolov@alumni.esade.edu>",
+                "type": "personal",
+                "icon": null,
+                "description": null,
+                "creatorId": "a4726199-d7ac-414b-b995-7863227e1dc5"
+            }
+        }
+    ],
+    "tags": [],
+    "activeVersion": null
 }

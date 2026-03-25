@@ -1,1 +1,473 @@
-{"updatedAt":"2026-03-24T22:35:50.996Z","createdAt":"2026-03-24T22:35:50.996Z","id":"hXnMZtOEEg1C60RR","name":"[WF-07-v3] Brett Voice and Link Forward","description":null,"active":false,"isArchived":false,"nodes":[{"parameters":{"updates":["message"],"additionalFields":{}},"type":"n8n-nodes-base.telegramTrigger","typeVersion":1.1,"position":[-608,304],"id":"70e216f7-70b9-42be-9218-579ee40859fc","name":"Telegram Trigger","webhookId":"a46babf6-5b0f-4f66-9e0b-a3cb3563e911","credentials":{"telegramApi":{"id":"V1Z3rnsrUvXf0TPr","name":"Telegram account"}}},{"parameters":{"jsCode":"var msg = $input.first().json.message;\nvar voice = msg.voice || null;\nvar audio = msg.audio || null;\nvar hasVoice = !!(voice || audio);\nvar text = msg.text || msg.caption || \"\";\nvar urlMatch = text.match(/https?:\\/\\/[^\\s]+/);\nvar hasUrl = !!urlMatch;\n\nreturn [{\n  json: {\n    type: hasVoice ? \"voice\" : (hasUrl ? \"url\" : \"text\"),\n    voice_file_id: voice ? voice.file_id : (audio ? audio.file_id : null),\n    voice_duration: voice ? voice.duration : (audio ? audio.duration : 0),\n    url: urlMatch ? urlMatch[0] : null,\n    text: text,\n    chat_id: msg.chat.id,\n    from_name: msg.from.first_name || \"Brett\"\n  }\n}];"},"type":"n8n-nodes-base.code","typeVersion":2,"position":[-384,304],"id":"5835c7e6-91d7-4350-9a81-022937677b56","name":"Detect Type"},{"parameters":{"conditions":{"options":{"caseSensitive":true,"leftValue":"","typeValidation":"strict","version":2},"conditions":[{"id":"6b8967a3-97b9-4fd2-8be3-fa82958ab2f1","leftValue":"={{ $json.type }}","rightValue":"voice","operator":{"type":"string","operation":"equals"}}],"combinator":"and"},"options":{}},"type":"n8n-nodes-base.if","typeVersion":2.2,"position":[-160,304],"id":"24962e91-2f0b-48a4-8173-b1dd6a00efdd","name":"Is Voice?"},{"parameters":{"url":"=https://api.telegram.org/bot8571582379:AAFbWBK6Hk7v1Mk1qs_yAlHtZrxzv1ZjIjY/getFile?file_id={{ $json.voice_file_id }}","options":{}},"type":"n8n-nodes-base.httpRequest","typeVersion":4.4,"position":[64,112],"id":"121ce72a-19f4-4c46-9494-52dae43b1e78","name":"Get File Path"},{"parameters":{"url":"=https://api.telegram.org/file/bot8571582379:AAFbWBK6Hk7v1Mk1qs_yAlHtZrxzv1ZjIjY/{{ $json.result.file_path }}","options":{"response":{"response":{"responseFormat":"file"}}}},"type":"n8n-nodes-base.httpRequest","typeVersion":4.4,"position":[288,112],"id":"9f687bec-b0d5-4665-91dd-bd56e87a64c5","name":"Download File"},{"parameters":{"method":"POST","url":"=https://jqegmsusycnjecqjndgd.supabase.co/storage/v1/object/audio/brett-recording-{{ Date.now() }}.ogg","sendHeaders":true,"headerParameters":{"parameters":[{"name":"Authorization","value":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxZWdtc3VzeWNuamVjcWpuZGdkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDAwMzMxMSwiZXhwIjoyMDg5NTc5MzExfQ.TGKw3RyqevjZSnxUoRfeCP0DQmgmehJtbcFAnjIoz54"},{"name":"apikey","value":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxZWdtc3VzeWNuamVjcWpuZGdkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDAwMzMxMSwiZXhwIjoyMDg5NTc5MzExfQ.TGKw3RyqevjZSnxUoRfeCP0DQmgmehJtbcFAnjIoz54"},{"name":"Content-Type","value":"audio/ogg"},{"name":"x-upsert","value":"true"}]},"sendBody":true,"contentType":"binaryData","inputDataFieldName":"data","options":{}},"type":"n8n-nodes-base.httpRequest","typeVersion":4.4,"position":[512,112],"id":"4ac2eed3-0f11-4b20-99dd-5930ad81826f","name":"Upload Voice"},{"parameters":{"chatId":"1240314255","text":"🎤 Voice recording saved!","additionalFields":{}},"type":"n8n-nodes-base.telegram","typeVersion":1.2,"position":[736,112],"id":"0dec2096-4a1b-4724-be09-29d24fb48369","name":"Reply Voice","credentials":{"telegramApi":{"id":"V1Z3rnsrUvXf0TPr","name":"Telegram account"}}},{"parameters":{"conditions":{"options":{"caseSensitive":true,"leftValue":"","typeValidation":"strict","version":2},"conditions":[{"id":"ef5e3568-3914-4ecd-9012-85ed79ab6e3a","leftValue":"={{ $json.type }}","rightValue":"url","operator":{"type":"string","operation":"equals"}}],"combinator":"and"},"options":{}},"type":"n8n-nodes-base.if","typeVersion":2.2,"position":[64,400],"id":"e8c71948-7902-4995-8d20-43cd259770ce","name":"Has URL?"},{"parameters":{"url":"=https://r.jina.ai/{{ $json.url }}","sendHeaders":true,"headerParameters":{"parameters":[{"name":"Accept","value":"application/json"},{"name":"Authorization","value":"Bearer jina_a811d82131fe4f10816452ae5b3db00dyMHYT-sknMYUF1OBl32x3ami5YLF"}]},"options":{}},"type":"n8n-nodes-base.httpRequest","typeVersion":4.4,"position":[288,304],"id":"6023a134-4d1c-4a61-86f9-8990f6da8337","name":"Jina Extract","continueOnFail":true},{"parameters":{"tableId":"articles","fieldsUi":{"fieldValues":[{"fieldId":"url","fieldValue":"={{ $('Detect Type').item.json.url }}"},{"fieldId":"title","fieldValue":"={{ $json.data && $json.data.title ? $json.data.title : 'Brett forwarded' }}"},{"fieldId":"content","fieldValue":"={{ ($json.data && $json.data.content ? $json.data.content : '').substring(0, 5000) }}"},{"fieldId":"source_name","fieldValue":"Brett Forward"},{"fieldId":"source_type","fieldValue":"manual"},{"fieldId":"status","fieldValue":"approved"}]}},"type":"n8n-nodes-base.supabase","typeVersion":1,"position":[512,304],"id":"bfa2fee9-80b4-416a-a029-817bd29e682d","name":"Save Article","continueOnFail":true,"credentials":{"supabaseApi":{"id":"k5u4E7DLyRpsGAB0","name":"Supabase account"}}},{"parameters":{"chatId":"1240314255","text":"=✅ Article queued and auto-approved!\n\n🔗 {{ $('Detect Type').item.json.url }}","additionalFields":{}},"type":"n8n-nodes-base.telegram","typeVersion":1.2,"position":[736,304],"id":"3b1f592e-47e5-47f6-89c5-32cdcef5dee0","name":"Reply URL","credentials":{"telegramApi":{"id":"V1Z3rnsrUvXf0TPr","name":"Telegram account"}}},{"parameters":{"chatId":"1240314255","text":"Send me:\n🔗 A URL to add to the pipeline\n🎤 A voice recording for the episode","additionalFields":{}},"type":"n8n-nodes-base.telegram","typeVersion":1.2,"position":[288,496],"id":"8196361e-fa62-4c07-85a5-302f8bdfc7fe","name":"Reply Help","credentials":{"telegramApi":{"id":"V1Z3rnsrUvXf0TPr","name":"Telegram account"}}}],"connections":{"Telegram Trigger":{"main":[[{"node":"Detect Type","type":"main","index":0}]]},"Detect Type":{"main":[[{"node":"Is Voice?","type":"main","index":0}]]},"Is Voice?":{"main":[[{"node":"Get File Path","type":"main","index":0}],[{"node":"Has URL?","type":"main","index":0}]]},"Get File Path":{"main":[[{"node":"Download File","type":"main","index":0}]]},"Download File":{"main":[[{"node":"Upload Voice","type":"main","index":0}]]},"Upload Voice":{"main":[[{"node":"Reply Voice","type":"main","index":0}]]},"Has URL?":{"main":[[{"node":"Jina Extract","type":"main","index":0}],[{"node":"Reply Help","type":"main","index":0}]]},"Jina Extract":{"main":[[{"node":"Save Article","type":"main","index":0}]]},"Save Article":{"main":[[{"node":"Reply URL","type":"main","index":0}]]}},"settings":{"executionOrder":"v1","callerPolicy":"workflowsFromSameOwner","availableInMCP":false},"staticData":null,"meta":null,"pinData":null,"versionId":"95599204-2605-4311-8bbe-29bfd779b84f","activeVersionId":null,"versionCounter":1,"triggerCount":0,"shared":[{"updatedAt":"2026-03-24T22:35:50.999Z","createdAt":"2026-03-24T22:35:50.999Z","role":"workflow:owner","workflowId":"hXnMZtOEEg1C60RR","projectId":"S1Sia4mxWWgZxzsz","project":{"updatedAt":"2026-03-19T21:30:04.243Z","createdAt":"2026-03-19T21:28:04.434Z","id":"S1Sia4mxWWgZxzsz","name":"Christian  Nikolov <christian.nikolov@alumni.esade.edu>","type":"personal","icon":null,"description":null,"creatorId":"a4726199-d7ac-414b-b995-7863227e1dc5"}}],"tags":[],"activeVersion":null}
+{
+    "updatedAt": "2026-03-25T11:54:35.640Z",
+    "createdAt": "2026-03-24T22:35:50.996Z",
+    "id": "hXnMZtOEEg1C60RR",
+    "name": "[WF-07-v3] Brett Voice and Link Forward",
+    "description": null,
+    "active": false,
+    "isArchived": false,
+    "nodes": [
+        {
+            "parameters": {
+                "updates": [
+                    "message"
+                ],
+                "additionalFields": {}
+            },
+            "type": "n8n-nodes-base.telegramTrigger",
+            "typeVersion": 1.1,
+            "position": [
+                -608,
+                304
+            ],
+            "id": "70e216f7-70b9-42be-9218-579ee40859fc",
+            "name": "Telegram Trigger",
+            "webhookId": "a46babf6-5b0f-4f66-9e0b-a3cb3563e911",
+            "credentials": {
+                "telegramApi": {
+                    "id": "V1Z3rnsrUvXf0TPr",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "var msg = $input.first().json.message;\nvar voice = msg.voice || null;\nvar audio = msg.audio || null;\nvar hasVoice = !!(voice || audio);\nvar text = msg.text || msg.caption || \"\";\nvar urlMatch = text.match(/https?:\\/\\/[^\\s]+/);\nvar hasUrl = !!urlMatch;\n\nreturn [{\n  json: {\n    type: hasVoice ? \"voice\" : (hasUrl ? \"url\" : \"text\"),\n    voice_file_id: voice ? voice.file_id : (audio ? audio.file_id : null),\n    voice_duration: voice ? voice.duration : (audio ? audio.duration : 0),\n    url: urlMatch ? urlMatch[0] : null,\n    text: text,\n    chat_id: msg.chat.id,\n    from_name: msg.from.first_name || \"Brett\"\n  }\n}];"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -384,
+                304
+            ],
+            "id": "5835c7e6-91d7-4350-9a81-022937677b56",
+            "name": "Detect Type"
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "strict",
+                        "version": 2
+                    },
+                    "conditions": [
+                        {
+                            "id": "6b8967a3-97b9-4fd2-8be3-fa82958ab2f1",
+                            "leftValue": "={{ $json.type }}",
+                            "rightValue": "voice",
+                            "operator": {
+                                "type": "string",
+                                "operation": "equals"
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2.2,
+            "position": [
+                -160,
+                304
+            ],
+            "id": "24962e91-2f0b-48a4-8173-b1dd6a00efdd",
+            "name": "Is Voice?"
+        },
+        {
+            "parameters": {
+                "url": "=https://api.telegram.org/bot8571582379:AAFbWBK6Hk7v1Mk1qs_yAlHtZrxzv1ZjIjY/getFile?file_id={{ $json.voice_file_id }}",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.4,
+            "position": [
+                64,
+                112
+            ],
+            "id": "121ce72a-19f4-4c46-9494-52dae43b1e78",
+            "name": "Get File Path"
+        },
+        {
+            "parameters": {
+                "url": "=https://api.telegram.org/file/bot8571582379:AAFbWBK6Hk7v1Mk1qs_yAlHtZrxzv1ZjIjY/{{ $json.result.file_path }}",
+                "options": {
+                    "response": {
+                        "response": {
+                            "responseFormat": "file"
+                        }
+                    }
+                }
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.4,
+            "position": [
+                288,
+                112
+            ],
+            "id": "9f687bec-b0d5-4665-91dd-bd56e87a64c5",
+            "name": "Download File"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "=https://jqegmsusycnjecqjndgd.supabase.co/storage/v1/object/audio/brett-recording-{{ Date.now() }}.ogg",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "Authorization",
+                            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxZWdtc3VzeWNuamVjcWpuZGdkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDAwMzMxMSwiZXhwIjoyMDg5NTc5MzExfQ.TGKw3RyqevjZSnxUoRfeCP0DQmgmehJtbcFAnjIoz54"
+                        },
+                        {
+                            "name": "apikey",
+                            "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxZWdtc3VzeWNuamVjcWpuZGdkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDAwMzMxMSwiZXhwIjoyMDg5NTc5MzExfQ.TGKw3RyqevjZSnxUoRfeCP0DQmgmehJtbcFAnjIoz54"
+                        },
+                        {
+                            "name": "Content-Type",
+                            "value": "audio/ogg"
+                        },
+                        {
+                            "name": "x-upsert",
+                            "value": "true"
+                        }
+                    ]
+                },
+                "sendBody": true,
+                "contentType": "binaryData",
+                "inputDataFieldName": "data",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.4,
+            "position": [
+                512,
+                112
+            ],
+            "id": "4ac2eed3-0f11-4b20-99dd-5930ad81826f",
+            "name": "Upload Voice"
+        },
+        {
+            "parameters": {
+                "chatId": "={{ $(\"Telegram Trigger\").item.json.message.chat.id }}",
+                "text": "\ud83c\udfa4 Voice recording saved!",
+                "additionalFields": {}
+            },
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                736,
+                112
+            ],
+            "id": "0dec2096-4a1b-4724-be09-29d24fb48369",
+            "name": "Reply Voice",
+            "credentials": {
+                "telegramApi": {
+                    "id": "V1Z3rnsrUvXf0TPr",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "strict",
+                        "version": 2
+                    },
+                    "conditions": [
+                        {
+                            "id": "ef5e3568-3914-4ecd-9012-85ed79ab6e3a",
+                            "leftValue": "={{ $json.type }}",
+                            "rightValue": "url",
+                            "operator": {
+                                "type": "string",
+                                "operation": "equals"
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2.2,
+            "position": [
+                64,
+                400
+            ],
+            "id": "e8c71948-7902-4995-8d20-43cd259770ce",
+            "name": "Has URL?"
+        },
+        {
+            "parameters": {
+                "url": "=https://r.jina.ai/{{ $json.url }}",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "Accept",
+                            "value": "application/json"
+                        },
+                        {
+                            "name": "Authorization",
+                            "value": "Bearer jina_a811d82131fe4f10816452ae5b3db00dyMHYT-sknMYUF1OBl32x3ami5YLF"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.4,
+            "position": [
+                288,
+                304
+            ],
+            "id": "6023a134-4d1c-4a61-86f9-8990f6da8337",
+            "name": "Jina Extract",
+            "continueOnFail": true
+        },
+        {
+            "parameters": {
+                "tableId": "articles",
+                "fieldsUi": {
+                    "fieldValues": [
+                        {
+                            "fieldId": "url",
+                            "fieldValue": "={{ $('Detect Type').item.json.url }}"
+                        },
+                        {
+                            "fieldId": "title",
+                            "fieldValue": "={{ $json.data && $json.data.title ? $json.data.title : 'Brett forwarded' }}"
+                        },
+                        {
+                            "fieldId": "content",
+                            "fieldValue": "={{ ($json.data && $json.data.content ? $json.data.content : '').substring(0, 5000) }}"
+                        },
+                        {
+                            "fieldId": "source_name",
+                            "fieldValue": "Brett Forward"
+                        },
+                        {
+                            "fieldId": "source_type",
+                            "fieldValue": "manual"
+                        },
+                        {
+                            "fieldId": "status",
+                            "fieldValue": "approved"
+                        }
+                    ]
+                }
+            },
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                512,
+                304
+            ],
+            "id": "bfa2fee9-80b4-416a-a029-817bd29e682d",
+            "name": "Save Article",
+            "continueOnFail": true,
+            "credentials": {
+                "supabaseApi": {
+                    "id": "k5u4E7DLyRpsGAB0",
+                    "name": "Supabase account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "chatId": "={{ $(\"Telegram Trigger\").item.json.message.chat.id }}",
+                "text": "=\u2705 Article queued and auto-approved!\n\n\ud83d\udd17 {{ $('Detect Type').item.json.url }}",
+                "additionalFields": {}
+            },
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                736,
+                304
+            ],
+            "id": "3b1f592e-47e5-47f6-89c5-32cdcef5dee0",
+            "name": "Reply URL",
+            "credentials": {
+                "telegramApi": {
+                    "id": "V1Z3rnsrUvXf0TPr",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "chatId": "={{ $(\"Telegram Trigger\").item.json.message.chat.id }}",
+                "text": "Send me:\n\ud83d\udd17 A URL to add to the pipeline\n\ud83c\udfa4 A voice recording for the episode",
+                "additionalFields": {}
+            },
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                288,
+                496
+            ],
+            "id": "8196361e-fa62-4c07-85a5-302f8bdfc7fe",
+            "name": "Reply Help",
+            "credentials": {
+                "telegramApi": {
+                    "id": "V1Z3rnsrUvXf0TPr",
+                    "name": "Telegram account"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Telegram Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Detect Type",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Detect Type": {
+            "main": [
+                [
+                    {
+                        "node": "Is Voice?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Is Voice?": {
+            "main": [
+                [
+                    {
+                        "node": "Get File Path",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Has URL?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get File Path": {
+            "main": [
+                [
+                    {
+                        "node": "Download File",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Download File": {
+            "main": [
+                [
+                    {
+                        "node": "Upload Voice",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Upload Voice": {
+            "main": [
+                [
+                    {
+                        "node": "Reply Voice",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Has URL?": {
+            "main": [
+                [
+                    {
+                        "node": "Jina Extract",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Reply Help",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Jina Extract": {
+            "main": [
+                [
+                    {
+                        "node": "Save Article",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Save Article": {
+            "main": [
+                [
+                    {
+                        "node": "Reply URL",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1",
+        "callerPolicy": "workflowsFromSameOwner",
+        "availableInMCP": false
+    },
+    "staticData": null,
+    "meta": null,
+    "pinData": null,
+    "versionId": "5075f7d6-8b5e-426d-bd73-fc2790c5d8c4",
+    "activeVersionId": null,
+    "versionCounter": 9,
+    "triggerCount": 1,
+    "shared": [
+        {
+            "updatedAt": "2026-03-24T22:35:50.999Z",
+            "createdAt": "2026-03-24T22:35:50.999Z",
+            "role": "workflow:owner",
+            "workflowId": "hXnMZtOEEg1C60RR",
+            "projectId": "S1Sia4mxWWgZxzsz",
+            "project": {
+                "updatedAt": "2026-03-19T21:30:04.243Z",
+                "createdAt": "2026-03-19T21:28:04.434Z",
+                "id": "S1Sia4mxWWgZxzsz",
+                "name": "Christian  Nikolov <christian.nikolov@alumni.esade.edu>",
+                "type": "personal",
+                "icon": null,
+                "description": null,
+                "creatorId": "a4726199-d7ac-414b-b995-7863227e1dc5"
+            }
+        }
+    ],
+    "tags": [],
+    "activeVersion": null
+}

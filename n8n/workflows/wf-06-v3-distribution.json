@@ -1,1 +1,250 @@
-{"updatedAt":"2026-03-24T22:35:50.369Z","createdAt":"2026-03-24T22:35:50.369Z","id":"cc0DUaeCAcbvE5cM","name":"[WF-06-v3] Distribution","description":null,"active":false,"isArchived":false,"nodes":[{"parameters":{},"type":"n8n-nodes-base.manualTrigger","typeVersion":1,"position":[-600,200],"id":"f38c0fbc-896f-4b04-82c1-93fbe95da0f6","name":"Manual Trigger"},{"parameters":{"operation":"getAll","tableId":"episodes","limit":1,"filterType":"string","filterString":"status=eq.audio_ready"},"type":"n8n-nodes-base.supabase","typeVersion":1,"position":[-380,200],"id":"2479c3be-675d-4f65-b17d-0fbcc560067d","name":"Get Ready Episode","credentials":{"supabaseApi":{"id":"k5u4E7DLyRpsGAB0","name":"Supabase account"}}},{"parameters":{"jsCode":"var episodes = $input.all().filter(function(item) { return item.json.id; });\n\nif (episodes.length === 0) {\n  throw new Error(\"No episodes with status audio_ready. Run WF-05 first.\");\n}\n\nvar ep = episodes[0].json;\n\nreturn [{\n  json: {\n    episode_id: ep.id,\n    title: ep.title,\n    script: ep.script,\n    audio_url: ep.audio_url,\n    status: ep.status,\n    created_at: ep.created_at\n  }\n}];"},"type":"n8n-nodes-base.code","typeVersion":2,"position":[-160,200],"id":"6a396667-cf9e-40fe-9690-c61523baaffe","name":"Check Episode"},{"parameters":{"jsCode":"var ep = $json;\nvar pubDate = new Date(ep.created_at || Date.now()).toUTCString();\nvar description = (ep.script || \"\").substring(0, 500).replace(/[<>&]/g, \"\");\n\nvar rssItem = \"<item>\\n\" +\n  \"  <title>\" + ep.title + \"</title>\\n\" +\n  \"  <description><![CDATA[\" + description + \"...]]></description>\\n\" +\n  '  <enclosure url=\"' + ep.audio_url + '\" length=\"0\" type=\"audio/mpeg\"/>\\n' +\n  '  <guid isPermaLink=\"false\">' + ep.episode_id + \"</guid>\\n\" +\n  \"  <pubDate>\" + pubDate + \"</pubDate>\\n\" +\n  \"  <itunes:duration>300</itunes:duration>\\n\" +\n  \"  <itunes:summary>\" + description + \"...</itunes:summary>\\n\" +\n  \"</item>\";\n\nreturn [{\n  json: {\n    episode_id: ep.episode_id,\n    title: ep.title,\n    script: ep.script,\n    audio_url: ep.audio_url,\n    rss_item: rssItem,\n    description: description\n  }\n}];"},"type":"n8n-nodes-base.code","typeVersion":2,"position":[60,200],"id":"0bf4f8d6-9b33-4b91-a4cf-faa558f5d77d","name":"Generate RSS Item"},{"parameters":{"operation":"update","tableId":"episodes","filterType":"string","filterString":"=id=eq.{{ $json.episode_id }}","fieldsUi":{"fieldValues":[{"fieldId":"status","fieldValue":"published"}]}},"type":"n8n-nodes-base.supabase","typeVersion":1,"position":[280,200],"id":"75b3d4f5-d01b-4e33-88b2-1660ef3c030b","name":"Mark Published","continueOnFail":true,"credentials":{"supabaseApi":{"id":"k5u4E7DLyRpsGAB0","name":"Supabase account"}}},{"parameters":{"chatId":"1240314255","text":"=🎙️ Episode Published!\n\n📋 {{ $('Check Episode').item.json.title }}\n\n🔊 Audio: {{ $('Check Episode').item.json.audio_url }}\n\n📡 RSS item generated.","additionalFields":{}},"type":"n8n-nodes-base.telegram","typeVersion":1.2,"position":[500,200],"id":"1e9aba22-d51c-4870-b371-b7c9d7d7f279","name":"Notify Published","credentials":{"telegramApi":{"id":"V1Z3rnsrUvXf0TPr","name":"Telegram account"}}},{"parameters":{"content":"## Distribution (WF-06-v3)\n\n**Future**: Auto-publish to YouTube, social media, podcast platforms\n\n**To add platforms**:\n- Spotify/Apple: Upload RSS feed URL to platform dashboards\n- YouTube: Add HTTP Request node to YouTube Data API\n- Social media: Add nodes for Twitter/LinkedIn/Instagram APIs"},"type":"n8n-nodes-base.stickyNote","typeVersion":1,"position":[-600,-50],"id":"3d2dc728-b5b7-4c66-a12a-565ee69e854d","name":"Note"}],"connections":{"Manual Trigger":{"main":[[{"node":"Get Ready Episode","type":"main","index":0}]]},"Get Ready Episode":{"main":[[{"node":"Check Episode","type":"main","index":0}]]},"Check Episode":{"main":[[{"node":"Generate RSS Item","type":"main","index":0}]]},"Generate RSS Item":{"main":[[{"node":"Mark Published","type":"main","index":0}]]},"Mark Published":{"main":[[{"node":"Notify Published","type":"main","index":0}]]}},"settings":{"executionOrder":"v1","callerPolicy":"workflowsFromSameOwner","availableInMCP":false},"staticData":null,"meta":null,"pinData":null,"versionId":"28487101-ce52-495c-aba6-e7e58fc21d31","activeVersionId":null,"versionCounter":1,"triggerCount":0,"shared":[{"updatedAt":"2026-03-24T22:35:50.371Z","createdAt":"2026-03-24T22:35:50.371Z","role":"workflow:owner","workflowId":"cc0DUaeCAcbvE5cM","projectId":"S1Sia4mxWWgZxzsz","project":{"updatedAt":"2026-03-19T21:30:04.243Z","createdAt":"2026-03-19T21:28:04.434Z","id":"S1Sia4mxWWgZxzsz","name":"Christian  Nikolov <christian.nikolov@alumni.esade.edu>","type":"personal","icon":null,"description":null,"creatorId":"a4726199-d7ac-414b-b995-7863227e1dc5"}}],"tags":[],"activeVersion":null}
+{
+    "updatedAt": "2026-03-25T11:54:35.548Z",
+    "createdAt": "2026-03-24T22:35:50.369Z",
+    "id": "cc0DUaeCAcbvE5cM",
+    "name": "[WF-06-v3] Distribution",
+    "description": null,
+    "active": false,
+    "isArchived": false,
+    "nodes": [
+        {
+            "parameters": {},
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                -600,
+                200
+            ],
+            "id": "f38c0fbc-896f-4b04-82c1-93fbe95da0f6",
+            "name": "Manual Trigger"
+        },
+        {
+            "parameters": {
+                "operation": "getAll",
+                "tableId": "episodes",
+                "limit": 1,
+                "filterType": "string",
+                "filterString": "status=eq.audio_ready"
+            },
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                -380,
+                200
+            ],
+            "id": "2479c3be-675d-4f65-b17d-0fbcc560067d",
+            "name": "Get Ready Episode",
+            "credentials": {
+                "supabaseApi": {
+                    "id": "k5u4E7DLyRpsGAB0",
+                    "name": "Supabase account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "var episodes = $input.all().filter(function(item) { return item.json.id; });\n\nif (episodes.length === 0) {\n  throw new Error(\"No episodes with status audio_ready. Run WF-05 first.\");\n}\n\nvar ep = episodes[0].json;\n\nreturn [{\n  json: {\n    episode_id: ep.id,\n    title: ep.title,\n    script: ep.script,\n    audio_url: ep.audio_url,\n    status: ep.status,\n    created_at: ep.created_at\n  }\n}];"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -160,
+                200
+            ],
+            "id": "6a396667-cf9e-40fe-9690-c61523baaffe",
+            "name": "Check Episode"
+        },
+        {
+            "parameters": {
+                "jsCode": "var ep = $json;\nvar pubDate = new Date(ep.created_at || Date.now()).toUTCString();\nvar description = (ep.script || \"\").substring(0, 500).replace(/[<>&]/g, \"\");\n\nvar rssItem = \"<item>\\n\" +\n  \"  <title>\" + ep.title + \"</title>\\n\" +\n  \"  <description><![CDATA[\" + description + \"...]]></description>\\n\" +\n  '  <enclosure url=\"' + ep.audio_url + '\" length=\"0\" type=\"audio/mpeg\"/>\\n' +\n  '  <guid isPermaLink=\"false\">' + ep.episode_id + \"</guid>\\n\" +\n  \"  <pubDate>\" + pubDate + \"</pubDate>\\n\" +\n  \"  <itunes:duration>300</itunes:duration>\\n\" +\n  \"  <itunes:summary>\" + description + \"...</itunes:summary>\\n\" +\n  \"</item>\";\n\nreturn [{\n  json: {\n    episode_id: ep.episode_id,\n    title: ep.title,\n    script: ep.script,\n    audio_url: ep.audio_url,\n    rss_item: rssItem,\n    description: description\n  }\n}];"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                60,
+                200
+            ],
+            "id": "0bf4f8d6-9b33-4b91-a4cf-faa558f5d77d",
+            "name": "Generate RSS Item"
+        },
+        {
+            "parameters": {
+                "operation": "update",
+                "tableId": "episodes",
+                "filterType": "string",
+                "filterString": "=id=eq.{{ $json.episode_id }}",
+                "fieldsUi": {
+                    "fieldValues": [
+                        {
+                            "fieldId": "status",
+                            "fieldValue": "published"
+                        }
+                    ]
+                }
+            },
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                280,
+                200
+            ],
+            "id": "75b3d4f5-d01b-4e33-88b2-1660ef3c030b",
+            "name": "Mark Published",
+            "continueOnFail": true,
+            "credentials": {
+                "supabaseApi": {
+                    "id": "k5u4E7DLyRpsGAB0",
+                    "name": "Supabase account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "chatId": "={{ $json.chat_id }}",
+                "text": "=\ud83c\udf99\ufe0f Episode Published!\n\n\ud83d\udccb {{ $('Check Episode').item.json.title }}\n\n\ud83d\udd0a Audio: {{ $('Check Episode').item.json.audio_url }}\n\n\ud83d\udce1 RSS item generated.",
+                "additionalFields": {}
+            },
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                500,
+                200
+            ],
+            "id": "1e9aba22-d51c-4870-b371-b7c9d7d7f279",
+            "name": "Notify Published",
+            "credentials": {
+                "telegramApi": {
+                    "id": "V1Z3rnsrUvXf0TPr",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "content": "## Distribution (WF-06-v3)\n\n**Future**: Auto-publish to YouTube, social media, podcast platforms\n\n**To add platforms**:\n- Spotify/Apple: Upload RSS feed URL to platform dashboards\n- YouTube: Add HTTP Request node to YouTube Data API\n- Social media: Add nodes for Twitter/LinkedIn/Instagram APIs"
+            },
+            "type": "n8n-nodes-base.stickyNote",
+            "typeVersion": 1,
+            "position": [
+                -600,
+                -50
+            ],
+            "id": "3d2dc728-b5b7-4c66-a12a-565ee69e854d",
+            "name": "Note"
+        },
+        {
+            "parameters": {
+                "jsCode": "var chatIds = [\"1240314255\", \"8509710128\", \"8727548584\"];\nvar item = $input.first().json;\nreturn chatIds.map(function(cid) {\n  var copy = JSON.parse(JSON.stringify(item));\n  copy.chat_id = cid;\n  return { json: copy };\n});"
+            },
+            "id": "73376e91-561c-45a7-9a04-7f2eb1facff0",
+            "name": "Fan Out Notify Published",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                276,
+                200
+            ]
+        }
+    ],
+    "connections": {
+        "Manual Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Get Ready Episode",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get Ready Episode": {
+            "main": [
+                [
+                    {
+                        "node": "Check Episode",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Check Episode": {
+            "main": [
+                [
+                    {
+                        "node": "Generate RSS Item",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Generate RSS Item": {
+            "main": [
+                [
+                    {
+                        "node": "Mark Published",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Mark Published": {
+            "main": [
+                [
+                    {
+                        "node": "Fan Out Notify Published",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Fan Out Notify Published": {
+            "main": [
+                [
+                    {
+                        "node": "Notify Published",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1",
+        "callerPolicy": "workflowsFromSameOwner",
+        "availableInMCP": false
+    },
+    "staticData": null,
+    "meta": null,
+    "pinData": null,
+    "versionId": "e6dc8cb3-90d8-4ff4-b906-71051d6fd186",
+    "activeVersionId": null,
+    "versionCounter": 5,
+    "triggerCount": 0,
+    "shared": [
+        {
+            "updatedAt": "2026-03-24T22:35:50.371Z",
+            "createdAt": "2026-03-24T22:35:50.371Z",
+            "role": "workflow:owner",
+            "workflowId": "cc0DUaeCAcbvE5cM",
+            "projectId": "S1Sia4mxWWgZxzsz",
+            "project": {
+                "updatedAt": "2026-03-19T21:30:04.243Z",
+                "createdAt": "2026-03-19T21:28:04.434Z",
+                "id": "S1Sia4mxWWgZxzsz",
+                "name": "Christian  Nikolov <christian.nikolov@alumni.esade.edu>",
+                "type": "personal",
+                "icon": null,
+                "description": null,
+                "creatorId": "a4726199-d7ac-414b-b995-7863227e1dc5"
+            }
+        }
+    ],
+    "tags": [],
+    "activeVersion": null
+}

@@ -1,673 +1,711 @@
 {
-  "name": "[WF-01c-v3] Present to Brett",
-  "nodes": [
-    {
-      "parameters": {},
-      "id": "93ebb404-5746-455f-b268-4827e6c78872",
-      "name": "Manual Trigger",
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
-      "position": [
-        -800,
-        200
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "var CONFIG = {CHAT_IDS: ['1240314255','8509710128'], SEND_TELEGRAM: true};\nreturn [{json: CONFIG}];"
-      },
-      "id": "1cc97692-e13c-4175-a855-46eeef64bfbf",
-      "name": "Config",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -600,
-        200
-      ]
-    },
-    {
-      "parameters": {
-        "operation": "getAll",
-        "tableId": "articles",
-        "returnAll": true,
-        "filterType": "string",
-        "filterString": "status=eq.curated"
-      },
-      "id": "ea3909b8-1c7f-44f8-b1ef-dd0faba1d112",
-      "name": "Get Curated",
-      "type": "n8n-nodes-base.supabase",
-      "typeVersion": 1,
-      "position": [
-        -400,
-        200
-      ],
-      "alwaysOutputData": true,
-      "credentials": {
-        "supabaseApi": {
-          "id": "k5u4E7DLyRpsGAB0",
-          "name": "Supabase account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "var articles = $input.all().filter(function(i) { return i.json.id; });\nif (articles.length === 0) throw new Error('No curated articles. Run WF-01b first.');\nreturn articles;"
-      },
-      "id": "aa3c06a9-b31e-4dbb-8369-06f1d1fd9788",
-      "name": "Check Articles",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -200,
-        200
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "var items = $input.all();\nvar catCounts = {};\nvar catEmojis = {\n  politics: '\\ud83c\\udfe3',\n  geopolitics: '\\ud83c\\udf0d',\n  science: '\\ud83d\\udd2c',\n  tech: '\\ud83d\\udcbb',\n  economics: '\\ud83d\\udcc8',\n  quirky: '\\u2728'\n};\n\nvar articles = [];\nfor (var i = 0; i < items.length; i++) {\n  var a = items[i].json;\n  var meta = a.llm_metadata || a.metadata || {};\n  if (typeof meta === 'string') {\n    try { meta = JSON.parse(meta); } catch(e) { meta = {}; }\n  }\n  var cat = (meta.category || a.category || 'uncategorized').toLowerCase();\n  catCounts[cat] = (catCounts[cat] || 0) + 1;\n  articles.push({\n    title: a.title || 'Untitled',\n    url: a.url,\n    source: a.source_name || a.feed_title || 'Unknown',\n    category: cat,\n    score: a.composite_score || a.header_score || 0,\n    emoji: catEmojis[cat] || '\\ud83d\\udcf0'\n  });\n}\n\nvar summaryParts = [];\nfor (var c in catCounts) {\n  var emoji = catEmojis[c] || '\\ud83d\\udcf0';\n  summaryParts.push(emoji + ' ' + catCounts[c] + ' ' + c);\n}\nvar summaryText = 'Today: ' + items.length + ' curated articles. ' + summaryParts.join(', ') + '.';\n\nvar prompt = 'Write a 2-3 sentence morning briefing intro for Brett Moore. '\n  + 'He is an Australian entrepreneur and news junkie in Barcelona. '\n  + 'Today we have ' + items.length + ' curated articles: ' + summaryParts.join(', ') + '. '\n  + 'Be conversational, sharp, and brief. No fluff. Reference the mix of topics.';\n\nreturn [{\n  json: {\n    summary_prompt: prompt,\n    summary_text: summaryText,\n    articles: articles,\n    total_curated: items.length\n  }\n}];"
-      },
-      "id": "932ad531-ded9-435d-999c-7ef9a04dafca",
-      "name": "Prepare Presentation",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        0,
-        200
-      ]
-    },
-    {
-      "parameters": {
-        "promptType": "define",
-        "text": "={{ $json.summary_prompt }}",
-        "messages": {
-          "messageValues": [
-            {
-              "message": "You write brief sharp morning news briefings. 2-3 sentences. Conversational."
-            }
-          ]
+    "updatedAt": "2026-03-25T11:23:58.570Z",
+    "createdAt": "2026-03-24T22:26:23.411Z",
+    "id": "iaTXkkVsyZvk6GIv",
+    "name": "[WF-01c-v3] Present to Brett",
+    "description": null,
+    "active": false,
+    "isArchived": false,
+    "nodes": [
+        {
+            "parameters": {},
+            "id": "93ebb404-5746-455f-b268-4827e6c78872",
+            "name": "Manual Trigger",
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                -800,
+                352
+            ]
         },
-        "hasOutputParser": false
-      },
-      "id": "b0db2500-0408-4c47-8f41-2b96bb7e6ac6",
-      "name": "Write Morning Intro",
-      "type": "@n8n/n8n-nodes-langchain.chainLlm",
-      "typeVersion": 1.9,
-      "position": [
-        200,
-        200
-      ]
-    },
-    {
-      "parameters": {
-        "model": "openai/gpt-4.1-nano",
-        "options": {}
-      },
-      "id": "e3e70803-6df6-4bfb-9385-9396e44944b8",
-      "name": "Intro Model",
-      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
-      "typeVersion": 1,
-      "position": [
-        200,
-        400
-      ],
-      "credentials": {
-        "openRouterApi": {
-          "id": "1HjiTjhZTVqv5vLc",
-          "name": "OpenRouter account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 2
-          },
-          "conditions": [
-            {
-              "id": "90b62acb-46da-4006-9da6-e45aae1beaf1",
-              "leftValue": "={{ $('Config').first().json.SEND_TELEGRAM }}",
-              "rightValue": true,
-              "operator": {
-                "type": "boolean",
-                "operation": "true",
-                "singleValue": true
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "id": "50830902-af4d-418c-b79c-f2df490bcec7",
-      "name": "IF SEND_TELEGRAM",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        400,
-        200
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "var chatIds = $('Config').first().json.CHAT_IDS;\nvar input = $input.first().json;\nvar introText = input.text || input.response || input.output || 'Good morning!';\nvar articles = $('Prepare Presentation').first().json.articles;\nvar summaryText = $('Prepare Presentation').first().json.summary_text;\nvar totalCurated = $('Prepare Presentation').first().json.total_curated;\n\nreturn chatIds.map(function(cid) {\n  return {\n    json: {\n      chat_id: cid,\n      intro_text: introText,\n      summary_text: summaryText,\n      articles: articles,\n      total_curated: totalCurated\n    }\n  };\n});"
-      },
-      "id": "4970ea06-739e-426e-9153-53ee7995ee0c",
-      "name": "Expand to Chats",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        600,
-        200
-      ]
-    },
-    {
-      "parameters": {
-        "operation": "sendMessage",
-        "chatId": "={{ $json.chat_id }}",
-        "text": "={{ $json.intro_text + '\\n\\n' + $json.summary_text }}",
-        "additionalFields": {
-          "parse_mode": "HTML"
-        }
-      },
-      "id": "9f9a81a2-96b3-4f67-9be8-af67e977639c",
-      "name": "Send Morning Summary",
-      "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1.2,
-      "position": [
-        800,
-        200
-      ],
-      "credentials": {
-        "telegramApi": {
-          "id": "V1Z3rnsrUvXf0TPr",
-          "name": "Telegram account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "var items = $input.all();\nvar result = [];\nfor (var i = 0; i < items.length; i++) {\n  var chatId = items[i].json.chat_id;\n  var articles = items[i].json.articles || [];\n  for (var j = 0; j < articles.length; j++) {\n    var a = articles[j];\n    var urlPath = (a.url || '').split('?')[0];\n    var pathPart = urlPath.length > 30 ? urlPath.substring(urlPath.length - 30) : urlPath;\n    var approveCb = 'a:' + pathPart;\n    result.push({\n      json: {\n        chat_id: chatId,\n        title: a.title,\n        url: a.url,\n        source: a.source,\n        category: a.category,\n        score: a.score,\n        emoji: a.emoji,\n        approve_cb: approveCb,\n        article_index: j + 1\n      }\n    });\n  }\n}\nreturn result;"
-      },
-      "id": "039c55c5-a511-402c-ba97-3f97a41993ae",
-      "name": "Unpack Articles",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1000,
-        200
-      ]
-    },
-    {
-      "parameters": {
-        "options": {
-          "reset": false
-        }
-      },
-      "id": "b9262f28-1faf-4e50-886b-e2c333186627",
-      "name": "Loop Articles",
-      "type": "n8n-nodes-base.splitInBatches",
-      "typeVersion": 3,
-      "position": [
-        1200,
-        200
-      ]
-    },
-    {
-      "parameters": {
-        "operation": "sendMessage",
-        "chatId": "={{ $json.chat_id }}",
-        "text": "={{ $json.emoji + ' [' + String(Math.round($json.score * 10) / 10) + '] ' + $json.title + '\\n' + '\\ud83d\\udcf0 ' + $json.source + '\\n' + '<a href=\"' + $json.url + '\">Read article</a>' }}",
-        "replyMarkup": "inlineKeyboard",
-        "inlineKeyboard": {
-          "rows": [
-            {
-              "row": {
-                "buttons": [
-                  {
-                    "text": "Include in episode",
-                    "additionalFields": {
-                      "callback_data": "={{ $json.approve_cb }}"
-                    }
-                  }
-                ]
-              }
-            }
-          ]
-        },
-        "additionalFields": {
-          "parse_mode": "HTML"
-        }
-      },
-      "id": "a03e96b7-2c7f-4f05-8c05-89201fd5976a",
-      "name": "Send Card",
-      "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1.2,
-      "position": [
-        1200,
-        400
-      ],
-      "continueOnFail": true,
-      "credentials": {
-        "telegramApi": {
-          "id": "V1Z3rnsrUvXf0TPr",
-          "name": "Telegram account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "var presented = $('Unpack Articles').all();\nvar urls = {};\nfor (var i = 0; i < presented.length; i++) {\n  urls[presented[i].json.url] = true;\n}\nvar presentedCount = Object.keys(urls).length;\nvar totalRemaining = Math.max(0, 50 - presentedCount);\n\nreturn [{\n  json: {\n    presented_count: presentedCount,\n    remaining_estimate: totalRemaining\n  }\n}];"
-      },
-      "id": "3fcec913-58ba-4830-9366-e960ee5665e2",
-      "name": "Count Remaining",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1400,
-        200
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "var chatIds = $('Config').first().json.CHAT_IDS;\nvar input = $input.first().json;\nreturn chatIds.map(function(cid) {\n  return {\n    json: {\n      chat_id: cid,\n      presented_count: input.presented_count,\n      remaining_estimate: input.remaining_estimate\n    }\n  };\n});"
-      },
-      "id": "741a07bf-ff1d-4d37-b133-d449c34700f7",
-      "name": "Expand Footer",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1600,
-        200
-      ]
-    },
-    {
-      "parameters": {
-        "operation": "sendMessage",
-        "chatId": "={{ $json.chat_id }}",
-        "text": "={{ '\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\n' + 'Top 10 reviewed. ' + $json.remaining_estimate + ' more available.' }}",
-        "replyMarkup": "inlineKeyboard",
-        "inlineKeyboard": {
-          "rows": [
-            {
-              "row": {
-                "buttons": [
-                  {
-                    "text": "\\ud83c\\udfe3 Politics",
-                    "additionalFields": {
-                      "callback_data": "c:politics"
-                    }
-                  },
-                  {
-                    "text": "\\ud83c\\udf0d Geopolitics",
-                    "additionalFields": {
-                      "callback_data": "c:geopolitics"
-                    }
-                  },
-                  {
-                    "text": "\\ud83d\\udd2c Science",
-                    "additionalFields": {
-                      "callback_data": "c:science"
-                    }
-                  }
-                ]
-              }
+        {
+            "parameters": {
+                "jsCode": "var CONFIG = {CHAT_IDS: ['1240314255','8509710128','8727548584'], SEND_TELEGRAM: true};\nreturn [{json: CONFIG}];"
             },
-            {
-              "row": {
-                "buttons": [
-                  {
-                    "text": "\\ud83d\\udcbb Tech",
-                    "additionalFields": {
-                      "callback_data": "c:tech"
-                    }
-                  },
-                  {
-                    "text": "\\ud83d\\udcc8 Economics",
-                    "additionalFields": {
-                      "callback_data": "c:economics"
-                    }
-                  },
-                  {
-                    "text": "\\u2728 Quirky",
-                    "additionalFields": {
-                      "callback_data": "c:quirky"
-                    }
-                  }
-                ]
-              }
-            },
-            {
-              "row": {
-                "buttons": [
-                  {
-                    "text": "\\u2705 Done for today",
-                    "additionalFields": {
-                      "callback_data": "d:"
-                    }
-                  }
-                ]
-              }
-            }
-          ]
+            "id": "1cc97692-e13c-4175-a855-46eeef64bfbf",
+            "name": "Config",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -576,
+                352
+            ]
         },
-        "additionalFields": {
-          "parse_mode": "HTML"
-        }
-      },
-      "id": "1f9d75b4-38d3-4605-8d22-c67c6f3dfb1c",
-      "name": "Send Footer",
-      "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1.2,
-      "position": [
-        1800,
-        200
-      ],
-      "credentials": {
-        "telegramApi": {
-          "id": "V1Z3rnsrUvXf0TPr",
-          "name": "Telegram account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "var presented = $('Unpack Articles').all();\nvar seen = {};\nvar result = [];\nfor (var i = 0; i < presented.length; i++) {\n  var url = presented[i].json.url;\n  if (url && !seen[url]) {\n    seen[url] = true;\n    result.push({json: {url: url}});\n  }\n}\nreturn result;"
-      },
-      "id": "13200f9c-4caa-440f-b3ed-9bb8544a5ce4",
-      "name": "Collect URLs",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        2000,
-        200
-      ]
-    },
-    {
-      "parameters": {
-        "options": {
-          "reset": false
-        }
-      },
-      "id": "00a9a7aa-03cf-4fdb-9f11-ed695e7f9a4f",
-      "name": "Loop Mark",
-      "type": "n8n-nodes-base.splitInBatches",
-      "typeVersion": 3,
-      "position": [
-        2200,
-        200
-      ]
-    },
-    {
-      "parameters": {
-        "operation": "update",
-        "tableId": "articles",
-        "filterType": "string",
-        "filterString": "=url=eq.{{ $json.url }}",
-        "fieldsUi": {
-          "fieldValues": [
-            {
-              "fieldId": "status",
-              "fieldValue": "presented"
+        {
+            "parameters": {
+                "operation": "getAll",
+                "tableId": "articles",
+                "returnAll": true,
+                "filterType": "string",
+                "filterString": "status=eq.curated"
+            },
+            "id": "ea3909b8-1c7f-44f8-b1ef-dd0faba1d112",
+            "name": "Get Curated",
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                -352,
+                352
+            ],
+            "alwaysOutputData": true,
+            "credentials": {
+                "supabaseApi": {
+                    "id": "k5u4E7DLyRpsGAB0",
+                    "name": "Supabase account"
+                }
             }
-          ]
+        },
+        {
+            "parameters": {
+                "jsCode": "var articles = $input.all().filter(function(i) { return i.json.id; });\nif (articles.length === 0) throw new Error('No curated articles. Run WF-01b first.');\nreturn articles;"
+            },
+            "id": "aa3c06a9-b31e-4dbb-8369-06f1d1fd9788",
+            "name": "Check Articles",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -128,
+                352
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "var items = $input.all();\nvar catCounts = {};\nvar catEmojis = {\n  politics: '\\ud83c\\udfe3',\n  geopolitics: '\\ud83c\\udf0d',\n  science: '\\ud83d\\udd2c',\n  tech: '\\ud83d\\udcbb',\n  economics: '\\ud83d\\udcc8',\n  quirky: '\\u2728'\n};\n\nvar articles = [];\nfor (var i = 0; i < items.length; i++) {\n  var a = items[i].json;\n  var meta = a.llm_metadata || a.metadata || {};\n  if (typeof meta === 'string') {\n    try { meta = JSON.parse(meta); } catch(e) { meta = {}; }\n  }\n  var cat = (meta.category || a.category || 'uncategorized').toLowerCase();\n  catCounts[cat] = (catCounts[cat] || 0) + 1;\n  articles.push({\n    title: a.title || 'Untitled',\n    url: a.url,\n    source: a.source_name || a.feed_title || 'Unknown',\n    category: cat,\n    score: a.composite_score || a.header_score || 0,\n    emoji: catEmojis[cat] || '\\ud83d\\udcf0'\n  });\n}\n\nvar summaryParts = [];\nfor (var c in catCounts) {\n  var emoji = catEmojis[c] || '\\ud83d\\udcf0';\n  summaryParts.push(emoji + ' ' + catCounts[c] + ' ' + c);\n}\nvar summaryText = 'Today: ' + items.length + ' curated articles. ' + summaryParts.join(', ') + '.';\n\nvar prompt = 'Write a 2-3 sentence morning briefing intro for Brett Moore. '\n  + 'He is an Australian entrepreneur and news junkie in Barcelona. '\n  + 'Today we have ' + items.length + ' curated articles: ' + summaryParts.join(', ') + '. '\n  + 'Be conversational, sharp, and brief. No fluff. Reference the mix of topics.';\n\nreturn [{\n  json: {\n    summary_prompt: prompt,\n    summary_text: summaryText,\n    articles: articles,\n    total_curated: items.length\n  }\n}];"
+            },
+            "id": "932ad531-ded9-435d-999c-7ef9a04dafca",
+            "name": "Prepare Presentation",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                96,
+                352
+            ]
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "={{ $json.summary_prompt }}",
+                "messages": {
+                    "messageValues": [
+                        {
+                            "message": "You write brief sharp morning news briefings. 2-3 sentences. Conversational."
+                        }
+                    ]
+                },
+                "batching": {}
+            },
+            "id": "b0db2500-0408-4c47-8f41-2b96bb7e6ac6",
+            "name": "Write Morning Intro",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.9,
+            "position": [
+                320,
+                352
+            ]
+        },
+        {
+            "parameters": {
+                "model": "openai/gpt-4.1-nano",
+                "options": {}
+            },
+            "id": "e3e70803-6df6-4bfb-9385-9396e44944b8",
+            "name": "Intro Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+            "typeVersion": 1,
+            "position": [
+                400,
+                576
+            ],
+            "credentials": {
+                "openRouterApi": {
+                    "id": "1HjiTjhZTVqv5vLc",
+                    "name": "OpenRouter account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "strict",
+                        "version": 2
+                    },
+                    "conditions": [
+                        {
+                            "id": "90b62acb-46da-4006-9da6-e45aae1beaf1",
+                            "leftValue": "={{ $('Config').first().json.SEND_TELEGRAM }}",
+                            "rightValue": true,
+                            "operator": {
+                                "type": "boolean",
+                                "operation": "true",
+                                "singleValue": true
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": {}
+            },
+            "id": "50830902-af4d-418c-b79c-f2df490bcec7",
+            "name": "IF SEND_TELEGRAM",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2.2,
+            "position": [
+                672,
+                352
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "var chatIds = $('Config').first().json.CHAT_IDS;\nvar input = $input.first().json;\nvar introText = input.text || input.response || input.output || 'Good morning!';\nvar articles = $('Prepare Presentation').first().json.articles;\nvar summaryText = $('Prepare Presentation').first().json.summary_text;\nvar totalCurated = $('Prepare Presentation').first().json.total_curated;\n\nreturn chatIds.map(function(cid) {\n  return {\n    json: {\n      chat_id: cid,\n      intro_text: introText,\n      summary_text: summaryText,\n      articles: articles,\n      total_curated: totalCurated\n    }\n  };\n});"
+            },
+            "id": "4970ea06-739e-426e-9153-53ee7995ee0c",
+            "name": "Expand to Chats",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                896,
+                352
+            ]
+        },
+        {
+            "parameters": {
+                "chatId": "={{ $json.chat_id }}",
+                "text": "={{ $json.intro_text + '\\n\\n' + $json.summary_text }}",
+                "additionalFields": {
+                    "parse_mode": "HTML"
+                }
+            },
+            "id": "9f9a81a2-96b3-4f67-9be8-af67e977639c",
+            "name": "Send Morning Summary",
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                1120,
+                352
+            ],
+            "webhookId": "418e0fda-d2df-45fc-8314-e988313257f5",
+            "credentials": {
+                "telegramApi": {
+                    "id": "V1Z3rnsrUvXf0TPr",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "var prepData = $('Prepare Presentation').first().json;\nvar chatIds = $('Config').first().json.CHAT_IDS || ['1240314255'];\nvar articles = prepData.articles || [];\nvar result = [];\nfor (var c = 0; c < chatIds.length; c++) {\n  for (var j = 0; j < articles.length; j++) {\n    var a = articles[j];\n    var urlPath = (a.url || '').split('?')[0];\n    var pathPart = urlPath.length > 30 ? urlPath.substring(urlPath.length - 30) : urlPath;\n    var score = parseFloat(a.score) || parseFloat(a.header_score) || parseFloat(a.composite_score) || 0;\n    var source = a.source || a.source_name || a.feed_name || 'News';\n    result.push({\n      json: {\n        chat_id: chatIds[c],\n        title: a.title || '',\n        url: a.url || '',\n        category: a.category || 'other',\n        header_score: score,\n        source_count: parseInt(a.source_count) || 1,\n        feed_name: source,\n        approve_cb: 'a:' + pathPart\n      }\n    });\n  }\n}\nif (result.length === 0) return [{json: {_empty: true}}];\nreturn result;"
+            },
+            "id": "039c55c5-a511-402c-ba97-3f97a41993ae",
+            "name": "Unpack Articles",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1344,
+                352
+            ]
+        },
+        {
+            "parameters": {
+                "options": {
+                    "reset": false
+                }
+            },
+            "id": "b9262f28-1faf-4e50-886b-e2c333186627",
+            "name": "Loop Articles",
+            "type": "n8n-nodes-base.splitInBatches",
+            "typeVersion": 3,
+            "position": [
+                1568,
+                352
+            ]
+        },
+        {
+            "parameters": {
+                "chatId": "={{ $json.chat_id }}",
+                "text": "={{ (function() { var s = $json; var score = s.header_score || 0; var cat = s.category || \"other\"; var title = s.title || \"\"; var url = s.url || \"\"; var source = s.feed_name || \"RSS\"; var catEmoji = {politics: \"\ud83c\udfe3\", geopolitics: \"\ud83c\udf0d\", science: \"\ud83d\udd2c\", tech: \"\ud83d\udcbb\", economics: \"\ud83d\udcc8\", quirky: \"\u2728\", other: \"\ud83d\udcc4\"}; var emoji = catEmoji[cat] || catEmoji.other; return emoji + \" \" + score + \"/10 | \" + cat + \"\\n\\n<b>\" + title + \"</b>\\n\\n\ud83d\udcf0 \" + source + \"\\n\\n<a href=\\\"\" + url + \"\\\">Read article</a>\"; })() }}",
+                "replyMarkup": "inlineKeyboard",
+                "inlineKeyboard": {
+                    "rows": [
+                        {
+                            "row": {
+                                "buttons": [
+                                    {
+                                        "text": "Include in episode",
+                                        "additionalFields": {
+                                            "callback_data": "={{ $json.approve_cb }}"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "additionalFields": {
+                    "parse_mode": "HTML"
+                }
+            },
+            "id": "a03e96b7-2c7f-4f05-8c05-89201fd5976a",
+            "name": "Send Card",
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                1792,
+                400
+            ],
+            "webhookId": "ef2b82e8-d5ac-457e-917c-9b288855ba96",
+            "credentials": {
+                "telegramApi": {
+                    "id": "V1Z3rnsrUvXf0TPr",
+                    "name": "Telegram account"
+                }
+            },
+            "continueOnFail": true
+        },
+        {
+            "parameters": {
+                "jsCode": "var presented = $('Unpack Articles').all();\nvar urls = {};\nfor (var i = 0; i < presented.length; i++) {\n  urls[presented[i].json.url] = true;\n}\nvar presentedCount = Object.keys(urls).length;\nvar totalRemaining = Math.max(0, 50 - presentedCount);\n\nreturn [{\n  json: {\n    presented_count: presentedCount,\n    remaining_estimate: totalRemaining\n  }\n}];"
+            },
+            "id": "3fcec913-58ba-4830-9366-e960ee5665e2",
+            "name": "Count Remaining",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1792,
+                208
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "var chatIds = $('Config').first().json.CHAT_IDS;\nvar input = $input.first().json;\nreturn chatIds.map(function(cid) {\n  return {\n    json: {\n      chat_id: cid,\n      presented_count: input.presented_count,\n      remaining_estimate: input.remaining_estimate\n    }\n  };\n});"
+            },
+            "id": "741a07bf-ff1d-4d37-b133-d449c34700f7",
+            "name": "Expand Footer",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                2016,
+                208
+            ]
+        },
+        {
+            "parameters": {
+                "chatId": "={{ $json.chat_id }}",
+                "text": "={{ '\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\u2500\\n' + 'Top 10 reviewed. ' + $json.remaining_estimate + ' more available.' }}",
+                "replyMarkup": "inlineKeyboard",
+                "inlineKeyboard": {
+                    "rows": [
+                        {
+                            "row": {
+                                "buttons": [
+                                    {
+                                        "text": "\ud83c\udfe3 Politics",
+                                        "additionalFields": {
+                                            "callback_data": "c:politics"
+                                        }
+                                    },
+                                    {
+                                        "text": "\ud83c\udf0d Geopolitics",
+                                        "additionalFields": {
+                                            "callback_data": "c:geopolitics"
+                                        }
+                                    },
+                                    {
+                                        "text": "\ud83d\udd2c Science",
+                                        "additionalFields": {
+                                            "callback_data": "c:science"
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "row": {
+                                "buttons": [
+                                    {
+                                        "text": "\ud83d\udcbb Tech",
+                                        "additionalFields": {
+                                            "callback_data": "c:tech"
+                                        }
+                                    },
+                                    {
+                                        "text": "\ud83d\udcc8 Economics",
+                                        "additionalFields": {
+                                            "callback_data": "c:economics"
+                                        }
+                                    },
+                                    {
+                                        "text": "\u2728 Quirky",
+                                        "additionalFields": {
+                                            "callback_data": "c:quirky"
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "row": {
+                                "buttons": [
+                                    {
+                                        "text": "\u2705 Done for today",
+                                        "additionalFields": {
+                                            "callback_data": "d:"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "additionalFields": {
+                    "parse_mode": "HTML"
+                }
+            },
+            "id": "1f9d75b4-38d3-4605-8d22-c67c6f3dfb1c",
+            "name": "Send Footer",
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                2240,
+                208
+            ],
+            "webhookId": "2f3586bf-ae23-4b06-af17-90820e6ba8c5",
+            "credentials": {
+                "telegramApi": {
+                    "id": "V1Z3rnsrUvXf0TPr",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "var presented = $('Unpack Articles').all();\nvar seen = {};\nvar result = [];\nfor (var i = 0; i < presented.length; i++) {\n  var url = presented[i].json.url;\n  if (url && !seen[url]) {\n    seen[url] = true;\n    result.push({json: {url: url}});\n  }\n}\nreturn result;"
+            },
+            "id": "13200f9c-4caa-440f-b3ed-9bb8544a5ce4",
+            "name": "Collect URLs",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                2464,
+                208
+            ]
+        },
+        {
+            "parameters": {
+                "options": {
+                    "reset": false
+                }
+            },
+            "id": "00a9a7aa-03cf-4fdb-9f11-ed695e7f9a4f",
+            "name": "Loop Mark",
+            "type": "n8n-nodes-base.splitInBatches",
+            "typeVersion": 3,
+            "position": [
+                2688,
+                208
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "update",
+                "tableId": "articles",
+                "filterType": "string",
+                "filterString": "=url=eq.{{ $json.url }}",
+                "fieldsUi": {
+                    "fieldValues": [
+                        {
+                            "fieldId": "status",
+                            "fieldValue": "presented"
+                        }
+                    ]
+                }
+            },
+            "id": "0201b049-4c81-45ba-b45d-d748fda103be",
+            "name": "Update Presented",
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                2912,
+                208
+            ],
+            "alwaysOutputData": true,
+            "credentials": {
+                "supabaseApi": {
+                    "id": "k5u4E7DLyRpsGAB0",
+                    "name": "Supabase account"
+                }
+            },
+            "continueOnFail": true
+        },
+        {
+            "parameters": {
+                "content": "## [WF-01c-v3] Present to Brett\n\nKNOWN BUG: All articles from NYTimes.\nCause: Curated via SQL ORDER BY score (no diversity).\nWF-01b diversity logic works but Mark Curated fails.\nFIX: Fix WF-01b Mark Curated, then diversity kicks in.\n\nKNOWN BUG: Footer category button emojis render as escape codes\nin some Telegram clients. Need actual Unicode in button text.\n\nSTATUS: Morning intro (LLM), article cards, footer all work.\nMark Presented works. Multi-chat works.",
+                "height": 300
+            },
+            "id": "af4f6fc9-ca98-483d-a4d6-b4097aba7fe8",
+            "name": "Note",
+            "type": "n8n-nodes-base.stickyNote",
+            "typeVersion": 1,
+            "position": [
+                -800,
+                0
+            ]
         }
-      },
-      "id": "0201b049-4c81-45ba-b45d-d748fda103be",
-      "name": "Update Presented",
-      "type": "n8n-nodes-base.supabase",
-      "typeVersion": 1,
-      "position": [
-        2200,
-        400
-      ],
-      "continueOnFail": true,
-      "alwaysOutputData": true,
-      "credentials": {
-        "supabaseApi": {
-          "id": "k5u4E7DLyRpsGAB0",
-          "name": "Supabase account"
+    ],
+    "connections": {
+        "Manual Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Config",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Config": {
+            "main": [
+                [
+                    {
+                        "node": "Get Curated",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get Curated": {
+            "main": [
+                [
+                    {
+                        "node": "Check Articles",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Check Articles": {
+            "main": [
+                [
+                    {
+                        "node": "Prepare Presentation",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Prepare Presentation": {
+            "main": [
+                [
+                    {
+                        "node": "Write Morning Intro",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Intro Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Write Morning Intro",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Write Morning Intro": {
+            "main": [
+                [
+                    {
+                        "node": "IF SEND_TELEGRAM",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "IF SEND_TELEGRAM": {
+            "main": [
+                [
+                    {
+                        "node": "Expand to Chats",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                []
+            ]
+        },
+        "Expand to Chats": {
+            "main": [
+                [
+                    {
+                        "node": "Send Morning Summary",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Send Morning Summary": {
+            "main": [
+                [
+                    {
+                        "node": "Unpack Articles",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Unpack Articles": {
+            "main": [
+                [
+                    {
+                        "node": "Loop Articles",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Loop Articles": {
+            "main": [
+                [
+                    {
+                        "node": "Count Remaining",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Send Card",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Send Card": {
+            "main": [
+                [
+                    {
+                        "node": "Loop Articles",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Count Remaining": {
+            "main": [
+                [
+                    {
+                        "node": "Expand Footer",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Expand Footer": {
+            "main": [
+                [
+                    {
+                        "node": "Send Footer",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Send Footer": {
+            "main": [
+                [
+                    {
+                        "node": "Collect URLs",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Collect URLs": {
+            "main": [
+                [
+                    {
+                        "node": "Loop Mark",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Loop Mark": {
+            "main": [
+                [],
+                [
+                    {
+                        "node": "Update Presented",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Update Presented": {
+            "main": [
+                [
+                    {
+                        "node": "Loop Mark",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
         }
-      }
     },
-    {
-      "parameters": {
-        "content": "## [WF-01c-v3] Present to Brett\n\nReads curated articles, generates LLM intro, sends article cards with approval buttons to Telegram, then marks all as presented."
-      },
-      "id": "af4f6fc9-ca98-483d-a4d6-b4097aba7fe8",
-      "name": "Note",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        -800,
-        0
-      ]
-    }
-  ],
-  "connections": {
-    "Manual Trigger": {
-      "main": [
-        [
-          {
-            "node": "Config",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+    "settings": {
+        "executionOrder": "v1",
+        "callerPolicy": "workflowsFromSameOwner",
+        "availableInMCP": false,
+        "binaryMode": "separate"
     },
-    "Config": {
-      "main": [
-        [
-          {
-            "node": "Get Curated",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get Curated": {
-      "main": [
-        [
-          {
-            "node": "Check Articles",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Check Articles": {
-      "main": [
-        [
-          {
-            "node": "Prepare Presentation",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Prepare Presentation": {
-      "main": [
-        [
-          {
-            "node": "Write Morning Intro",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Intro Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Write Morning Intro",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Write Morning Intro": {
-      "main": [
-        [
-          {
-            "node": "IF SEND_TELEGRAM",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "IF SEND_TELEGRAM": {
-      "main": [
-        [
-          {
-            "node": "Expand to Chats",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        []
-      ]
-    },
-    "Expand to Chats": {
-      "main": [
-        [
-          {
-            "node": "Send Morning Summary",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Send Morning Summary": {
-      "main": [
-        [
-          {
-            "node": "Unpack Articles",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Unpack Articles": {
-      "main": [
-        [
-          {
-            "node": "Loop Articles",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Loop Articles": {
-      "main": [
-        [
-          {
-            "node": "Count Remaining",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Send Card",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Send Card": {
-      "main": [
-        [
-          {
-            "node": "Loop Articles",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Count Remaining": {
-      "main": [
-        [
-          {
-            "node": "Expand Footer",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Expand Footer": {
-      "main": [
-        [
-          {
-            "node": "Send Footer",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Send Footer": {
-      "main": [
-        [
-          {
-            "node": "Collect URLs",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Collect URLs": {
-      "main": [
-        [
-          {
-            "node": "Loop Mark",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Loop Mark": {
-      "main": [
-        [],
-        [
-          {
-            "node": "Update Presented",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Update Presented": {
-      "main": [
-        [
-          {
-            "node": "Loop Mark",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    }
-  },
-  "settings": {
-    "executionOrder": "v1"
-  }
+    "staticData": null,
+    "meta": null,
+    "pinData": {},
+    "versionId": "7f5b4936-9c57-40ad-aafe-a436346248d5",
+    "activeVersionId": null,
+    "versionCounter": 10,
+    "triggerCount": 0,
+    "shared": [
+        {
+            "updatedAt": "2026-03-24T22:26:23.413Z",
+            "createdAt": "2026-03-24T22:26:23.413Z",
+            "role": "workflow:owner",
+            "workflowId": "iaTXkkVsyZvk6GIv",
+            "projectId": "S1Sia4mxWWgZxzsz",
+            "project": {
+                "updatedAt": "2026-03-19T21:30:04.243Z",
+                "createdAt": "2026-03-19T21:28:04.434Z",
+                "id": "S1Sia4mxWWgZxzsz",
+                "name": "Christian  Nikolov <christian.nikolov@alumni.esade.edu>",
+                "type": "personal",
+                "icon": null,
+                "description": null,
+                "creatorId": "a4726199-d7ac-414b-b995-7863227e1dc5"
+            }
+        }
+    ],
+    "tags": [],
+    "activeVersion": null
 }

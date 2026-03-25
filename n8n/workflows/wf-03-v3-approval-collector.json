@@ -1,1 +1,967 @@
-{"updatedAt":"2026-03-24T22:35:21.854Z","createdAt":"2026-03-24T22:35:21.854Z","id":"eux9fCnah3tFBNBn","name":"[WF-03-v3] Approval Collector","description":null,"active":false,"isArchived":false,"nodes":[{"parameters":{"updates":["callback_query"],"additionalFields":{}},"id":"04b7ad93-db47-4eb8-aae6-e47276340dcb","name":"Telegram Trigger","type":"n8n-nodes-base.telegramTrigger","typeVersion":1.1,"position":[-600,300],"webhookId":"573257ea-58c4-49bb-80f1-cf4c60ef1f59","credentials":{"telegramApi":{"id":"V1Z3rnsrUvXf0TPr","name":"Telegram account"}}},{"parameters":{"jsCode":"var cb = $input.first().json.callback_query;\nvar data = cb.data || '';\nvar colonIdx = data.indexOf(':');\nvar action = colonIdx > -1 ? data.substring(0, colonIdx) : data;\nvar payload = colonIdx > -1 ? data.substring(colonIdx + 1) : '';\n\nvar chatId = cb.from.id;\nvar msgText = (cb.message && cb.message.text) ? cb.message.text : '';\n\nreturn [{\n  json: {\n    action: action,\n    payload: payload,\n    chat_id: chatId,\n    message_text: msgText,\n    callback_query_id: cb.id\n  }\n}];"},"id":"561dd9ba-0325-4099-ae6a-4249187f4d32","name":"Parse Callback","type":"n8n-nodes-base.code","typeVersion":2,"position":[-380,300]},{"parameters":{"operation":"getAll","tableId":"articles","limit":1,"filterType":"string","filterString":"=url=like.*{{ $json.payload }}*"},"id":"184c24f5-40de-4562-9f20-da90e74d15bc","name":"Find Article","type":"n8n-nodes-base.supabase","typeVersion":1,"position":[-160,300],"alwaysOutputData":true,"continueOnFail":true,"credentials":{"supabaseApi":{"id":"k5u4E7DLyRpsGAB0","name":"Supabase account"}}},{"parameters":{"conditions":{"options":{"caseSensitive":true,"leftValue":"","typeValidation":"strict","version":2},"conditions":[{"id":"b2b9c477-4bd4-44d6-ac16-eeb839079261","leftValue":"={{ $(\"Parse Callback\").item.json.action }}","rightValue":"a","operator":{"type":"string","operation":"equals"}}],"combinator":"and"},"options":{}},"id":"9dc44081-e8cf-4bcf-a44f-d9bf16ddce3f","name":"Is Approve?","type":"n8n-nodes-base.if","typeVersion":2.2,"position":[60,300]},{"parameters":{"operation":"update","tableId":"articles","filterType":"string","filterString":"=url=eq.{{ $(\"Find Article\").item.json.url }}","fieldsUi":{"fieldValues":[{"fieldId":"status","fieldValue":"approved"}]}},"id":"b28da1d9-ecc4-43e4-8c78-1ede31c14720","name":"Update Approved","type":"n8n-nodes-base.supabase","typeVersion":1,"position":[300,200],"continueOnFail":true,"credentials":{"supabaseApi":{"id":"k5u4E7DLyRpsGAB0","name":"Supabase account"}}},{"parameters":{"operation":"sendMessage","chatId":"={{ $(\"Parse Callback\").item.json.chat_id }}","text":"=✅ Included: {{ $(\"Find Article\").item.json.title }}","additionalFields":{}},"id":"1cd6da5f-5d9a-45a0-8339-ce185566e17a","name":"Reply Included","type":"n8n-nodes-base.telegram","typeVersion":1.2,"position":[540,200],"continueOnFail":true,"credentials":{"telegramApi":{"id":"V1Z3rnsrUvXf0TPr","name":"Telegram account"}}},{"parameters":{"conditions":{"options":{"caseSensitive":true,"leftValue":"","typeValidation":"strict","version":2},"conditions":[{"id":"2956710a-b531-4edc-af6a-df16246c28b5","leftValue":"={{ $(\"Parse Callback\").item.json.action }}","rightValue":"c","operator":{"type":"string","operation":"equals"}}],"combinator":"and"},"options":{}},"id":"60985b39-daa9-4bcd-afb0-2c5f48133e4a","name":"Is Category?","type":"n8n-nodes-base.if","typeVersion":2.2,"position":[60,500]},{"parameters":{"operation":"getAll","tableId":"articles","limit":5,"filterType":"string","filterString":"=status=in.(header_scored,scored)&category=eq.{{ $(\"Parse Callback\").item.json.payload }}"},"id":"ebc648c6-9f58-45cc-ba9e-8920a5ee7615","name":"Get Category Articles","type":"n8n-nodes-base.supabase","typeVersion":1,"position":[300,440],"alwaysOutputData":true,"continueOnFail":true,"credentials":{"supabaseApi":{"id":"k5u4E7DLyRpsGAB0","name":"Supabase account"}}},{"parameters":{"jsCode":"var items = $input.all().filter(function(i) { return i.json.id; });\nvar chatId = $(\"Parse Callback\").item.json.chat_id;\nvar category = $(\"Parse Callback\").item.json.payload;\n\nvar catEmojis = {\n  politics: '\\ud83c\\udfe3',\n  geopolitics: '\\ud83c\\udf0d',\n  science: '\\ud83d\\udd2c',\n  tech: '\\ud83d\\udcbb',\n  economics: '\\ud83d\\udcc8',\n  quirky: '\\u2728'\n};\n\nif (items.length === 0) {\n  return [{\n    json: {\n      chat_id: chatId,\n      text: 'No more ' + category + ' articles available right now.',\n      reply_markup: ''\n    }\n  }];\n}\n\nvar lines = ['More ' + category + ' articles:'];\nvar buttons = [];\n\nfor (var i = 0; i < items.length; i++) {\n  var a = items[i].json;\n  var meta = a.llm_metadata || a.metadata || {};\n  if (typeof meta === 'string') {\n    try { meta = JSON.parse(meta); } catch(e) { meta = {}; }\n  }\n  var cat = (meta.category || a.category || category).toLowerCase();\n  var emoji = catEmojis[cat] || '\\ud83d\\udcf0';\n  var score = a.composite_score || a.header_score || 0;\n  var title = a.title || 'Untitled';\n  var source = a.source_name || a.feed_title || 'Unknown';\n  var url = a.url || '';\n\n  lines.push(emoji + ' [' + (Math.round(score * 10) / 10) + '] ' + title);\n  lines.push('   ' + source + ' | <a href=\"' + url + '\">Read</a>');\n\n  var urlPath = url.split('?')[0];\n  var pathPart = urlPath.length > 30 ? urlPath.substring(urlPath.length - 30) : urlPath;\n  buttons.push({text: 'Include #' + (i + 1), callback_data: 'a:' + pathPart});\n}\n\nvar keyboard = [];\nfor (var j = 0; j < buttons.length; j += 2) {\n  var row = [buttons[j]];\n  if (j + 1 < buttons.length) row.push(buttons[j + 1]);\n  keyboard.push(row);\n}\n\nreturn [{\n  json: {\n    chat_id: chatId,\n    text: lines.join('\\n'),\n    reply_markup: JSON.stringify({inline_keyboard: keyboard})\n  }\n}];"},"id":"57091079-8ce9-4048-837a-01923a18ad09","name":"Format Category Cards","type":"n8n-nodes-base.code","typeVersion":2,"position":[540,440]},{"parameters":{"operation":"sendMessage","chatId":"={{ $json.chat_id }}","text":"={{ $json.text }}","additionalFields":{"parse_mode":"HTML"}},"id":"b3c7aa5d-7fc4-472c-a0db-a81618db90b4","name":"Send Category Message","type":"n8n-nodes-base.telegram","typeVersion":1.2,"position":[780,440],"continueOnFail":true,"credentials":{"telegramApi":{"id":"V1Z3rnsrUvXf0TPr","name":"Telegram account"}}},{"parameters":{"conditions":{"options":{"caseSensitive":true,"leftValue":"","typeValidation":"strict","version":2},"conditions":[{"id":"a4ebff23-4049-4571-8408-2cefa1500411","leftValue":"={{ $(\"Parse Callback\").item.json.action }}","rightValue":"d","operator":{"type":"string","operation":"equals"}}],"combinator":"and"},"options":{}},"id":"2043807f-9eb6-4647-9c75-3f4e9b81cc3b","name":"Is Done?","type":"n8n-nodes-base.if","typeVersion":2.2,"position":[60,700]},{"parameters":{"operation":"sendMessage","chatId":"={{ $(\"Parse Callback\").item.json.chat_id }}","text":"👋 All done! Approved articles ready for script generation.","additionalFields":{}},"id":"618d3cc8-55a5-4c84-b9cd-8cfbea2b7f67","name":"Reply Done","type":"n8n-nodes-base.telegram","typeVersion":1.2,"position":[300,640],"continueOnFail":true,"credentials":{"telegramApi":{"id":"V1Z3rnsrUvXf0TPr","name":"Telegram account"}}},{"parameters":{"content":"## [WF-03-v3] Approval Collector\n\nHandles Telegram button callbacks from WF-01c-v3 article cards and footer.\n\nCallbacks: a:URL_PATH (approve), c:CATEGORY (browse more), d: (done for today)."},"id":"4dee433d-373a-4a1a-8b27-ca26ca219ecc","name":"Note","type":"n8n-nodes-base.stickyNote","typeVersion":1,"position":[-600,80]}],"connections":{"Telegram Trigger":{"main":[[{"node":"Parse Callback","type":"main","index":0}]]},"Parse Callback":{"main":[[{"node":"Find Article","type":"main","index":0}]]},"Find Article":{"main":[[{"node":"Is Approve?","type":"main","index":0}]]},"Is Approve?":{"main":[[{"node":"Update Approved","type":"main","index":0}],[{"node":"Is Category?","type":"main","index":0}]]},"Update Approved":{"main":[[{"node":"Reply Included","type":"main","index":0}]]},"Is Category?":{"main":[[{"node":"Get Category Articles","type":"main","index":0}],[{"node":"Is Done?","type":"main","index":0}]]},"Get Category Articles":{"main":[[{"node":"Format Category Cards","type":"main","index":0}]]},"Format Category Cards":{"main":[[{"node":"Send Category Message","type":"main","index":0}]]},"Is Done?":{"main":[[{"node":"Reply Done","type":"main","index":0}],[]]}},"settings":{"executionOrder":"v1","callerPolicy":"workflowsFromSameOwner","availableInMCP":false},"staticData":null,"meta":null,"pinData":null,"versionId":"a8164864-49a0-451d-bda5-2cffa8c3691c","activeVersionId":null,"versionCounter":1,"triggerCount":0,"shared":[{"updatedAt":"2026-03-24T22:35:21.856Z","createdAt":"2026-03-24T22:35:21.856Z","role":"workflow:owner","workflowId":"eux9fCnah3tFBNBn","projectId":"S1Sia4mxWWgZxzsz","project":{"updatedAt":"2026-03-19T21:30:04.243Z","createdAt":"2026-03-19T21:28:04.434Z","id":"S1Sia4mxWWgZxzsz","name":"Christian  Nikolov <christian.nikolov@alumni.esade.edu>","type":"personal","icon":null,"description":null,"creatorId":"a4726199-d7ac-414b-b995-7863227e1dc5"}}],"tags":[],"activeVersion":null}
+{
+    "updatedAt": "2026-03-25T10:46:07.435Z",
+    "createdAt": "2026-03-24T22:35:21.854Z",
+    "id": "eux9fCnah3tFBNBn",
+    "name": "[WF-03-v3] Approval Collector",
+    "description": null,
+    "active": true,
+    "isArchived": false,
+    "nodes": [
+        {
+            "parameters": {
+                "updates": [
+                    "callback_query"
+                ],
+                "additionalFields": {}
+            },
+            "id": "04b7ad93-db47-4eb8-aae6-e47276340dcb",
+            "name": "Telegram Trigger",
+            "type": "n8n-nodes-base.telegramTrigger",
+            "typeVersion": 1.1,
+            "position": [
+                -600,
+                300
+            ],
+            "webhookId": "573257ea-58c4-49bb-80f1-cf4c60ef1f59",
+            "credentials": {
+                "telegramApi": {
+                    "id": "V1Z3rnsrUvXf0TPr",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "var cb = $input.first().json.callback_query;\nvar data = cb.data || '';\nvar colonIdx = data.indexOf(':');\nvar action = colonIdx > -1 ? data.substring(0, colonIdx) : data;\nvar payload = colonIdx > -1 ? data.substring(colonIdx + 1) : '';\n\nvar chatId = cb.from.id;\nvar msgText = (cb.message && cb.message.text) ? cb.message.text : '';\n\nreturn [{\n  json: {\n    action: action,\n    payload: payload,\n    chat_id: chatId,\n    message_text: msgText,\n    callback_query_id: cb.id\n  }\n}];"
+            },
+            "id": "561dd9ba-0325-4099-ae6a-4249187f4d32",
+            "name": "Parse Callback",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -380,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "getAll",
+                "tableId": "articles",
+                "limit": 1,
+                "filterType": "string",
+                "filterString": "=url=like.*{{ $json.payload }}*"
+            },
+            "id": "184c24f5-40de-4562-9f20-da90e74d15bc",
+            "name": "Find Article",
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                -160,
+                300
+            ],
+            "alwaysOutputData": true,
+            "continueOnFail": true,
+            "credentials": {
+                "supabaseApi": {
+                    "id": "k5u4E7DLyRpsGAB0",
+                    "name": "Supabase account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "strict",
+                        "version": 2
+                    },
+                    "conditions": [
+                        {
+                            "id": "b2b9c477-4bd4-44d6-ac16-eeb839079261",
+                            "leftValue": "={{ $(\"Parse Callback\").item.json.action }}",
+                            "rightValue": "a",
+                            "operator": {
+                                "type": "string",
+                                "operation": "equals"
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": {}
+            },
+            "id": "9dc44081-e8cf-4bcf-a44f-d9bf16ddce3f",
+            "name": "Is Approve?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2.2,
+            "position": [
+                60,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "method": "PATCH",
+                "url": "=https://jqegmsusycnjecqjndgd.supabase.co/rest/v1/articles?url=eq.{{ encodeURIComponent($(\"Find Article\").item.json.url) }}",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "apikey",
+                            "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxZWdtc3VzeWNuamVjcWpuZGdkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDAwMzMxMSwiZXhwIjoyMDg5NTc5MzExfQ.TGKw3RyqevjZSnxUoRfeCP0DQmgmehJtbcFAnjIoz54"
+                        },
+                        {
+                            "name": "Authorization",
+                            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxZWdtc3VzeWNuamVjcWpuZGdkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDAwMzMxMSwiZXhwIjoyMDg5NTc5MzExfQ.TGKw3RyqevjZSnxUoRfeCP0DQmgmehJtbcFAnjIoz54"
+                        },
+                        {
+                            "name": "Content-Type",
+                            "value": "application/json"
+                        },
+                        {
+                            "name": "Prefer",
+                            "value": "return=minimal"
+                        }
+                    ]
+                },
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={\"status\": \"approved\"}",
+                "options": {}
+            },
+            "id": "b28da1d9-ecc4-43e4-8c78-1ede31c14720",
+            "name": "Update Approved",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.4,
+            "position": [
+                300,
+                200
+            ],
+            "alwaysOutputData": true,
+            "continueOnFail": true
+        },
+        {
+            "parameters": {
+                "operation": "sendMessage",
+                "chatId": "={{ $(\"Parse Callback\").item.json.chat_id }}",
+                "text": "=\u2705 Included: {{ $(\"Find Article\").item.json.title }}",
+                "additionalFields": {}
+            },
+            "id": "1cd6da5f-5d9a-45a0-8339-ce185566e17a",
+            "name": "Reply Included",
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                540,
+                200
+            ],
+            "continueOnFail": true,
+            "credentials": {
+                "telegramApi": {
+                    "id": "V1Z3rnsrUvXf0TPr",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "strict",
+                        "version": 2
+                    },
+                    "conditions": [
+                        {
+                            "id": "2956710a-b531-4edc-af6a-df16246c28b5",
+                            "leftValue": "={{ $(\"Parse Callback\").item.json.action }}",
+                            "rightValue": "c",
+                            "operator": {
+                                "type": "string",
+                                "operation": "equals"
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": {}
+            },
+            "id": "60985b39-daa9-4bcd-afb0-2c5f48133e4a",
+            "name": "Is Category?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2.2,
+            "position": [
+                60,
+                500
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "getAll",
+                "tableId": "articles",
+                "limit": 5,
+                "filterType": "string",
+                "filterString": "=status=in.(header_scored,scored)&category=eq.{{ $(\"Parse Callback\").item.json.payload }}"
+            },
+            "id": "ebc648c6-9f58-45cc-ba9e-8920a5ee7615",
+            "name": "Get Category Articles",
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                300,
+                440
+            ],
+            "alwaysOutputData": true,
+            "continueOnFail": true,
+            "credentials": {
+                "supabaseApi": {
+                    "id": "k5u4E7DLyRpsGAB0",
+                    "name": "Supabase account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "var items = $input.all().filter(function(i) { return i.json.id; });\nvar chatId = $(\"Parse Callback\").item.json.chat_id;\nvar category = $(\"Parse Callback\").item.json.payload;\n\nvar catEmojis = {\n  politics: '\\ud83c\\udfe3',\n  geopolitics: '\\ud83c\\udf0d',\n  science: '\\ud83d\\udd2c',\n  tech: '\\ud83d\\udcbb',\n  economics: '\\ud83d\\udcc8',\n  quirky: '\\u2728'\n};\n\nif (items.length === 0) {\n  return [{\n    json: {\n      chat_id: chatId,\n      text: 'No more ' + category + ' articles available right now.',\n      reply_markup: ''\n    }\n  }];\n}\n\nvar lines = ['More ' + category + ' articles:'];\nvar buttons = [];\n\nfor (var i = 0; i < items.length; i++) {\n  var a = items[i].json;\n  var meta = a.llm_metadata || a.metadata || {};\n  if (typeof meta === 'string') {\n    try { meta = JSON.parse(meta); } catch(e) { meta = {}; }\n  }\n  var cat = (meta.category || a.category || category).toLowerCase();\n  var emoji = catEmojis[cat] || '\\ud83d\\udcf0';\n  var score = a.composite_score || a.header_score || 0;\n  var title = a.title || 'Untitled';\n  var source = a.source_name || a.feed_title || 'Unknown';\n  var url = a.url || '';\n\n  lines.push(emoji + ' [' + (Math.round(score * 10) / 10) + '] ' + title);\n  lines.push('   ' + source + ' | <a href=\"' + url + '\">Read</a>');\n\n  var urlPath = url.split('?')[0];\n  var pathPart = urlPath.length > 30 ? urlPath.substring(urlPath.length - 30) : urlPath;\n  buttons.push({text: 'Include #' + (i + 1), callback_data: 'a:' + pathPart});\n}\n\nvar keyboard = [];\nfor (var j = 0; j < buttons.length; j += 2) {\n  var row = [buttons[j]];\n  if (j + 1 < buttons.length) row.push(buttons[j + 1]);\n  keyboard.push(row);\n}\n\nreturn [{\n  json: {\n    chat_id: chatId,\n    text: lines.join('\\n'),\n    reply_markup: JSON.stringify({inline_keyboard: keyboard})\n  }\n}];"
+            },
+            "id": "57091079-8ce9-4048-837a-01923a18ad09",
+            "name": "Format Category Cards",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                540,
+                440
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "sendMessage",
+                "chatId": "={{ $json.chat_id }}",
+                "text": "={{ $json.text }}",
+                "additionalFields": {
+                    "parse_mode": "HTML"
+                }
+            },
+            "id": "b3c7aa5d-7fc4-472c-a0db-a81618db90b4",
+            "name": "Send Category Message",
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                780,
+                440
+            ],
+            "continueOnFail": true,
+            "credentials": {
+                "telegramApi": {
+                    "id": "V1Z3rnsrUvXf0TPr",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "strict",
+                        "version": 2
+                    },
+                    "conditions": [
+                        {
+                            "id": "a4ebff23-4049-4571-8408-2cefa1500411",
+                            "leftValue": "={{ $(\"Parse Callback\").item.json.action }}",
+                            "rightValue": "d",
+                            "operator": {
+                                "type": "string",
+                                "operation": "equals"
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": {}
+            },
+            "id": "2043807f-9eb6-4647-9c75-3f4e9b81cc3b",
+            "name": "Is Done?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2.2,
+            "position": [
+                60,
+                700
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "sendMessage",
+                "chatId": "={{ $(\"Parse Callback\").item.json.chat_id }}",
+                "text": "\ud83d\udc4b All done! Approved articles ready for script generation.",
+                "additionalFields": {}
+            },
+            "id": "618d3cc8-55a5-4c84-b9cd-8cfbea2b7f67",
+            "name": "Reply Done",
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                300,
+                640
+            ],
+            "continueOnFail": true,
+            "credentials": {
+                "telegramApi": {
+                    "id": "V1Z3rnsrUvXf0TPr",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "content": "## [WF-03-v3] Approval Collector\n\nHandles Telegram button callbacks from WF-01c-v3 article cards and footer.\n\nCallbacks: a:URL_PATH (approve), c:CATEGORY (browse more), d: (done for today)."
+            },
+            "id": "4dee433d-373a-4a1a-8b27-ca26ca219ecc",
+            "name": "Note",
+            "type": "n8n-nodes-base.stickyNote",
+            "typeVersion": 1,
+            "position": [
+                -600,
+                80
+            ]
+        }
+    ],
+    "connections": {
+        "Telegram Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Parse Callback",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Parse Callback": {
+            "main": [
+                [
+                    {
+                        "node": "Find Article",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Find Article": {
+            "main": [
+                [
+                    {
+                        "node": "Is Approve?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Is Approve?": {
+            "main": [
+                [
+                    {
+                        "node": "Update Approved",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Is Category?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Update Approved": {
+            "main": [
+                [
+                    {
+                        "node": "Reply Included",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Is Category?": {
+            "main": [
+                [
+                    {
+                        "node": "Get Category Articles",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Is Done?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get Category Articles": {
+            "main": [
+                [
+                    {
+                        "node": "Format Category Cards",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Format Category Cards": {
+            "main": [
+                [
+                    {
+                        "node": "Send Category Message",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Is Done?": {
+            "main": [
+                [
+                    {
+                        "node": "Reply Done",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                []
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1",
+        "callerPolicy": "workflowsFromSameOwner",
+        "availableInMCP": false
+    },
+    "staticData": null,
+    "meta": null,
+    "pinData": null,
+    "versionId": "5015f223-2cea-4b30-8d23-4040a2485d31",
+    "activeVersionId": "5015f223-2cea-4b30-8d23-4040a2485d31",
+    "versionCounter": 8,
+    "triggerCount": 1,
+    "shared": [
+        {
+            "updatedAt": "2026-03-24T22:35:21.856Z",
+            "createdAt": "2026-03-24T22:35:21.856Z",
+            "role": "workflow:owner",
+            "workflowId": "eux9fCnah3tFBNBn",
+            "projectId": "S1Sia4mxWWgZxzsz",
+            "project": {
+                "updatedAt": "2026-03-19T21:30:04.243Z",
+                "createdAt": "2026-03-19T21:28:04.434Z",
+                "id": "S1Sia4mxWWgZxzsz",
+                "name": "Christian  Nikolov <christian.nikolov@alumni.esade.edu>",
+                "type": "personal",
+                "icon": null,
+                "description": null,
+                "creatorId": "a4726199-d7ac-414b-b995-7863227e1dc5"
+            }
+        }
+    ],
+    "tags": [],
+    "activeVersion": {
+        "updatedAt": "2026-03-25T10:46:07.437Z",
+        "createdAt": "2026-03-25T10:46:07.437Z",
+        "versionId": "5015f223-2cea-4b30-8d23-4040a2485d31",
+        "workflowId": "eux9fCnah3tFBNBn",
+        "nodes": [
+            {
+                "parameters": {
+                    "updates": [
+                        "callback_query"
+                    ],
+                    "additionalFields": {}
+                },
+                "id": "04b7ad93-db47-4eb8-aae6-e47276340dcb",
+                "name": "Telegram Trigger",
+                "type": "n8n-nodes-base.telegramTrigger",
+                "typeVersion": 1.1,
+                "position": [
+                    -600,
+                    300
+                ],
+                "webhookId": "573257ea-58c4-49bb-80f1-cf4c60ef1f59",
+                "credentials": {
+                    "telegramApi": {
+                        "id": "V1Z3rnsrUvXf0TPr",
+                        "name": "Telegram account"
+                    }
+                }
+            },
+            {
+                "parameters": {
+                    "jsCode": "var cb = $input.first().json.callback_query;\nvar data = cb.data || '';\nvar colonIdx = data.indexOf(':');\nvar action = colonIdx > -1 ? data.substring(0, colonIdx) : data;\nvar payload = colonIdx > -1 ? data.substring(colonIdx + 1) : '';\n\nvar chatId = cb.from.id;\nvar msgText = (cb.message && cb.message.text) ? cb.message.text : '';\n\nreturn [{\n  json: {\n    action: action,\n    payload: payload,\n    chat_id: chatId,\n    message_text: msgText,\n    callback_query_id: cb.id\n  }\n}];"
+                },
+                "id": "561dd9ba-0325-4099-ae6a-4249187f4d32",
+                "name": "Parse Callback",
+                "type": "n8n-nodes-base.code",
+                "typeVersion": 2,
+                "position": [
+                    -380,
+                    300
+                ]
+            },
+            {
+                "parameters": {
+                    "operation": "getAll",
+                    "tableId": "articles",
+                    "limit": 1,
+                    "filterType": "string",
+                    "filterString": "=url=like.*{{ $json.payload }}*"
+                },
+                "id": "184c24f5-40de-4562-9f20-da90e74d15bc",
+                "name": "Find Article",
+                "type": "n8n-nodes-base.supabase",
+                "typeVersion": 1,
+                "position": [
+                    -160,
+                    300
+                ],
+                "alwaysOutputData": true,
+                "continueOnFail": true,
+                "credentials": {
+                    "supabaseApi": {
+                        "id": "k5u4E7DLyRpsGAB0",
+                        "name": "Supabase account"
+                    }
+                }
+            },
+            {
+                "parameters": {
+                    "conditions": {
+                        "options": {
+                            "caseSensitive": true,
+                            "leftValue": "",
+                            "typeValidation": "strict",
+                            "version": 2
+                        },
+                        "conditions": [
+                            {
+                                "id": "b2b9c477-4bd4-44d6-ac16-eeb839079261",
+                                "leftValue": "={{ $(\"Parse Callback\").item.json.action }}",
+                                "rightValue": "a",
+                                "operator": {
+                                    "type": "string",
+                                    "operation": "equals"
+                                }
+                            }
+                        ],
+                        "combinator": "and"
+                    },
+                    "options": {}
+                },
+                "id": "9dc44081-e8cf-4bcf-a44f-d9bf16ddce3f",
+                "name": "Is Approve?",
+                "type": "n8n-nodes-base.if",
+                "typeVersion": 2.2,
+                "position": [
+                    60,
+                    300
+                ]
+            },
+            {
+                "parameters": {
+                    "method": "PATCH",
+                    "url": "=https://jqegmsusycnjecqjndgd.supabase.co/rest/v1/articles?url=eq.{{ encodeURIComponent($(\"Find Article\").item.json.url) }}",
+                    "sendHeaders": true,
+                    "headerParameters": {
+                        "parameters": [
+                            {
+                                "name": "apikey",
+                                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxZWdtc3VzeWNuamVjcWpuZGdkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDAwMzMxMSwiZXhwIjoyMDg5NTc5MzExfQ.TGKw3RyqevjZSnxUoRfeCP0DQmgmehJtbcFAnjIoz54"
+                            },
+                            {
+                                "name": "Authorization",
+                                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxZWdtc3VzeWNuamVjcWpuZGdkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDAwMzMxMSwiZXhwIjoyMDg5NTc5MzExfQ.TGKw3RyqevjZSnxUoRfeCP0DQmgmehJtbcFAnjIoz54"
+                            },
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "name": "Prefer",
+                                "value": "return=minimal"
+                            }
+                        ]
+                    },
+                    "sendBody": true,
+                    "specifyBody": "json",
+                    "jsonBody": "={\"status\": \"approved\"}",
+                    "options": {}
+                },
+                "id": "b28da1d9-ecc4-43e4-8c78-1ede31c14720",
+                "name": "Update Approved",
+                "type": "n8n-nodes-base.httpRequest",
+                "typeVersion": 4.4,
+                "position": [
+                    300,
+                    200
+                ],
+                "alwaysOutputData": true,
+                "continueOnFail": true
+            },
+            {
+                "parameters": {
+                    "operation": "sendMessage",
+                    "chatId": "={{ $(\"Parse Callback\").item.json.chat_id }}",
+                    "text": "=\u2705 Included: {{ $(\"Find Article\").item.json.title }}",
+                    "additionalFields": {}
+                },
+                "id": "1cd6da5f-5d9a-45a0-8339-ce185566e17a",
+                "name": "Reply Included",
+                "type": "n8n-nodes-base.telegram",
+                "typeVersion": 1.2,
+                "position": [
+                    540,
+                    200
+                ],
+                "continueOnFail": true,
+                "credentials": {
+                    "telegramApi": {
+                        "id": "V1Z3rnsrUvXf0TPr",
+                        "name": "Telegram account"
+                    }
+                }
+            },
+            {
+                "parameters": {
+                    "conditions": {
+                        "options": {
+                            "caseSensitive": true,
+                            "leftValue": "",
+                            "typeValidation": "strict",
+                            "version": 2
+                        },
+                        "conditions": [
+                            {
+                                "id": "2956710a-b531-4edc-af6a-df16246c28b5",
+                                "leftValue": "={{ $(\"Parse Callback\").item.json.action }}",
+                                "rightValue": "c",
+                                "operator": {
+                                    "type": "string",
+                                    "operation": "equals"
+                                }
+                            }
+                        ],
+                        "combinator": "and"
+                    },
+                    "options": {}
+                },
+                "id": "60985b39-daa9-4bcd-afb0-2c5f48133e4a",
+                "name": "Is Category?",
+                "type": "n8n-nodes-base.if",
+                "typeVersion": 2.2,
+                "position": [
+                    60,
+                    500
+                ]
+            },
+            {
+                "parameters": {
+                    "operation": "getAll",
+                    "tableId": "articles",
+                    "limit": 5,
+                    "filterType": "string",
+                    "filterString": "=status=in.(header_scored,scored)&category=eq.{{ $(\"Parse Callback\").item.json.payload }}"
+                },
+                "id": "ebc648c6-9f58-45cc-ba9e-8920a5ee7615",
+                "name": "Get Category Articles",
+                "type": "n8n-nodes-base.supabase",
+                "typeVersion": 1,
+                "position": [
+                    300,
+                    440
+                ],
+                "alwaysOutputData": true,
+                "continueOnFail": true,
+                "credentials": {
+                    "supabaseApi": {
+                        "id": "k5u4E7DLyRpsGAB0",
+                        "name": "Supabase account"
+                    }
+                }
+            },
+            {
+                "parameters": {
+                    "jsCode": "var items = $input.all().filter(function(i) { return i.json.id; });\nvar chatId = $(\"Parse Callback\").item.json.chat_id;\nvar category = $(\"Parse Callback\").item.json.payload;\n\nvar catEmojis = {\n  politics: '\\ud83c\\udfe3',\n  geopolitics: '\\ud83c\\udf0d',\n  science: '\\ud83d\\udd2c',\n  tech: '\\ud83d\\udcbb',\n  economics: '\\ud83d\\udcc8',\n  quirky: '\\u2728'\n};\n\nif (items.length === 0) {\n  return [{\n    json: {\n      chat_id: chatId,\n      text: 'No more ' + category + ' articles available right now.',\n      reply_markup: ''\n    }\n  }];\n}\n\nvar lines = ['More ' + category + ' articles:'];\nvar buttons = [];\n\nfor (var i = 0; i < items.length; i++) {\n  var a = items[i].json;\n  var meta = a.llm_metadata || a.metadata || {};\n  if (typeof meta === 'string') {\n    try { meta = JSON.parse(meta); } catch(e) { meta = {}; }\n  }\n  var cat = (meta.category || a.category || category).toLowerCase();\n  var emoji = catEmojis[cat] || '\\ud83d\\udcf0';\n  var score = a.composite_score || a.header_score || 0;\n  var title = a.title || 'Untitled';\n  var source = a.source_name || a.feed_title || 'Unknown';\n  var url = a.url || '';\n\n  lines.push(emoji + ' [' + (Math.round(score * 10) / 10) + '] ' + title);\n  lines.push('   ' + source + ' | <a href=\"' + url + '\">Read</a>');\n\n  var urlPath = url.split('?')[0];\n  var pathPart = urlPath.length > 30 ? urlPath.substring(urlPath.length - 30) : urlPath;\n  buttons.push({text: 'Include #' + (i + 1), callback_data: 'a:' + pathPart});\n}\n\nvar keyboard = [];\nfor (var j = 0; j < buttons.length; j += 2) {\n  var row = [buttons[j]];\n  if (j + 1 < buttons.length) row.push(buttons[j + 1]);\n  keyboard.push(row);\n}\n\nreturn [{\n  json: {\n    chat_id: chatId,\n    text: lines.join('\\n'),\n    reply_markup: JSON.stringify({inline_keyboard: keyboard})\n  }\n}];"
+                },
+                "id": "57091079-8ce9-4048-837a-01923a18ad09",
+                "name": "Format Category Cards",
+                "type": "n8n-nodes-base.code",
+                "typeVersion": 2,
+                "position": [
+                    540,
+                    440
+                ]
+            },
+            {
+                "parameters": {
+                    "operation": "sendMessage",
+                    "chatId": "={{ $json.chat_id }}",
+                    "text": "={{ $json.text }}",
+                    "additionalFields": {
+                        "parse_mode": "HTML"
+                    }
+                },
+                "id": "b3c7aa5d-7fc4-472c-a0db-a81618db90b4",
+                "name": "Send Category Message",
+                "type": "n8n-nodes-base.telegram",
+                "typeVersion": 1.2,
+                "position": [
+                    780,
+                    440
+                ],
+                "continueOnFail": true,
+                "credentials": {
+                    "telegramApi": {
+                        "id": "V1Z3rnsrUvXf0TPr",
+                        "name": "Telegram account"
+                    }
+                }
+            },
+            {
+                "parameters": {
+                    "conditions": {
+                        "options": {
+                            "caseSensitive": true,
+                            "leftValue": "",
+                            "typeValidation": "strict",
+                            "version": 2
+                        },
+                        "conditions": [
+                            {
+                                "id": "a4ebff23-4049-4571-8408-2cefa1500411",
+                                "leftValue": "={{ $(\"Parse Callback\").item.json.action }}",
+                                "rightValue": "d",
+                                "operator": {
+                                    "type": "string",
+                                    "operation": "equals"
+                                }
+                            }
+                        ],
+                        "combinator": "and"
+                    },
+                    "options": {}
+                },
+                "id": "2043807f-9eb6-4647-9c75-3f4e9b81cc3b",
+                "name": "Is Done?",
+                "type": "n8n-nodes-base.if",
+                "typeVersion": 2.2,
+                "position": [
+                    60,
+                    700
+                ]
+            },
+            {
+                "parameters": {
+                    "operation": "sendMessage",
+                    "chatId": "={{ $(\"Parse Callback\").item.json.chat_id }}",
+                    "text": "\ud83d\udc4b All done! Approved articles ready for script generation.",
+                    "additionalFields": {}
+                },
+                "id": "618d3cc8-55a5-4c84-b9cd-8cfbea2b7f67",
+                "name": "Reply Done",
+                "type": "n8n-nodes-base.telegram",
+                "typeVersion": 1.2,
+                "position": [
+                    300,
+                    640
+                ],
+                "continueOnFail": true,
+                "credentials": {
+                    "telegramApi": {
+                        "id": "V1Z3rnsrUvXf0TPr",
+                        "name": "Telegram account"
+                    }
+                }
+            },
+            {
+                "parameters": {
+                    "content": "## [WF-03-v3] Approval Collector\n\nHandles Telegram button callbacks from WF-01c-v3 article cards and footer.\n\nCallbacks: a:URL_PATH (approve), c:CATEGORY (browse more), d: (done for today)."
+                },
+                "id": "4dee433d-373a-4a1a-8b27-ca26ca219ecc",
+                "name": "Note",
+                "type": "n8n-nodes-base.stickyNote",
+                "typeVersion": 1,
+                "position": [
+                    -600,
+                    80
+                ]
+            }
+        ],
+        "connections": {
+            "Telegram Trigger": {
+                "main": [
+                    [
+                        {
+                            "node": "Parse Callback",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Parse Callback": {
+                "main": [
+                    [
+                        {
+                            "node": "Find Article",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Find Article": {
+                "main": [
+                    [
+                        {
+                            "node": "Is Approve?",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Is Approve?": {
+                "main": [
+                    [
+                        {
+                            "node": "Update Approved",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "Is Category?",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Update Approved": {
+                "main": [
+                    [
+                        {
+                            "node": "Reply Included",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Is Category?": {
+                "main": [
+                    [
+                        {
+                            "node": "Get Category Articles",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    [
+                        {
+                            "node": "Is Done?",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Get Category Articles": {
+                "main": [
+                    [
+                        {
+                            "node": "Format Category Cards",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Format Category Cards": {
+                "main": [
+                    [
+                        {
+                            "node": "Send Category Message",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ]
+                ]
+            },
+            "Is Done?": {
+                "main": [
+                    [
+                        {
+                            "node": "Reply Done",
+                            "type": "main",
+                            "index": 0
+                        }
+                    ],
+                    []
+                ]
+            }
+        },
+        "authors": "Christian  Nikolov",
+        "name": null,
+        "description": null,
+        "autosaved": false,
+        "workflowPublishHistory": [
+            {
+                "createdAt": "2026-03-25T10:46:08.393Z",
+                "id": 45,
+                "workflowId": "eux9fCnah3tFBNBn",
+                "versionId": "5015f223-2cea-4b30-8d23-4040a2485d31",
+                "event": "activated",
+                "userId": "a4726199-d7ac-414b-b995-7863227e1dc5"
+            },
+            {
+                "createdAt": "2026-03-25T10:46:12.718Z",
+                "id": 47,
+                "workflowId": "eux9fCnah3tFBNBn",
+                "versionId": "5015f223-2cea-4b30-8d23-4040a2485d31",
+                "event": "activated",
+                "userId": "a4726199-d7ac-414b-b995-7863227e1dc5"
+            },
+            {
+                "createdAt": "2026-03-25T10:46:07.884Z",
+                "id": 44,
+                "workflowId": "eux9fCnah3tFBNBn",
+                "versionId": "5015f223-2cea-4b30-8d23-4040a2485d31",
+                "event": "deactivated",
+                "userId": "a4726199-d7ac-414b-b995-7863227e1dc5"
+            },
+            {
+                "createdAt": "2026-03-25T10:46:12.204Z",
+                "id": 46,
+                "workflowId": "eux9fCnah3tFBNBn",
+                "versionId": "5015f223-2cea-4b30-8d23-4040a2485d31",
+                "event": "deactivated",
+                "userId": "a4726199-d7ac-414b-b995-7863227e1dc5"
+            }
+        ]
+    }
+}

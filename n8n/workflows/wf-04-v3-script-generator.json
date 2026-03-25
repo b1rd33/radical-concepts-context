@@ -1,1 +1,882 @@
-{"updatedAt":"2026-03-24T22:35:45.923Z","createdAt":"2026-03-24T22:35:45.923Z","id":"TRRRsRw9jfyvKVZv","name":"[WF-04-v3] Script Generator","description":null,"active":false,"isArchived":false,"nodes":[{"parameters":{},"id":"6764471e-d661-4da2-9536-1f6472f5f9c1","name":"Manual Trigger","type":"n8n-nodes-base.manualTrigger","typeVersion":1,"position":[-1200,340]},{"parameters":{"operation":"getAll","tableId":"articles","returnAll":true,"filterType":"string","filterString":"status=eq.approved"},"id":"95666463-9dc5-488e-af80-84eb8c411078","name":"Get Approved Articles","type":"n8n-nodes-base.supabase","typeVersion":1,"position":[-960,340],"alwaysOutputData":true,"credentials":{"supabaseApi":{"id":"k5u4E7DLyRpsGAB0","name":"Supabase account"}}},{"parameters":{"jsCode":"var articles = $input.all().filter(function(item) { return item.json.id; });\nif (articles.length === 0) {\n  throw new Error('No approved articles found. Brett needs to approve articles in Telegram first.');\n}\nreturn articles;"},"id":"0d4eecdc-80b6-4266-b61c-e15b021d1c4a","name":"Check Articles","type":"n8n-nodes-base.code","typeVersion":2,"position":[-720,340]},{"parameters":{"options":{"reset":false}},"id":"8b06b202-92b0-4d6e-82fb-9cee88be7200","name":"Loop Extract","type":"n8n-nodes-base.splitInBatches","typeVersion":3,"position":[-480,340]},{"parameters":{"url":"=https://r.jina.ai/{{ $json.url }}","sendHeaders":true,"specifyHeaders":"keypair","headerParameters":{"parameters":[{"name":"Accept","value":"application/json"},{"name":"Authorization","value":"Bearer jina_a811d82131fe4f10816452ae5b3db00dyMHYT-sknMYUF1OBl32x3ami5YLF"}]},"options":{}},"id":"3035221e-b1ff-4310-a1e5-28bcb681d9f5","name":"Jina Extract","type":"n8n-nodes-base.httpRequest","typeVersion":4.4,"position":[-240,400],"continueOnFail":true},{"parameters":{"operation":"update","tableId":"articles","filterType":"string","filterString":"=url=eq.{{ $('Loop Extract').item.json.url }}","fieldsUi":{"fieldValues":[{"fieldId":"content","fieldValue":"={{ $json.data ? $json.data.content : '' }}"}]}},"id":"dce03e6c-3b68-4293-ad1a-9cd30ce1f2b0","name":"Save Content","type":"n8n-nodes-base.supabase","typeVersion":1,"position":[0,400],"continueOnFail":true,"alwaysOutputData":true,"credentials":{"supabaseApi":{"id":"k5u4E7DLyRpsGAB0","name":"Supabase account"}}},{"parameters":{"jsCode":"var articles = $('Check Articles').all();\nvar count = articles.length;\n\nvar template = 'standard_daily';\nvar templateLabel = 'Standard Daily (5 min)';\nif (count === 1) {\n  template = 'deep_dive';\n  templateLabel = 'Deep Dive (10 min)';\n} else if (count >= 5) {\n  template = 'weekly_roundup';\n  templateLabel = 'Weekly Roundup (15 min)';\n}\n\nvar selected;\nif (template === 'standard_daily') {\n  selected = articles.slice(0, 4);\n} else if (template === 'deep_dive') {\n  selected = articles.slice(0, 1);\n} else {\n  selected = articles.slice(0, 7);\n}\n\nvar combined = selected.map(function(item, i) {\n  var content = item.json.content || item.json.title || '';\n  return 'Article ' + (i + 1) + ': ' + (item.json.title || 'Untitled') +\n    '\\nURL: ' + (item.json.url || '') +\n    '\\nCategory: ' + (item.json.score_category || item.json.category || 'general') +\n    '\\nScore: ' + (item.json.composite_score || 'N/A') + '/10' +\n    '\\nContent: ' + content.substring(0, 2000);\n}).join('\\n\\n---\\n\\n');\n\nvar articleUrls = selected.map(function(a) { return a.json.url; });\nvar articleTitles = selected.map(function(a) { return a.json.title; });\n\nreturn [{\n  json: {\n    allArticles: combined,\n    articleCount: selected.length,\n    template: template,\n    templateLabel: templateLabel,\n    articleUrls: articleUrls,\n    articleTitles: articleTitles\n  }\n}];"},"id":"8694d3cd-9a43-4c03-a030-833aa52ca6e1","name":"Select Template","type":"n8n-nodes-base.code","typeVersion":2,"position":[240,340]},{"parameters":{"promptType":"define","text":"=Write a {{ $json.templateLabel }} podcast episode script.\n\nTEMPLATE: {{ $json.template }}\n\n{% if $json.template === 'deep_dive' %}\nUse EXACTLY this structure:\n[HOOK - 30 seconds]\nSet the stakes. Why this story matters beyond the headline.\n\n[CONTEXT - 2 minutes]\nHistorical/structural context. What led here. Key players and motivations.\n\n[THE DEVELOPMENT - 3 minutes]\nWhat happened. Key facts, data, quotes with attribution. What mainstream coverage got right and what it oversimplified.\n\n[BRETT'S ANALYSIS - 2 minutes]\nSecond/third-order effects. Cross-domain connections. Who wins and loses. Historical parallels.\n\n[WHAT TO WATCH - 1 minute]\nSpecific indicators, dates, decisions coming. \"If X happens within Y timeframe, it means Z.\"\n\n[CLOSE - 30 seconds]\nSynthesise. Forward-looking. One of Brett's closing patterns.\n\nRULES: 1500-1800 words.\n{% elif $json.template === 'weekly_roundup' %}\nUse EXACTLY this structure:\n[COLD OPEN - 30 seconds]\nThe week's theme in one provocative observation.\n\n[STORY 1 - 3 minutes]\nBiggest story of the week. Full narrative with context.\n\n[STORY 2 - 3 minutes]\nMost surprising story. Why the surprise matters.\n\n[STORY 3 - 3 minutes]\nMost underreported story. Why the audience should know.\n\n[BRETT'S SYNTHESIS - 3 minutes]\nConnect all stories into a single argument. The pattern they reveal together.\n\n[PREVIEW - 1 minute]\nWhat's coming next week. Events, stories Brett is tracking.\n\n[CLOSE - 30 seconds]\nWeekly sign-off. Warmer tone.\n\nRULES: 2500-3000 words.\n{% else %}\nUse EXACTLY this structure:\n[HOOK - 20 seconds]\nProvocative question connecting today's stories. Tease tension, don't summarise.\n\n[STORY 1 - 2 minutes]\nFull narrative: scene, key fact, 1-2 data points with source attribution, why it matters.\n\n[BRETT'S TAKE - 45 seconds]\nSecond-order implications, what coverage misses, what to watch.\n\n[STORY 2 - 2 minutes]\nDifferent domain. Same structure. Deliberate contrast to Story 1.\n\n[BRETT'S TAKE - 45 seconds]\nAnalysis + cross-domain connection to Story 1.\n\n[CLOSE - 20 seconds]\nSynthesise theme. Forward-looking question. Closing pattern.\n\nRULES: 750-900 words. Stronger story = Story 1. Cross-domain connection is the payoff.\n{% endif %}\n\nEvery sentence fully written. Every claim sourced by name. Natural transitions only.\n\nHere are Brett's approved articles:\n{{ $json.allArticles }}","messages":{"messageValues":[{"message":"You are Brett Moore -- Australian entrepreneur, geopolitical analyst, host of \"Fasten Your Seatbelt\" by Radical Concepts. 40 years across law, tech, media. Lived through Hong Kong handover, Asian financial crisis, GFC, COVID across four continents. Based in Barcelona.\n\nVOICE: Conversational authority with dry humour. Plain language -- explain geopolitics to a smart friend over coffee. Use first person always. Include specific numbers with context. Name sources explicitly. No jargon, no AI-isms, no filler.\n\nDO: First person always. Natural transitions. Conversational asides. Vary sentence length. Specific numbers with context (\"$4.2B -- more than Iceland's GDP\"). Name sources (\"According to the FT...\"). Front-load the interesting part. Address listener with \"you\".\n\nDON'T: No jargon (leverage, synergize, ecosystem). No AI-isms (delve, underscores, robust, navigate, the landscape). No filler (at the end of the day, needless to say). No emoji/hashtags/bullets in speech. No passive voice overuse.\n\nInclude [PAUSE] between sections.\nInclude [pronunciation hints] for unfamiliar names.\nEnd every episode with: \"I'm Brett Moore, and that was Fasten Your Seatbelt.\""}]},"batching":{}},"id":"4142a94c-1ac7-4d33-824b-f1597f3367c4","name":"Generate Script","type":"@n8n/n8n-nodes-langchain.chainLlm","typeVersion":1.9,"position":[480,340]},{"parameters":{"model":"openai/gpt-5.4-mini","options":{}},"id":"71de8964-35a6-4a33-98f7-aa4deff9a9cb","name":"Script Model","type":"@n8n/n8n-nodes-langchain.lmChatOpenRouter","typeVersion":1,"position":[560,560],"credentials":{"openRouterApi":{"id":"1HjiTjhZTVqv5vLc","name":"OpenRouter account"}}},{"parameters":{"tableId":"episodes","fieldsUi":{"fieldValues":[{"fieldId":"title","fieldValue":"=Episode - {{ $now.format('yyyy-MM-dd') }} ({{ $('Select Template').item.json.templateLabel }})"},{"fieldId":"script","fieldValue":"={{ $json.text }}"},{"fieldId":"status","fieldValue":"draft"}]}},"id":"d84df19e-5ef1-4fd0-9cc7-e314c43d3749","name":"Save Episode","type":"n8n-nodes-base.supabase","typeVersion":1,"position":[720,340],"alwaysOutputData":true,"credentials":{"supabaseApi":{"id":"k5u4E7DLyRpsGAB0","name":"Supabase account"}}},{"parameters":{"jsCode":"var articleUrls = $('Select Template').item.json.articleUrls;\nreturn articleUrls.map(function(url) {\n  return { json: { url: url } };\n});"},"id":"2fdf8f30-e230-4a56-b371-b3b710ddfa67","name":"Mark Articles Used","type":"n8n-nodes-base.code","typeVersion":2,"position":[960,340]},{"parameters":{"options":{"reset":false}},"id":"73f40f66-b4db-4a8d-975d-d4c75b1bfe76","name":"Loop Mark Used","type":"n8n-nodes-base.splitInBatches","typeVersion":3,"position":[1200,340]},{"parameters":{"operation":"update","tableId":"articles","filterType":"string","filterString":"=url=eq.{{ $json.url }}","fieldsUi":{"fieldValues":[{"fieldId":"status","fieldValue":"used"}]}},"id":"c0c00fb5-56da-4a73-a18f-c654d72883eb","name":"Update Used","type":"n8n-nodes-base.supabase","typeVersion":1,"position":[1440,400],"continueOnFail":true,"alwaysOutputData":true,"credentials":{"supabaseApi":{"id":"k5u4E7DLyRpsGAB0","name":"Supabase account"}}},{"parameters":{"chatId":"1240314255","text":"={{ (function() {\nvar tmpl = $('Select Template').item.json.templateLabel;\nvar count = $('Select Template').item.json.articleCount;\nvar titles = $('Select Template').item.json.articleTitles;\nvar script = $('Generate Script').item.json.text;\nvar words = script.split(' ').length;\nvar msg = 'Episode Script Generated\\n\\n';\nmsg += 'Template: ' + tmpl + '\\n';\nmsg += 'Articles: ' + count + '\\n';\nfor (var i = 0; i < titles.length; i++) {\n  msg += '  ' + (i + 1) + '. ' + titles[i] + '\\n';\n}\nmsg += '\\nWord count: ' + words + '\\n';\nmsg += '\\nFull script saved to database. View in dashboard.';\nreturn msg;\n})() }}","additionalFields":{}},"id":"1060b2df-df44-4f90-b8bf-78fe31070ee1","name":"Notify Brett","type":"n8n-nodes-base.telegram","typeVersion":1.2,"position":[1440,160],"credentials":{"telegramApi":{"id":"V1Z3rnsrUvXf0TPr","name":"Telegram account"}}},{"parameters":{"content":"## [WF-04-v3] Script Generator\n\nReads approved articles, extracts full text via Jina,\ngenerates podcast script with Brett persona,\nsaves episode, marks articles used, notifies Brett.\n\nTemplate selection:\n- 1 article: Deep Dive (10 min)\n- 2-4 articles: Standard Daily (5 min)\n- 5+ articles: Weekly Roundup (15 min)","height":260,"width":320},"type":"n8n-nodes-base.stickyNote","typeVersion":1,"position":[-1200,60],"id":"562f8b4d-bb0e-4d7c-a7b3-33a493e9a749","name":"Info Note"}],"connections":{"Manual Trigger":{"main":[[{"node":"Get Approved Articles","type":"main","index":0}]]},"Get Approved Articles":{"main":[[{"node":"Check Articles","type":"main","index":0}]]},"Check Articles":{"main":[[{"node":"Loop Extract","type":"main","index":0}]]},"Loop Extract":{"main":[[{"node":"Select Template","type":"main","index":0}],[{"node":"Jina Extract","type":"main","index":0}]]},"Jina Extract":{"main":[[{"node":"Save Content","type":"main","index":0}]]},"Save Content":{"main":[[{"node":"Loop Extract","type":"main","index":0}]]},"Select Template":{"main":[[{"node":"Generate Script","type":"main","index":0}]]},"Script Model":{"ai_languageModel":[[{"node":"Generate Script","type":"ai_languageModel","index":0}]]},"Generate Script":{"main":[[{"node":"Save Episode","type":"main","index":0}]]},"Save Episode":{"main":[[{"node":"Mark Articles Used","type":"main","index":0}]]},"Mark Articles Used":{"main":[[{"node":"Loop Mark Used","type":"main","index":0}]]},"Loop Mark Used":{"main":[[{"node":"Notify Brett","type":"main","index":0}],[{"node":"Update Used","type":"main","index":0}]]},"Update Used":{"main":[[{"node":"Loop Mark Used","type":"main","index":0}]]}},"settings":{"executionOrder":"v1","callerPolicy":"workflowsFromSameOwner","availableInMCP":false},"staticData":null,"meta":null,"pinData":null,"versionId":"27b370f7-6278-490f-a423-543e489d954c","activeVersionId":null,"versionCounter":1,"triggerCount":0,"shared":[{"updatedAt":"2026-03-24T22:35:45.926Z","createdAt":"2026-03-24T22:35:45.926Z","role":"workflow:owner","workflowId":"TRRRsRw9jfyvKVZv","projectId":"S1Sia4mxWWgZxzsz","project":{"updatedAt":"2026-03-19T21:30:04.243Z","createdAt":"2026-03-19T21:28:04.434Z","id":"S1Sia4mxWWgZxzsz","name":"Christian  Nikolov <christian.nikolov@alumni.esade.edu>","type":"personal","icon":null,"description":null,"creatorId":"a4726199-d7ac-414b-b995-7863227e1dc5"}}],"tags":[],"activeVersion":null}
+{
+    "updatedAt": "2026-03-25T11:57:52.686Z",
+    "createdAt": "2026-03-24T22:35:45.923Z",
+    "id": "TRRRsRw9jfyvKVZv",
+    "name": "[WF-04-v3] Script Generator",
+    "description": null,
+    "active": false,
+    "isArchived": false,
+    "nodes": [
+        {
+            "parameters": {},
+            "id": "6764471e-d661-4da2-9536-1f6472f5f9c1",
+            "name": "Manual Trigger",
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                -1200,
+                216
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "getAll",
+                "tableId": "articles",
+                "returnAll": true,
+                "filterType": "string",
+                "filterString": "status=eq.approved"
+            },
+            "id": "95666463-9dc5-488e-af80-84eb8c411078",
+            "name": "Get Approved Articles",
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                -976,
+                216
+            ],
+            "alwaysOutputData": true,
+            "credentials": {
+                "supabaseApi": {
+                    "id": "k5u4E7DLyRpsGAB0",
+                    "name": "Supabase account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "var articles = $input.all().filter(function(item) { return item.json.id; });\nif (articles.length === 0) {\n  throw new Error('No approved articles found. Brett needs to approve articles in Telegram first.');\n}\n// Filter to last 48 hours only\nvar now = new Date();\nvar maxAge = 48 * 60 * 60 * 1000;\nvar recent = articles.filter(function(item) {\n  var created = new Date(item.json.created_at || now);\n  return (now - created) < maxAge;\n});\nif (recent.length === 0) {\n  throw new Error('No recently approved articles (last 48h). Run WF-01a/01b/01c/03 first.');\n}\nreturn recent;"
+            },
+            "id": "0d4eecdc-80b6-4266-b61c-e15b021d1c4a",
+            "name": "Check Articles",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -752,
+                216
+            ]
+        },
+        {
+            "parameters": {
+                "options": {
+                    "reset": false
+                }
+            },
+            "id": "8b06b202-92b0-4d6e-82fb-9cee88be7200",
+            "name": "Loop Extract",
+            "type": "n8n-nodes-base.splitInBatches",
+            "typeVersion": 3,
+            "position": [
+                -528,
+                216
+            ]
+        },
+        {
+            "parameters": {
+                "url": "=https://r.jina.ai/{{ $json.url }}",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "Accept",
+                            "value": "application/json"
+                        },
+                        {
+                            "name": "Authorization",
+                            "value": "Bearer jina_a811d82131fe4f10816452ae5b3db00dyMHYT-sknMYUF1OBl32x3ami5YLF"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "3035221e-b1ff-4310-a1e5-28bcb681d9f5",
+            "name": "Jina Extract",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.4,
+            "position": [
+                -304,
+                144
+            ],
+            "continueOnFail": true
+        },
+        {
+            "parameters": {
+                "operation": "update",
+                "tableId": "articles",
+                "filterType": "string",
+                "filterString": "=url=eq.{{ $('Loop Extract').item.json.url }}",
+                "fieldsUi": {
+                    "fieldValues": [
+                        {
+                            "fieldId": "content",
+                            "fieldValue": "={{ $json.data ? $json.data.content : '' }}"
+                        }
+                    ]
+                }
+            },
+            "id": "dce03e6c-3b68-4293-ad1a-9cd30ce1f2b0",
+            "name": "Save Content",
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                -80,
+                288
+            ],
+            "alwaysOutputData": true,
+            "credentials": {
+                "supabaseApi": {
+                    "id": "k5u4E7DLyRpsGAB0",
+                    "name": "Supabase account"
+                }
+            },
+            "continueOnFail": true
+        },
+        {
+            "parameters": {
+                "tableId": "episodes",
+                "fieldsUi": {
+                    "fieldValues": [
+                        {
+                            "fieldId": "title",
+                            "fieldValue": "=Episode - {{ $now.format('yyyy-MM-dd') }} (Multi-variant)"
+                        },
+                        {
+                            "fieldId": "script",
+                            "fieldValue": "={{ (function() {\nvar d = $json;\nvar out = '=== INVESTIGATION ===\\n' + d.investigation;\nout += '\\n\\n=== NARRATIVE ===\\n' + d.narrative;\nout += '\\n\\n=== SEGMENT (4min clip-ready) ===\\n' + d.segment;\nout += '\\n\\n=== QUICK TAKE (90s) ===\\n' + d.quickTake;\nout += '\\n\\n=== SOCIAL POSTS ===\\n' + d.socialPosts;\nout += '\\n\\n=== REVIEW NOTES ===\\n' + d.reviewNotes;\nreturn out;\n})() }}"
+                        },
+                        {
+                            "fieldId": "status",
+                            "fieldValue": "draft"
+                        }
+                    ]
+                }
+            },
+            "id": "d84df19e-5ef1-4fd0-9cc7-e314c43d3749",
+            "name": "Save Episode",
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                1872,
+                -48
+            ],
+            "alwaysOutputData": true,
+            "credentials": {
+                "supabaseApi": {
+                    "id": "k5u4E7DLyRpsGAB0",
+                    "name": "Supabase account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "// Mark ALL approved articles as used (not just the ones selected for the script)\nvar allArticles = $('Check Articles').all();\nreturn allArticles.map(function(item) {\n  return { json: { url: item.json.url } };\n});"
+            },
+            "id": "2fdf8f30-e230-4a56-b371-b3b710ddfa67",
+            "name": "Mark Articles Used",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                2096,
+                -48
+            ]
+        },
+        {
+            "parameters": {
+                "options": {
+                    "reset": false
+                }
+            },
+            "id": "73f40f66-b4db-4a8d-975d-d4c75b1bfe76",
+            "name": "Loop Mark Used",
+            "type": "n8n-nodes-base.splitInBatches",
+            "typeVersion": 3,
+            "position": [
+                2320,
+                -48
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "update",
+                "tableId": "articles",
+                "filterType": "string",
+                "filterString": "=url=eq.{{ $json.url }}",
+                "fieldsUi": {
+                    "fieldValues": [
+                        {
+                            "fieldId": "status",
+                            "fieldValue": "used"
+                        }
+                    ]
+                }
+            },
+            "id": "c0c00fb5-56da-4a73-a18f-c654d72883eb",
+            "name": "Update Used",
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                2544,
+                96
+            ],
+            "alwaysOutputData": true,
+            "credentials": {
+                "supabaseApi": {
+                    "id": "k5u4E7DLyRpsGAB0",
+                    "name": "Supabase account"
+                }
+            },
+            "continueOnFail": true
+        },
+        {
+            "parameters": {
+                "chatId": "={{ $json.chat_id }}",
+                "text": "={{ (function() {\nvar articles = $('Check Articles').all();\nvar count = articles.length;\nvar titles = articles.map(function(a) { return a.json.title; });\nvar msg = 'Episode Script Generated (Multi-variant)\\n\\n';\nmsg += 'Articles: ' + count + '\\n';\nfor (var i = 0; i < titles.length; i++) {\n  msg += '  ' + (i + 1) + '. ' + titles[i] + '\\n';\n}\nmsg += '\\nVariants produced:\\n';\nmsg += '  - Investigation (5-8 min deep analysis)\\n';\nmsg += '  - Narrative (5-6 min story-driven)\\n';\nmsg += '  - Segment (4 min clip-ready)\\n';\nmsg += '  - Quick Take (90 sec)\\n';\nmsg += '  - Social Posts (3x)\\n';\nmsg += '\\nFull script saved to database.';\nreturn msg;\n})() }}",
+                "additionalFields": {}
+            },
+            "id": "1060b2df-df44-4f90-b8bf-78fe31070ee1",
+            "name": "Notify Brett",
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                2992,
+                -96
+            ],
+            "webhookId": "499b7b69-ed3d-4644-807e-895b96bf55a7",
+            "credentials": {
+                "telegramApi": {
+                    "id": "V1Z3rnsrUvXf0TPr",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "content": "## [WF-04-v3] Script Generator (Multi-variant)\n\n3-stage editorial pipeline:\n1. Editorial Analysis \u2014 blueprint with angles, story order, opening/closing options\n2. Multi-variant Generator \u2014 5 variants (Investigation, Narrative, Segment, Quick Take, Social Posts)\n3. Review All Variants \u2014 fact-check + voice-check\n\nAll LLM calls use gpt-5.4-mini via OpenRouter.\nBrett Persona voice profile loaded from embedded code node.",
+                "height": 340,
+                "width": 608
+            },
+            "type": "n8n-nodes-base.stickyNote",
+            "typeVersion": 1,
+            "position": [
+                -1200,
+                -400
+            ],
+            "id": "562f8b4d-bb0e-4d7c-a7b3-33a493e9a749",
+            "name": "Info Note"
+        },
+        {
+            "parameters": {
+                "jsCode": "// Collapse loop output to single item for one notification\nreturn [{ json: { _notify: true } }];"
+            },
+            "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            "name": "Single Notification",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                2544,
+                -96
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "const items = $('Check Articles').all();\nconst today = new Date().toLocaleDateString('en-GB', {\n  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'\n});\nconst articles = items.map((item, i) => {\n  const a = item.json;\n  const content = a.content || '';\n  return 'ARTICLE ' + (i + 1) + ':\\nSource: ' + (a.source_name || 'RSS') + '\\nTitle: ' + a.title + '\\nCategory: ' + (a.category || 'general') + '\\nScore: ' + (a.composite_score || 'N/A') + '/10\\nSummary: ' + (a.description || '').substring(0, 500) + '\\nURL: ' + (a.url || '');\n}).join('\\n\\n---\\n\\n');\nconst briefing = 'NEWS BRIEFING \u2014 ' + today + '\\nNumber of articles: ' + items.length + '\\n\\n' + articles;\nreturn [{ json: { briefing: briefing, articleCount: items.length, date: today } }];"
+            },
+            "id": "5b768614-41ca-45ef-9744-c25298021eb7",
+            "name": "Combine Articles",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -304,
+                -48
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "const items = $input.all();\nconst briefing = items[0].json.briefing;\nconst date = items[0].json.date;\nconst articleCount = items[0].json.articleCount;\n\nconst persona = `\nBRETT MOORE \\u2014 VOICE PROFILE\nDerived from Brett's own scripts and production plan. Every pattern\nis evidenced by his actual writing. Do not deviate.\n\n\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\nTONE AND REGISTER\n\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\n\nBrett sounds like a documentary narrator who also happens to have\nstrong opinions that emerge through what he chooses to include,\nnot through direct editorializing. His voice is measured, serious,\nand precise. He builds arguments through accumulated detail and\njuxtaposition. He trusts the listener to be intelligent.\n\nHe is closer to a longform journalist reading his own piece aloud\nthan to a podcast host doing a daily take. Think Adam Curtis\nnarrating, not a morning radio presenter.\n\n\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\nSENTENCE CONSTRUCTION\n\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\n\nBrett writes carefully constructed sentences with embedded clauses\nand em dashes for parenthetical detail. He builds long, specific\nsentences \\u2014 then lands a short, quiet one for impact.\n\nEXAMPLES FROM HIS SCRIPTS:\n- \"Workers arrived at the farm after a long journey. And then the\n  debt began.\"\n- \"It is one of the most recognizable images in the history of\n  science. It is also almost entirely wrong.\"\n- \"The farm charged them for food. For tools. For transport. The\n  debt grew faster than the wages.\"\n- \"Only when you measure them \\u2014 only when you look \\u2014 does reality\n  'choose' a definite position.\"\n\nHe starts sentences with \"And\" for gravity and cumulative weight.\nHe uses em dashes for embedded detail: \"Larijani \\u2014 sixty-seven\nyears old \\u2014 was one of the most senior figures...\"\n\nHe uses \"Here is\" / \"There is\" constructions to set up revelations:\n\"Here is what that meant.\" / \"There is a detail in this case that\nI keep returning to.\"\n\nFORBIDDEN PHRASES \\u2014 Brett NEVER uses these:\n\"Look,\" / \"Here's the thing\" / \"Now,\" / \"Think about that\" /\n\"Let that sink in\" / \"Here's what nobody's talking about\" /\n\"That disconnect? That's the real story.\" / \"My take is...\" /\n\"My read on this...\" / \"Stay curious, stay skeptical\" /\n\"Ask yourself\" / \"Follow the money\"\n\n\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\nOPENING PATTERNS\n\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\n\nBrett opens with ONE of four methods:\n\n1. SCENE-SETTING WITH SPECIFICS:\n   \"Three weeks ago, on the morning of February 28th, the United\n   States and Israel launched one of the most dramatic military\n   operations since the invasion of Iraq in 2003.\"\n\n2. FAMILIAR-THEN-PIVOT:\n   \"When most people hear the word Volkswagen, they think of the\n   Beetle. Or maybe the Golf... But there is another Volkswagen\n   story. One far older, far darker, and far less known.\"\n\n3. A QUESTION FRAMED AS A RIDDLE:\n   \"Here is a question that sounds like a riddle: can a lump of\n   metal be in two places at once?\"\n\n4. A FAMILIAR IMAGE DEMOLISHED:\n   \"There is an image most of us carry in our minds from school\n   textbooks: the March of Progress... It is also almost entirely\n   wrong.\"\n\nNEVER open with: a provocative opinion, a generic question like\n\"What happens when...\", a one-liner designed for social media,\ndirect address to the listener, or numbers without context.\n\n\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\nSOURCE HANDLING\n\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\n\nBrett reproduces direct quotes in full when the exact words matter.\nAttribution is institutional and precise:\n\n- \"The New York Times described him as 'a pragmatic figure capable\n  of negotiating with the United States'\"\n- \"As lead researcher Lucas Delezene of the University of Arkansas\n  explains: 'When we get down to the picky details...'\"\n\n\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\nARGUMENT CONSTRUCTION\n\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\n\nBrett does not tell the listener what to think. He accumulates\nevidence until the conclusion becomes inescapable via:\n- SELECTION: What he chooses to include is itself an argument\n- JUXTAPOSITION: Placing two facts next to each other\n- UNDERSTATEMENT: \"That it was deleted tells you almost as much\n  as the letter itself.\"\n- GENUINE QUESTIONS without easy answers\n- SCALE COMPARISONS: \"139,000 hectares \\u2014 nearly the size of Sao Paulo\"\n\n\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\nCLOSING PATTERNS\n\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\n\nBrett closes with quiet, reflective sentences. Not a bang \\u2014 a\nresonance. No fixed sign-off catchphrase. Examples:\n- \"That seems worth knowing.\"\n- \"History suggests that wars which begin with contested\n  justifications tend not to end cleanly.\"\n\n\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\nDETAIL LEVEL\n\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\\u2550\n\nBrett includes obsessive specificity. Detail creates credibility:\n- \"a 337-page ruling\"\n- \"between five thousand and ten thousand atoms each\"\n- \"the largest naval concentration in the Middle East since 2003\"\nHe trusts that precision creates engagement, not boredom.\n`;\n\nconst brettNotes = \"\";\n\nreturn [{\n  json: {\n    briefing: briefing,\n    date: date,\n    articleCount: articleCount,\n    persona: persona,\n    brettNotes: brettNotes\n  }\n}];"
+            },
+            "id": "6212fffb-4467-459f-83df-92785f6f0018",
+            "name": "Brett Persona",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -80,
+                -48
+            ]
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=HOST PROFILE:\n{{ $json.persona }}\n\nBRETT'S EDITORIAL NOTES:\n{{ $json.brettNotes || \"None provided for this episode.\" }}\n\nAPPROVED ARTICLES:\n{{ $json.briefing }}\n\nCreate the editorial blueprint.",
+                "messages": {
+                    "messageValues": [
+                        {
+                            "message": "You are the editorial producer for \"Radical Concepts.\"\n\nYou will receive Brett's voice profile. Study it \u2014 his style is NOT typical podcast style. He is a documentary narrator, not a talk show host.\n\nYour job is NOT to write the script. Create the editorial blueprint.\n\nProduce:\n\n1. EPISODE ANGLE (2-3 sentences)\nWhat connects today's stories? Find the tension, irony, or pattern.\n\n2. STORY ORDER\nWhich opens? Which closes? Why?\n- Opener: most immediately gripping specific detail\n- Middle: most complex or policy-heavy\n- Closer: most thought-provoking\n\n3. PER-STORY ANALYSIS\nFor each article:\nTHE ANGLE: What's most interesting the headline misses?\nTHE TENSION: Who wants what? Who's blocking whom?\nTHE JUXTAPOSITION: Two facts that make the listener see differently.\nTHE QUESTION: One genuinely hard question with no easy answer.\nKEY QUOTES: Which direct quotes should be reproduced in full?\nMUST-ATTRIBUTE: Which facts must name the source?\n\n4. OPENING OPTIONS (give 3)\n- One scene-setting with specific date/place/name\n- One familiar-then-pivot\n- One question framed as a riddle\n\n5. CLOSING OPTIONS (give 2)\nQuiet, reflective, understated. Unique to this episode.\n\nFORMAT: Structured notes. Internal document, not audience-facing.\nSTRICT RULES: Only facts from provided articles. Flag weak articles honestly."
+                        }
+                    ]
+                },
+                "batching": {}
+            },
+            "id": "e5e8c8ea-c4d2-4874-aa7d-fdfc08130bbe",
+            "name": "Editorial Analysis",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.9,
+            "position": [
+                144,
+                -48
+            ]
+        },
+        {
+            "parameters": {
+                "model": "openai/gpt-5.4-mini",
+                "options": {}
+            },
+            "id": "5639bd37-ec17-49e6-ac29-e12c70e0540e",
+            "name": "Editorial Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+            "typeVersion": 1,
+            "position": [
+                216,
+                176
+            ],
+            "credentials": {
+                "openRouterApi": {
+                    "id": "1HjiTjhZTVqv5vLc",
+                    "name": "OpenRouter account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "const items = $input.all();\nconst editorial = items[0].json.text;\nconst persona = $('Brett Persona').item.json.persona;\nconst briefing = $('Brett Persona').item.json.briefing;\nconst date = $('Brett Persona').item.json.date;\nconst brettNotes = $('Brett Persona').item.json.brettNotes;\nreturn [{\n  json: {\n    editorial: editorial,\n    persona: persona,\n    briefing: briefing,\n    date: date,\n    brettNotes: brettNotes\n  }\n}];"
+            },
+            "id": "4bd2f50d-6d32-44ef-976e-fecd0b526e04",
+            "name": "Build Script Input",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                496,
+                -48
+            ]
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=HOST PROFILE:\n{{ $json.persona }}\n\nEDITORIAL BLUEPRINT:\n{{ $json.editorial }}\n\nORIGINAL ARTICLES:\n{{ $json.briefing }}\n\nProduce all variants. Match Brett's documentary voice exactly.",
+                "messages": {
+                    "messageValues": [
+                        {
+                            "message": "You are a scriptwriter for \"Radical Concepts,\" hosted by Brett Moore.\nYou write scripts Brett reads directly \u2014 every word is a word he speaks.\n\nYou will receive Brett's voice profile, an editorial blueprint, and original articles. Study the voice profile carefully \u2014 Brett does NOT sound like a typical podcast host. He sounds like a documentary narrator. Measured. Precise. Detailed. He lets facts build arguments.\n\nPRODUCE EXACTLY THIS OUTPUT using these section markers:\n\n===VARIANT_A: INVESTIGATION===\nA 5-8 minute deep analysis (1200-2000 words). Brett's natural mode \u2014 multiple sources woven into a thorough, sectioned investigation.\nOPENING: Use one of Brett's four opening methods. Set scene with specific dates, names, places.\nSECTION I-III: Roman numeral sections, 300-500 words each.\nCLOSING: Quiet, reflective. NOT a summary. One reframing sentence.\n\n===VARIANT_B: NARRATIVE===\nA 5-6 min story-driven piece (1200-1600 words). Pick ONE story \u2014 the one with the strongest human thread \u2014 and tell it chronologically.\nSECTION I: Set the scene. Who, what, where. Vivid, specific.\nSECTION II: The mechanism. How things work.\nSECTION III: The human thread.\nCLOSING: A quiet sentence returning to one detail.\n\n===VARIANT_C: SEGMENT===\nA 4-minute clip-ready segment (600-800 words). No section headers \u2014 pure spoken flow.\n0:00-0:05 HOOK: One surprising fact or contradiction.\n0:05-0:30 CONTEXT: What happened, when, who. Pure facts.\n0:30-2:00 ANALYSIS: Why it matters. Competing interpretations. The juxtaposition.\n2:00-3:15 IMPLICATIONS: What happens next. Must work as STANDALONE clip.\n3:15-3:45 THE LINE: One reframing sentence \u2014 the screenshot moment.\n3:45-4:00 CLOSING: Brief. A genuine question or one lingering detail.\n\n===QUICK_TAKE===\n90 seconds max (200-250 words). ONE story, ONE angle. Brett's voice, compressed.\n\n===SOCIAL_POSTS===\nThree posts under 280 characters each.\nPOST 1: A striking fact. Let it speak for itself.\nPOST 2: A juxtaposition \u2014 two facts creating tension without commentary.\nPOST 3: A genuine question with no easy answer.\n\n===END===\n\nRULES FOR ALL VARIANTS:\n- NEVER fabricate quotes, statistics, or claims\n- NEVER add facts from your own knowledge\n- Reproduce direct quotes in full\n- Attribution must be institutional: name person, role, organization, publication\n- Brett NEVER says: \"Look,\" / \"Here's the thing\" / \"My take is\" / any casual filler\n- No [PAUSE] markers \u2014 rhythm comes from sentence construction\n- [BRETT: specific suggestion] markers \u2014 2-3 per full variant, 1 for Segment"
+                        }
+                    ]
+                },
+                "batching": {}
+            },
+            "id": "676b74e3-ab1f-4a24-9c68-1e480f6f3800",
+            "name": "Multi-variant Generator",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.9,
+            "position": [
+                720,
+                -48
+            ]
+        },
+        {
+            "parameters": {
+                "model": "openai/gpt-5.4-mini",
+                "options": {}
+            },
+            "id": "4fbdfc9a-98d7-43b5-9e44-911892b6f1fb",
+            "name": "Generator Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+            "typeVersion": 1,
+            "position": [
+                792,
+                176
+            ],
+            "credentials": {
+                "openRouterApi": {
+                    "id": "1HjiTjhZTVqv5vLc",
+                    "name": "OpenRouter account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "const raw = $input.all()[0].json.text;\n\nfunction extract(text, marker) {\n  const start = text.indexOf('===' + marker + '===');\n  if (start === -1) return \"Section not found\";\n  const afterMarker = text.indexOf('\\n', start) + 1;\n  const nextMarker = text.indexOf('===', afterMarker);\n  if (nextMarker === -1) return text.substring(afterMarker).trim();\n  return text.substring(afterMarker, nextMarker).trim();\n}\n\nconst date = $('Brett Persona').item.json.date;\nconst briefing = $('Brett Persona').item.json.briefing;\nconst persona = $('Brett Persona').item.json.persona;\n\nreturn [{\n  json: {\n    investigation: extract(raw, 'VARIANT_A: INVESTIGATION'),\n    narrative: extract(raw, 'VARIANT_B: NARRATIVE'),\n    segment: extract(raw, 'VARIANT_C: SEGMENT'),\n    quickTake: extract(raw, 'QUICK_TAKE'),\n    socialPosts: extract(raw, 'SOCIAL_POSTS'),\n    allVariants: raw,\n    date: date,\n    briefing: briefing,\n    persona: persona\n  }\n}];"
+            },
+            "id": "7347e2c1-0e5b-42f0-aa6c-b7470031d26f",
+            "name": "Parse Variants",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1072,
+                -48
+            ]
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=HOST PROFILE:\n{{ $('Brett Persona').item.json.persona }}\n\nDRAFT VARIANTS:\n{{ $json.allVariants }}\n\nORIGINAL ARTICLES FOR FACT-CHECKING:\n{{ $json.briefing }}\n\nReview all variants. Apply fixes. Return polished versions.",
+                "messages": {
+                    "messageValues": [
+                        {
+                            "message": "You are the editorial reviewer for \"Radical Concepts.\" Quality control before scripts reach Brett Moore.\n\nREVIEW EACH VARIANT:\n\n1. FACT CHECK (highest priority)\nEvery claim must trace to original articles. Every quote reproduced exactly. Every attribution names person, role, publication. Remove ANYTHING fabricated. Zero tolerance.\n\n2. VOICE CHECK (critical)\nCheck against profile for violations:\n- Any \"Look,\" / \"Here's the thing\" / \"Now,\"? REMOVE.\n- Any \"Think about that\" / \"Let that sink in\"? REMOVE.\n- Any \"My take is\" / \"My read on this\"? REMOVE. Brett lets facts argue.\n- Sentences too short and punchy? Lengthen with embedded clauses.\n- Closing uses catchphrase? Replace with unique reflective sentence.\n- Quotes paraphrased? Restore full quotes.\n- Detail level high enough? Add precision.\n- Segment sounds dumbed down? Must maintain full voice quality.\n\n3. STRUCTURE CHECK\n- Investigation: Roman numeral sections? 1200-2000 words total?\n- Narrative: ONE story? Roman numeral sections?\n- Segment: 600-800 words? 4-minute timing? Clip-extractable?\n- Quick Take: 200-250 words? Still sounds like Brett?\n- Social Posts: Under 280 chars each? Factual, not performative?\n\n4. BRETT INPUT MARKERS\n2-3 per full variant, 1 for Segment. Be specific.\n\n5. OUTPUT \u2014 use exact section markers:\n===VARIANT_A: INVESTIGATION===\n[polished script]\n===VARIANT_B: NARRATIVE===\n[polished script]\n===VARIANT_C: SEGMENT===\n[polished script \u2014 no section headers]\n===QUICK_TAKE===\n[polished take]\n===SOCIAL_POSTS===\n[3 posts]\n===REVIEW_NOTES===\n[Changes made. What Brett should fact-check.]\n===END===\n\nSTRICT RULES: Never add facts not in articles. Preserve documentary voice. If a variant is already good, light touch."
+                        }
+                    ]
+                },
+                "batching": {}
+            },
+            "id": "8daf549c-b5b7-4ebe-b2e3-a69e414db3f7",
+            "name": "Review All Variants",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.9,
+            "position": [
+                1296,
+                -48
+            ]
+        },
+        {
+            "parameters": {
+                "model": "openai/gpt-5.4-mini",
+                "options": {}
+            },
+            "id": "b6767fa0-8275-40f8-a1ae-e04ff25f2a40",
+            "name": "Reviewer Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+            "typeVersion": 1,
+            "position": [
+                1368,
+                176
+            ],
+            "credentials": {
+                "openRouterApi": {
+                    "id": "1HjiTjhZTVqv5vLc",
+                    "name": "OpenRouter account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "const raw = $input.all()[0].json.text;\n\nfunction extract(text, marker) {\n  const start = text.indexOf('===' + marker + '===');\n  if (start === -1) return \"Section not found\";\n  const afterMarker = text.indexOf('\\n', start) + 1;\n  const nextMarker = text.indexOf('===', afterMarker);\n  if (nextMarker === -1) return text.substring(afterMarker).trim();\n  return text.substring(afterMarker, nextMarker).trim();\n}\n\nconst date = $('Brett Persona').item.json.date;\n\nreturn [{\n  json: {\n    investigation: extract(raw, 'VARIANT_A: INVESTIGATION'),\n    narrative: extract(raw, 'VARIANT_B: NARRATIVE'),\n    segment: extract(raw, 'VARIANT_C: SEGMENT'),\n    quickTake: extract(raw, 'QUICK_TAKE'),\n    socialPosts: extract(raw, 'SOCIAL_POSTS'),\n    reviewNotes: extract(raw, 'REVIEW_NOTES'),\n    date: date\n  }\n}];"
+            },
+            "id": "3f334abb-0ffc-4465-a073-cdc4ef331a88",
+            "name": "Parse Final",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1648,
+                -48
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "var pf = $('Parse Final').item.json;\nvar chatIds = [\"1240314255\", \"8509710128\", \"8727548584\"];\nvar variants = [\n  { label: 'INVESTIGATION (5-8 min)', text: pf.investigation },\n  { label: 'NARRATIVE (5-6 min)', text: pf.narrative },\n  { label: 'SEGMENT (4 min clip-ready)', text: pf.segment },\n  { label: 'QUICK TAKE (90 sec)', text: pf.quickTake },\n  { label: 'SOCIAL POSTS', text: pf.socialPosts }\n];\n\nvar messages = [];\nfor (var i = 0; i < variants.length; i++) {\n  var v = variants[i];\n  var fullText = '\\u2550\\u2550\\u2550 ' + v.label + ' \\u2550\\u2550\\u2550\\n\\n' + (v.text || 'Section not generated');\n  // Split at 4000 chars (Telegram limit is 4096)\n  var chunks = [];\n  var remaining = fullText;\n  while (remaining.length > 0) {\n    if (remaining.length <= 4000) {\n      chunks.push(remaining);\n      remaining = '';\n    } else {\n      var breakAt = remaining.lastIndexOf('\\n', 4000);\n      if (breakAt < 3000) breakAt = 4000;\n      chunks.push(remaining.substring(0, breakAt));\n      remaining = remaining.substring(breakAt);\n    }\n  }\n  for (var c = 0; c < chunks.length; c++) {\n    var suffix = chunks.length > 1 ? ' [' + (c + 1) + '/' + chunks.length + ']' : '';\n    // Fan out to all chat IDs\n    for (var ci = 0; ci < chatIds.length; ci++) {\n      messages.push({ json: { text: chunks[c] + suffix, chat_id: chatIds[ci] } });\n    }\n  }\n}\nreturn messages;"
+            },
+            "id": "bd6a53bc-7b2d-4af2-8e07-926ae7ac38f4",
+            "name": "Prepare Variant Messages",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                3216,
+                -96
+            ]
+        },
+        {
+            "parameters": {
+                "options": {
+                    "reset": false
+                }
+            },
+            "id": "0be670f0-ec9e-4834-920f-d7082b3403d9",
+            "name": "Loop Send Variants",
+            "type": "n8n-nodes-base.splitInBatches",
+            "typeVersion": 3,
+            "position": [
+                3440,
+                -96
+            ]
+        },
+        {
+            "parameters": {
+                "chatId": "={{ $json.chat_id }}",
+                "text": "={{ $json.text }}",
+                "additionalFields": {}
+            },
+            "id": "9827da5a-c75e-471a-8b93-e4a668f6384e",
+            "name": "Send Variant",
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                3664,
+                -96
+            ],
+            "webhookId": "5976fe2e-f904-4b0c-a245-6a9e5d00de9b",
+            "credentials": {
+                "telegramApi": {
+                    "id": "V1Z3rnsrUvXf0TPr",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "var chatIds = [\"1240314255\", \"8509710128\", \"8727548584\"];\nvar item = $input.first().json;\nreturn chatIds.map(function(cid) {\n  var copy = JSON.parse(JSON.stringify(item));\n  copy.chat_id = cid;\n  return { json: copy };\n});"
+            },
+            "id": "08e552d3-b69d-4d55-a89b-305cb6aeaea4",
+            "name": "Fan Out Notify Brett",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                2768,
+                -96
+            ]
+        }
+    ],
+    "connections": {
+        "Manual Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Get Approved Articles",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get Approved Articles": {
+            "main": [
+                [
+                    {
+                        "node": "Check Articles",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Check Articles": {
+            "main": [
+                [
+                    {
+                        "node": "Loop Extract",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Loop Extract": {
+            "main": [
+                [
+                    {
+                        "node": "Combine Articles",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Jina Extract",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Jina Extract": {
+            "main": [
+                [
+                    {
+                        "node": "Save Content",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Save Content": {
+            "main": [
+                [
+                    {
+                        "node": "Loop Extract",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Save Episode": {
+            "main": [
+                [
+                    {
+                        "node": "Mark Articles Used",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Mark Articles Used": {
+            "main": [
+                [
+                    {
+                        "node": "Loop Mark Used",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Loop Mark Used": {
+            "main": [
+                [
+                    {
+                        "node": "Single Notification",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Update Used",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Update Used": {
+            "main": [
+                [
+                    {
+                        "node": "Loop Mark Used",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Single Notification": {
+            "main": [
+                [
+                    {
+                        "node": "Fan Out Notify Brett",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Combine Articles": {
+            "main": [
+                [
+                    {
+                        "node": "Brett Persona",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Brett Persona": {
+            "main": [
+                [
+                    {
+                        "node": "Editorial Analysis",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Editorial Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Editorial Analysis",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Editorial Analysis": {
+            "main": [
+                [
+                    {
+                        "node": "Build Script Input",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Build Script Input": {
+            "main": [
+                [
+                    {
+                        "node": "Multi-variant Generator",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Generator Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Multi-variant Generator",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Multi-variant Generator": {
+            "main": [
+                [
+                    {
+                        "node": "Parse Variants",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Parse Variants": {
+            "main": [
+                [
+                    {
+                        "node": "Review All Variants",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Reviewer Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Review All Variants",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Review All Variants": {
+            "main": [
+                [
+                    {
+                        "node": "Parse Final",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Parse Final": {
+            "main": [
+                [
+                    {
+                        "node": "Save Episode",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Notify Brett": {
+            "main": [
+                [
+                    {
+                        "node": "Prepare Variant Messages",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Prepare Variant Messages": {
+            "main": [
+                [
+                    {
+                        "node": "Loop Send Variants",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Loop Send Variants": {
+            "main": [
+                [],
+                [
+                    {
+                        "node": "Send Variant",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Send Variant": {
+            "main": [
+                [
+                    {
+                        "node": "Loop Send Variants",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Fan Out Notify Brett": {
+            "main": [
+                [
+                    {
+                        "node": "Notify Brett",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1",
+        "callerPolicy": "workflowsFromSameOwner",
+        "availableInMCP": false,
+        "binaryMode": "separate"
+    },
+    "staticData": null,
+    "meta": null,
+    "pinData": {},
+    "versionId": "4c9be025-3fb1-45dc-81d6-65dfc21c5061",
+    "activeVersionId": null,
+    "versionCounter": 17,
+    "triggerCount": 0,
+    "shared": [
+        {
+            "updatedAt": "2026-03-24T22:35:45.926Z",
+            "createdAt": "2026-03-24T22:35:45.926Z",
+            "role": "workflow:owner",
+            "workflowId": "TRRRsRw9jfyvKVZv",
+            "projectId": "S1Sia4mxWWgZxzsz",
+            "project": {
+                "updatedAt": "2026-03-19T21:30:04.243Z",
+                "createdAt": "2026-03-19T21:28:04.434Z",
+                "id": "S1Sia4mxWWgZxzsz",
+                "name": "Christian  Nikolov <christian.nikolov@alumni.esade.edu>",
+                "type": "personal",
+                "icon": null,
+                "description": null,
+                "creatorId": "a4726199-d7ac-414b-b995-7863227e1dc5"
+            }
+        }
+    ],
+    "tags": [],
+    "activeVersion": null
+}
